@@ -145,6 +145,7 @@ float g_worldMatrix[16];
 float g_viewMatrix[16];
 float g_projectionMatrix[16];
 
+
 bool InitializeOpenGL(HWND hwnd, int screenWidth, int screenHeight, float screenDepth, float screenNear, bool vsync)
 {
         int attributeListInt[19];

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -36,7 +37,7 @@ namespace Aurora
 			out << "SceneObject" << std::endl;
 			out << "-----------" << std::endl;
 			out << "GUID: " << obj.guid_ << std::endl;
-			out << "Type: " << obj.type_ << std::endl;
+			out << "Type: " << static_cast<uint32_t>(obj.type_) << std::endl;
 
 			return out;
 		}
@@ -443,13 +444,13 @@ namespace Aurora
 		{
 			switch (axis) {
 			case 'x':
-				MatrixScale(m_matrix, amount, 0.0f, 0.0f);
+				matrix_ = glm::scale(matrix_, glm::vec3(amount, 0.0f, 0.0f));
 				break;
 			case 'y':
-				MatrixScale(m_matrix, 0.0f, amount, 0.0f);
+				matrix_ = glm::scale(matrix_, glm::vec3(0.0f, amount, 0.0f));
 				break;
 			case 'z':
-				MatrixScale(m_matrix, 0.0f, 0.0f, amount);
+				matrix_ = glm::scale(matrix_, glm::vec3(0.0f, 0.0f, amount));
 				break;
 			default:
 				assert(0);
@@ -458,7 +459,7 @@ namespace Aurora
 
 		SceneObjectScale(const float x, const float y, const float z)
 		{
-			MatrixScale(m_matrix, x, y, z);
+			matrix_ = glm::scale(matrix_, glm::vec3(x, y, z));
 		}
 	};
 }
