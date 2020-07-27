@@ -5,7 +5,7 @@
 
 using namespace Aurora;
 
-GfxConfiguration config;
+GfxConfiguration config(8,8,8,8,24,0,0,900,500,"RenderLab");
 GLFWApplication app(config);
 IApplication* g_app = &app;
 

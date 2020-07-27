@@ -2,5 +2,8 @@
 
 namespace Aurora
 {
-	class 
+	class RedLoader
+	{
+
+	};
 }
