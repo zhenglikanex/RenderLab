@@ -18,6 +18,8 @@ SceneObject.hpp
 SceneObject.cpp
 SceneNode.hpp
 SceneNode.cpp
+SceneParser.hpp
+OGEX.hpp
 Image.hpp
 main.cpp
 )
