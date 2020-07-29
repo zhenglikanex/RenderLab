@@ -75,12 +75,28 @@ namespace Aurora
 	// 將頂點已SOA的方式存儲,有利於GPU讀取
 	class SceneObjectVertexArray : public BaseSceneObject
 	{
+	public:
+		SceneObjectVertexArray(const std::string& attr = "", uint32_t morph_index = 0, VertexDataType data_type = VertexDataType::kVertexDataTypeFloat3, const void* data = nullptr, size_t data_size = 0)
+			: BaseSceneObject(SceneObjectType::kSceneObjectTypeVertexArray)
+			, attribute_(attr)
+			, morph_target_index_(morph_index)
+			, data_type_(data_type)
+			, data_(data)
+			, data_size_(data_size)
+		{
+		}
+
+		SceneObjectVertexArray(const SceneObjectVertexArray&) = default;
+		SceneObjectVertexArray(SceneObjectVertexArray&&) = default;
+
+		SceneObjectVertexArray& operator=(SceneObjectVertexArray&) = default;
+		SceneObjectVertexArray& operator=(SceneObjectVertexArray&&) = default;
 	protected:
 		std::string attribute_;
 		uint32_t morph_target_index_;
 		VertexDataType data_type_;
 		
-		const void* data_;
+		const void* data_; // todo 不用釋放？
 		size_t data_size_;
 	};
 
@@ -94,12 +110,28 @@ namespace Aurora
 
 	class SceneObjectIndexArray :public BaseSceneObject
 	{
+	public:
+		SceneObjectIndexArray(uint32_t material_index = 0,size_t restart_index = 0,IndexDataType data_type = IndexDataType::kIndexDataTypeInt16,const void* data = nullptr,size_t data_size = 0)
+			: BaseSceneObject(SceneObjectType::kSceneObjectTypeIndexArray)
+			, material_index_(material_index)
+			, restart_index_(restart_index)
+			, data_type_(data_type)
+			, data_(data)
+			, data_size_(data_size)
+		{
+		}
+
+		SceneObjectIndexArray(const SceneObjectIndexArray&) = default;
+		SceneObjectIndexArray(SceneObjectIndexArray&&) = default;
+
+		SceneObjectIndexArray& operator=(SceneObjectIndexArray&) = default;
+		SceneObjectIndexArray& operator=(SceneObjectIndexArray&&) = default;
 	protected:
 		uint32_t material_index_;
 		size_t restart_index_;
 		IndexDataType data_type_;
 
-		const void* data_;
+		const void* data_; // todo 不用釋放？
 		size_t data_size_;
 	};
 
