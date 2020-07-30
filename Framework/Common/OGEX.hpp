@@ -315,17 +315,28 @@ namespace Aurora
 					}break;
 					case OGEX::kStructureTexture:
 					{
-
+						attrib = dynamic_cast<const OGEX::TextureStructure*>(_sub_structure)->GetAttribString();
+						textureName = dynamic_cast<const OGEX::TextureStructure*>(_sub_structure)->GetTextureName();
+						material->SetTexture(attrib, textureName);
 					}break;
 					default:
 						break;
 					}
+					_sub_structure = _sub_structure->Next();
 				}
 			}
 			default:
-				break;
+				return;
 			}
 
+			const ODDL::Structure* sub_structure = structure.GetFirstSubnode();
+			while (sub_structure)
+			{
+				ConvertOddlStructureTOSceneNode(*sub_structure, node);
+				sub_structure = sub_structure->Next();
+			}
+
+			base_node->AppendChild(std::move(node));
 		}
 	private:
 		std::unordered_map<std::string, std::shared_ptr<BaseSceneObject>> scene_objects_;
