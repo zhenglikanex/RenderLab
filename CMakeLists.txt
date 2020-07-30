@@ -4,6 +4,7 @@ project(Aurora)
 
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}/3rdparty/glm/include")
 include_directories("${PROJECT_SOURCE_DIR}/3rdparty/opengex/include")
 
 find_library(OPENDDL_LIBRARY OpenDDL PATHS ${MYGE_EXTERNAL_LIBRARY_PATH})

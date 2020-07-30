@@ -16,4 +16,6 @@ namespace Aurora
 		virtual void Quit() = 0;
 		virtual bool IsQuit() const = 0;
 	};
+
+	extern IApplication* g_app;
 }

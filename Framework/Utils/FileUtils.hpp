@@ -1,20 +1,25 @@
 #pragma once
 
 #include <string>
+
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 // C++17(¾ÍÊÇboostµÄfilesystem)
 #include <experimental/filesystem>
 
+#include "Framework/Utils/Singleton.hpp"
 #include "Framework/Utils/FileHandle.hpp"
 
 using namespace std::experimental;
 
 namespace Aurora
 {
-	class FileUtils
+	class FileUtils : public Singleton<FileUtils>
+
+
 	{
 	public:
 		FileUtils();
-		~FileUtils();
+		~Fil
 
 		void AddSearchPath(const std::string& path);
 

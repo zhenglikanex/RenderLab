@@ -24,8 +24,13 @@ namespace Aurora
 		void Draw() override;
 	private:
 		bool SetShaderParameters(float* world_matrix, float* view_matrix, float projection_matrix);
+
+		bool InitializeBuffers();
+		void RenderBuffers();
+		void CalculateCameraPosition();
+		bool InitializeShader(const char* vs_filename, const char* fs_filename);
 	private:
-		/*uint32_t vertex_shader_;
+		uint32_t vertex_shader_;
 		uint32_t fragment_shader_;
 		uint32_t shader_program_;
 
@@ -42,9 +47,9 @@ namespace Aurora
 
 		std::vector<DrawBathContext> VAO_;
 		std::unordered_map<std::string, uint32_t> buffers_;
-		*/
-		/*float position_x_ = 0, position_y_ = 0, position_y_ = -10;
-		float rotation_x_ = 0, rotaion_y_ = 0, rotation_z = 0;*/
+		
+		float position_x_ = 0, position_y_ = 0, position_z_ = -10;
+		float rotation_x_ = 0, rotaion_y_ = 0, rotation_z = 0;
 
 		glm::mat4 world_matrix_;
 		glm::mat4 view_matrix_;

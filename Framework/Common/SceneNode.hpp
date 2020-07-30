@@ -59,7 +59,7 @@ namespace Aurora
 		void SetIfCastShadow(bool shadow) { shadow_ = shadow; }
 		bool IsCastShadow() const { return shadow_; }
 		void SetIfMotionBlur(bool motion_blur) { motion_blur_ = motion_blur; }
-		bool IsCastShadow() const { return shadow_; }
+		bool IsMotionBlur() const { return motion_blur_; }
 
 		using SceneNode::AddSceneObjectRef;
 		void AddSceneObjectRef(const std::shared_ptr<SceneObjectMaterial>& object) { materials_.push_back(object); }

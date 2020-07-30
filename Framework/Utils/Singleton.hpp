@@ -1,16 +1,16 @@
 #pragom once
+
 #include <memory>
 
-namespace aurora
+namespace Aurora
 {
 
 	template<class T>
 	class Singleton
 	{
 	public:
-		Singleton(){}
-
-		~Singleton(){}
+		Singleton() = default;
+		~Singleton() = default;
 
 		static const std::unique_ptr<T>& GetInstance()
 		{
@@ -22,12 +22,6 @@ namespace aurora
 
 			return instance_;
 		}
-
-		virtual bool Initialized()
-		{
-			return true;
-		}
-
 	protected:
 		static std::unique_ptr<T> instance_;
 	};

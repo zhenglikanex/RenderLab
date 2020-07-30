@@ -1,10 +1,52 @@
 #include "OpenGLGraphicsManager.hpp"
 
 #include <iostream>
+#include <fstream>
+
+#include "Framework/Utils/FileHandle.hpp"
+
 
 using namespace Aurora;
 
 extern struct gladGLversionStruct GLVersion;
+
+static void OutputShaderErrorMessage(uint32_t shader_id, const char* shader_filename)
+{
+    int log_size, i;
+    char* info_log;
+    std::ofstream fout;
+
+    glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &log_size);
+
+    log_size++;
+
+    info_log = new char[log_size];
+    if (!info_log)
+    {
+        return;
+    }
+
+    glGetShaderInfoLog(shader_id, log_size, NULL, info_log);
+
+    fout.open("shader_error.txt");
+    for (i = 0; i < log_size; ++i)
+    {
+        fout << info_log[i];
+    }
+
+    fout.close();
+
+    std::cerr << "Error compiling shader. Check shader_error.txt for message." << shader_filename << std::endl;
+
+    return;
+}
+
+static void OutputLinkerErrorMessage(uint32_t program_id)
+{
+    int log_size, i;
+    char* info_log;
+    std::ofstream fout;
+}
 
 OpenGLGraphicsManager::OpenGLGraphicsManager(GLADloadproc loader)
     : loader_(loader)
@@ -58,4 +100,39 @@ void OpenGLGraphicsManager::Finalize()
 void OpenGLGraphicsManager::Tick()
 {
 
+}
+
+void OpenGLGraphicsManager::Clear()
+{
+
+}
+
+void OpenGLGraphicsManager::Draw()
+{
+
+}
+
+bool OpenGLGraphicsManager::SetShaderParameters(float* world_matrix, float* view_matrix, float projection_matrix)
+{
+    return true;
+}
+
+bool OpenGLGraphicsManager::InitializeBuffers()
+{
+    return true;
+}
+
+void OpenGLGraphicsManager::RenderBuffers()
+{
+
+}
+
+void OpenGLGraphicsManager::CalculateCameraPosition()
+{
+
+}
+
+bool OpenGLGraphicsManager::InitializeShader(const char* vs_filename, const char* fs_filename)
+{
+    return true;
 }

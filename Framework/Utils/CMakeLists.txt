@@ -1,4 +1,5 @@
 add_library(Utils
+Singleton.hpp
 StringUtils.hpp
 StringUtils.cpp
 FileUtils.hpp

@@ -6,8 +6,6 @@
 
 using namespace Aurora;
 
-extern IApplication* g_app;
-
 int main()
 {
 	if (!g_app->Initialize())
