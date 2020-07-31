@@ -23,7 +23,7 @@ namespace Aurora
 		void Clear() override;
 		void Draw() override;
 	private:
-		bool SetShaderParameters(float* world_matrix, float* view_matrix, float projection_matrix);
+		bool SetShaderParameters(float* world_matrix, float* view_matrix, float* projection_matrix);
 
 		bool InitializeBuffers();
 		void RenderBuffers();

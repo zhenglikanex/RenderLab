@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Framework/Common/IRuntimeModule.hpp"
+#include "Framework/Common//GfxConfiguration.hpp"
 
 namespace Aurora
 {
@@ -15,6 +16,8 @@ namespace Aurora
 
 		virtual void Quit() = 0;
 		virtual bool IsQuit() const = 0;
+
+		virtual const GfxConfiguration& GetConfiguration() = 0;
 	};
 
 	extern IApplication* g_app;

@@ -65,6 +65,17 @@ namespace Aurora
 		return FileHandle(full_name, istream);
 	}
 
+	std::string FileUtils::OpenFileAndReadString(const std::string& file_name)
+	{
+		auto handle = OpenFile(file_name);
+		if (handle)
+		{
+			return handle.string();
+		}
+		
+		return "";
+	}
+
 	bool FileUtils::IsExists(const std::string& file_name)
 	{
 		return filesystem::exists(file_name);

@@ -27,6 +27,8 @@ namespace Aurora
 		kSceneObjectTypeGeometry
 	};
 
+	std::ostream& operator<<(std::ostream& out, SceneObjectType type);
+
 	class BaseSceneObject
 	{
 	public:
@@ -37,7 +39,7 @@ namespace Aurora
 			out << "SceneObject" << std::endl;
 			out << "-----------" << std::endl;
 			out << "GUID: " << obj.guid_ << std::endl;
-			out << "Type: " << static_cast<uint32_t>(obj.type_) << std::endl;
+			out << "Type: " << obj.type_ << std::endl;
 
 			return out;
 		}
@@ -91,6 +93,72 @@ namespace Aurora
 
 		SceneObjectVertexArray& operator=(SceneObjectVertexArray&) = default;
 		SceneObjectVertexArray& operator=(SceneObjectVertexArray&&) = default;
+
+		const std::string& GetAttributeName() const { return attribute_; }
+		VertexDataType GetDataType() const { return data_type_; }
+		size_t GetDataSize() const 
+		{
+			size_t size = data_size_;
+
+			switch (data_type_)
+			{
+			case VertexDataType::kVertexDataTypeFloat1:
+			case VertexDataType::kVertexDataTypeFloat2:
+			case VertexDataType::kVertexDataTypeFloat3:
+			case VertexDataType::kVertexDataTypeFloat4:
+				size *= sizeof(float);
+				break;
+			case VertexDataType::kVertexDataTypeDouble1:
+			case VertexDataType::kVertexDataTypeDouble2:
+			case VertexDataType::kVertexDataTypeDouble3:
+			case VertexDataType::kVertexDataTypeDouble4:
+				size *= sizeof(double);
+				break;
+			default:
+				size = 0;
+				assert(0);
+				break;
+			}
+
+			return size;
+		}
+		const void* GetData() const { return data_; }
+		size_t GetVertexCount() const
+		{
+			size_t size = data_size_;
+
+			switch (data_type_) {
+			case VertexDataType::kVertexDataTypeFloat1:
+				size /= 1;
+				break;
+			case VertexDataType::kVertexDataTypeFloat2:
+				size /= 2;
+				break;
+			case VertexDataType::kVertexDataTypeFloat3:
+				size /= 3;
+				break;
+			case VertexDataType::kVertexDataTypeFloat4:
+				size /= 4;
+				break;
+			case VertexDataType::kVertexDataTypeDouble1:
+				size /= 1;
+				break;
+			case VertexDataType::kVertexDataTypeDouble2:
+				size /= 2;
+				break;
+			case VertexDataType::kVertexDataTypeDouble3:
+				size /= 3;
+				break;
+			case VertexDataType::kVertexDataTypeDouble4:
+				size /= 4;
+				break;
+			default:
+				size = 0;
+				assert(0);
+				break;
+			}
+		}
+
 	protected:
 		std::string attribute_;
 		uint32_t morph_target_index_;
@@ -126,6 +194,36 @@ namespace Aurora
 
 		SceneObjectIndexArray& operator=(SceneObjectIndexArray&) = default;
 		SceneObjectIndexArray& operator=(SceneObjectIndexArray&&) = default;
+
+		const IndexDataType GetIndexType() const { return data_type_; }
+		const void* GetData() const { return data_; }
+		size_t GetDataSize() const
+		{
+			size_t size = data_size_;
+			switch (data_type_)
+			{
+			case IndexDataType::kIndexDataTypeInt8:
+				size *= sizeof(int8_t);
+				break;
+			case IndexDataType::kIndexDataTypeInt16:
+				size *= sizeof(int16_t);
+				break;
+			case IndexDataType::kIndexDataTypeInt32:
+				size *= sizeof(int32_t);
+				break;
+			case IndexDataType::kIndexDataTypeInt64:
+				size *= sizeof(int64_t);
+				break;
+			default:
+				size = 0;
+				assert(0);
+				break;
+			}
+
+			return size;
+		}
+
+		size_t GetIndexCount() const { return data_size_; }
 	protected:
 		uint32_t material_index_;
 		size_t restart_index_;

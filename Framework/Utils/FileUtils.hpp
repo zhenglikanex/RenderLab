@@ -19,13 +19,15 @@ namespace Aurora
 	{
 	public:
 		FileUtils();
-		~Fil
+		~FileUtils();
 
 		void AddSearchPath(const std::string& path);
 
 		filesystem::path GetFullPath(const std::string& file_name);
 
 		FileHandle OpenFile(const std::string& file_name, uint32_t mode = std::ios_base::in);
+
+		std::string OpenFileAndReadString(const std::string& file_name);
 
 		bool IsExists(const std::string& file_name);
 		bool IsExists(const filesystem::path& path);
