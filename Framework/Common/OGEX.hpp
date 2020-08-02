@@ -12,9 +12,9 @@ namespace Aurora
 	class OgexParser : public SceneParser
 	{
 	public:
-		std::unique_ptr<BaseSceneNode> Parser(const std::string& buf) override
+		std::unique_ptr<Scene> Parser(const std::string& buf) override
 		{
-			std::unique_ptr<BaseSceneNode> root_node = std::make_unique<BaseSceneNode>("scene_root");
+			std::unique_ptr<Scene> scene = std::make_unique<Scene>("ogex_scene");
 			OGEX::OpenGexDataDescription opengex_data_desc;
 
 			ODDL::DataResult result = opengex_data_desc.ProcessText(buf.c_str());
@@ -23,16 +23,16 @@ namespace Aurora
 				const ODDL::Structure* structure = opengex_data_desc.GetRootStructure()->GetFirstSubnode();
 				while (structure)
 				{
-					ConvertOddlStructureTOSceneNode(*structure, root_node);
+					ConvertOddlStructureToSceneNode(*structure, scene->SceneGraph,*scene);
 
 					structure = structure->Next();
 				}
 			}
 
-			return root_node;
+			return scene;
 		}
 	private:
-		void ConvertOddlStructureTOSceneNode(const ODDL::Structure& structure, const std::unique_ptr<BaseSceneNode>& base_node)
+		void ConvertOddlStructureToSceneNode(const ODDL::Structure& structure, const std::unique_ptr<BaseSceneNode>& base_node,Scene& scene)
 		{
 			std::unique_ptr<BaseSceneNode> node;
 
@@ -166,10 +166,10 @@ namespace Aurora
 									vertexDataType = VertexDataType::kVertexDataTypeFloat2;
 									break;
 								case 3:
-									vertexDataType = VertexDataType::kVertexDataTypeFloat2;
+									vertexDataType = VertexDataType::kVertexDataTypeFloat3;
 									break;
 								case 4:
-									vertexDataType = VertexDataType::kVertexDataTypeFloat2;
+									vertexDataType = VertexDataType::kVertexDataTypeFloat4;
 									break;
 								default:
 									continue;
@@ -258,6 +258,8 @@ namespace Aurora
 						_object->AddMesh(mesh);
 					}
 				}
+				scene.Geometries[_key] = _object;
+				
 			}break;
 			case OGEX::kStructureTransform:
 			{
@@ -332,7 +334,7 @@ namespace Aurora
 			const ODDL::Structure* sub_structure = structure.GetFirstSubnode();
 			while (sub_structure)
 			{
-				ConvertOddlStructureTOSceneNode(*sub_structure, node);
+				ConvertOddlStructureToSceneNode(*sub_structure, node,scene);
 				sub_structure = sub_structure->Next();
 			}
 

@@ -1,4 +1,4 @@
-#pragom once
+#pragma once
 
 #include <memory>
 
@@ -28,5 +28,3 @@ namespace Aurora
 
 	template<class T> std::unique_ptr<T> Singleton<T>::instance_ = std::unique_ptr<T>();
 }
-
-#endif

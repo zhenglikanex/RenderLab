@@ -32,6 +32,8 @@ namespace Aurora
 	class BaseSceneObject
 	{
 	public:
+		virtual ~BaseSceneObject() = default;
+
 		const Guid& guid() const { return guid_; }
 
 		friend std::ostream& operator<<(std::ostream& out, const BaseSceneObject& obj)
@@ -157,6 +159,8 @@ namespace Aurora
 				assert(0);
 				break;
 			}
+
+			return size;
 		}
 
 	protected:
@@ -277,6 +281,13 @@ namespace Aurora
 		void AddIndexArray(SceneObjectIndexArray&& array) { index_array_.push_back(std::move(array)); }
 		void AddVertexArray(SceneObjectVertexArray&& array) { vertex_array_.push_back(std::move(array)); }
 		void SetPrimitiveType(PrimitiveType type) { primitive_type_ = type; }
+
+		size_t GetIndexCount() const { return index_array_.empty() ? 0 : index_array_[0].GetIndexCount(); }
+		size_t GetVertexCount() const { return vertex_array_.empty() ? 0 : vertex_array_[0].GetVertexCount(); }
+		size_t GetVertexPropertiesCount() const { return vertex_array_.size(); }
+		const SceneObjectVertexArray& GetVertexPropertyArray(const size_t index) const { return vertex_array_[index]; }
+		const SceneObjectIndexArray& GetIndexArray(const size_t index) const { return index_array_[index]; }
+		const PrimitiveType& GetPrimitiveType() { return primitive_type_; }
 	protected:
 		std::vector<SceneObjectIndexArray> index_array_;
 		std::vector<SceneObjectVertexArray> vertex_array_;
@@ -347,7 +358,6 @@ namespace Aurora
 	class SceneObjectMaterial : public BaseSceneObject
 	{
 	public:
-		SceneObjectMaterial() : BaseSceneObject(SceneObjectType::kSceneObjectTypeMaterial) {}
 		SceneObjectMaterial(const std::string& name) : BaseSceneObject(SceneObjectType::kSceneObjectTypeMaterial) {}
 		SceneObjectMaterial(
 			const std::string& name = "",
@@ -419,6 +429,8 @@ namespace Aurora
 
 		void AddMesh(const std::shared_ptr<SceneObjectMesh>& mesh) { meshs_.push_back(mesh); }
 		void AddMesh(std::shared_ptr<SceneObjectMesh>&& mesh) { meshs_.push_back(std::move(mesh)); }
+		const std::weak_ptr<SceneObjectMesh> GetMesh() { return meshs_.empty() ? nullptr : meshs_[0]; }
+		const std::weak_ptr<SceneObjectMesh> GetMeshLOD(size_t lod) { return lod < meshs_.size() ? meshs_[lod] : nullptr; }
 	protected:
 		std::vector<std::shared_ptr<SceneObjectMesh>> meshs_;
 		bool visible_;

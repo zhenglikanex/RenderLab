@@ -1,6 +1,7 @@
 #include "GLFWApplication.hpp"
 
 #include "Framework/Common/Engine.hpp"
+#include "Framework/Common/SceneManager.hpp"
 #include "RHI/OpenGL/OpenGLGraphicsManager.hpp"
 
 using namespace Aurora;
@@ -17,7 +18,8 @@ GLFWApplication::GLFWApplication(GfxConfiguration& cfg)
     ,window_(nullptr)
 {
     engine_ = std::make_unique<Engine>(
-        std::make_unique<OpenGLGraphicsManager>((GLADloadproc)glfwGetProcAddress)
+        std::make_unique<OpenGLGraphicsManager>((GLADloadproc)glfwGetProcAddress),
+        std::make_unique<SceneManager>()
         );
 }
 
@@ -69,10 +71,19 @@ void GLFWApplication::Finalize()
 
 void GLFWApplication::Tick()
 {
-    while (!glfwWindowShouldClose(window_))
+    BaseApplication::Tick();
+
+    engine_->GetGraphicsManager()->Clear();
+    engine_->GetGraphicsManager()->Draw();
+
+    glfwSwapBuffers(window_);
+
+    if (!glfwWindowShouldClose(window_))
     {
         glfwPollEvents();
     }
-
-    BaseApplication::Tick();
+    else
+    {
+        Quit();
+    }
 }

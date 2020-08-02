@@ -5,6 +5,8 @@
 
 namespace Aurora
 {
+	class Engine;
+
 	class IApplication : public IRuntimeModule
 	{
 	public:
@@ -17,7 +19,8 @@ namespace Aurora
 		virtual void Quit() = 0;
 		virtual bool IsQuit() const = 0;
 
-		virtual const GfxConfiguration& GetConfiguration() = 0;
+		virtual const GfxConfiguration& GetConfiguration() const = 0;
+		virtual const std::unique_ptr<Engine>& GetEngine() const = 0;
 	};
 
 	extern IApplication* g_app;

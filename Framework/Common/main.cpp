@@ -3,6 +3,8 @@
 
 
 #include "IApplication.hpp"
+#include "Framework/Common/Engine.hpp"
+#include "Framework/Common/SceneManager.hpp"
 
 using namespace Aurora;
 

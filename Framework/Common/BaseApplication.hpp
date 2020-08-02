@@ -21,8 +21,8 @@ namespace Aurora
 		void Quit() override { quit_ = true; }
 		bool IsQuit() const override { return quit_; }
 
-		const GfxConfiguration& GetConfiguration() override { return config_; }
-		const std::unique_ptr<Engine>& GetEngine() const { return engine_; }
+		const GfxConfiguration& GetConfiguration() const override { return config_; }
+		const std::unique_ptr<Engine>& GetEngine() const override { return engine_; }
 	protected:
 		virtual void OnDraw() {}
 

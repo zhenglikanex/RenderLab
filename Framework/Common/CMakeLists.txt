@@ -20,6 +20,8 @@ SceneNode.hpp
 SceneNode.cpp
 SceneParser.hpp
 SceneParser.cpp
+SceneManager.hpp
+SceneManager.cpp
 OGEX.hpp
 Image.hpp
 main.cpp

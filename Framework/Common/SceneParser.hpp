@@ -43,6 +43,6 @@ namespace Aurora
 	class SceneParser
 	{
 	public:
-		virtual std::unique_ptr<BaseSceneNode> Parser(const std::string& buf) = 0;
+		virtual std::unique_ptr<Scene> Parser(const std::string& buf) = 0;
 	};
 }

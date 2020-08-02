@@ -4,6 +4,8 @@
 #include <fstream>
 
 #include "Framework/Common/IApplication.hpp"
+#include "Framework/Common/Engine.hpp"
+#include "Framework/Common/SceneManager.hpp"
 #include "Framework/Utils/FileUtils.hpp"
 #include "Framework/Utils/FileHandle.hpp"
 
@@ -198,12 +200,150 @@ bool OpenGLGraphicsManager::SetShaderParameters(float* world_matrix, float* view
 
 bool OpenGLGraphicsManager::InitializeBuffers()
 {
+	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
+	auto geometry = scene.GetFirstGeometry();
+	while (geometry)
+	{
+		auto mesh = geometry->GetMesh().lock();
+		if (!mesh) return false;
+
+		// 顶点属性数量
+		auto vertex_properties_count = mesh->GetVertexPropertiesCount();
+
+		// 顶点数量
+		auto vertex_count = mesh->GetVertexCount();
+
+		// 分配opengl vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+
+		glBindVertexArray(vao);
+
+		GLuint buffer_id;
+
+		for (int32_t i = 0; i < vertex_properties_count; ++i)
+		{
+			const SceneObjectVertexArray& v_property_array = mesh->GetVertexPropertyArray(i);
+			auto v_property_array_data_size = v_property_array.GetDataSize();
+			auto v_property_array_data = v_property_array.GetData();
+
+			glGenBuffers(1, &buffer_id);
+
+			glBindBuffer(GL_ARRAY_BUFFER, buffer_id);
+			glBufferData(GL_ARRAY_BUFFER, v_property_array_data_size, v_property_array_data, GL_STATIC_DRAW);
+
+			glEnableVertexAttribArray(i);
+
+			glBindBuffer(GL_ARRAY_BUFFER, buffer_id);
+			switch (v_property_array.GetDataType())
+			{
+			case VertexDataType::kVertexDataTypeFloat1:
+				glVertexAttribPointer(i, 1, GL_FLOAT, false, 0, 0);
+				break;
+			case VertexDataType::kVertexDataTypeFloat2:
+				glVertexAttribPointer(i, 2, GL_FLOAT, false, 0, 0);
+				break;
+			case VertexDataType::kVertexDataTypeFloat3:
+				glVertexAttribPointer(i, 3, GL_FLOAT, false, 0, 0);
+				break;
+			case VertexDataType::kVertexDataTypeFloat4:
+				glVertexAttribPointer(i, 4, GL_FLOAT, false, 0, 0);
+				break;
+			case VertexDataType::kVertexDataTypeDouble1:
+				glVertexAttribPointer(i, 1, GL_DOUBLE, false, 0, 0);
+				break;
+			case VertexDataType::kVertexDataTypeDouble2:
+				glVertexAttribPointer(i, 2, GL_DOUBLE, false, 0, 0);
+				break;
+			case VertexDataType::kVertexDataTypeDouble3:
+				glVertexAttribPointer(i, 3, GL_DOUBLE, false, 0, 0);
+				break;
+			case VertexDataType::kVertexDataTypeDouble4:
+				glVertexAttribPointer(i, 4, GL_DOUBLE, false, 0, 0);
+				break;
+			default:
+				assert(0);
+				break;
+			}
+
+			buffers_[v_property_array.GetAttributeName()] = buffer_id;
+		}
+
+		glGenBuffers(1, &buffer_id);
+
+		const SceneObjectIndexArray& index_array = mesh->GetIndexArray(0);
+		auto index_array_size = index_array.GetDataSize();
+		auto index_array_data = index_array.GetData();
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_array_size, index_array_data, GL_STATIC_DRAW);
+
+		GLsizei index_count = static_cast<GLsizei>(index_array.GetIndexCount());
+		GLenum mode;
+		switch (mesh->GetPrimitiveType())
+		{
+		case PrimitiveType::kPrimitiveTypePointList:
+			mode = GL_POINTS;
+			break;
+		case PrimitiveType::kPrimitiveTypeLineList:
+			mode = GL_LINES;
+			break;
+		case PrimitiveType::kPrimitiveTypeLineStrip:
+			mode = GL_LINE_STRIP;
+			break;
+		case PrimitiveType::kPrimitiveTypeTriList:
+			mode = GL_TRIANGLES;
+			break;
+		case PrimitiveType::kPrimitiveTypeTriStrip:
+			mode = GL_TRIANGLE_STRIP;
+			break;
+		case PrimitiveType::kPrimitiveTypeTriFan:
+			mode = GL_TRIANGLE_FAN;
+			break;
+		default:
+			continue;
+		}
+
+		GLenum type;
+		switch (index_array.GetIndexType())
+		{
+		case IndexDataType::kIndexDataTypeInt8:
+			type = GL_UNSIGNED_BYTE;
+			break;
+		case IndexDataType::kIndexDataTypeInt16:
+			type = GL_UNSIGNED_SHORT;
+			break;
+		case IndexDataType::kIndexDataTypeInt32:
+			type = GL_UNSIGNED_INT;
+			break;
+		default:
+			std::cerr << "Error: Unsupported Index Type " << index_array << std::endl;
+			continue;
+		}
+
+		buffers_["index"] = buffer_id;
+
+		DrawBathContext& dbc = *(new DrawBathContext);
+		dbc.vao = vao;
+		dbc.mode = mode;
+		dbc.type = type;
+		dbc.count = index_count;
+
+		VAO_.push_back(std::move(dbc));
+
+		geometry = scene.GetNextGeometry();
+	}
     return true;
 }
 
 void OpenGLGraphicsManager::RenderBuffers()
 {
-	//glBindVertexArray(vertex_arr)
+	for (auto& dbc : VAO_)
+	{
+		glBindVertexArray(dbc.vao);
+
+		glDrawElements(dbc.mode, dbc.count, dbc.type, 0);
+	}
 }
 
 void OpenGLGraphicsManager::CalculateCameraPosition()
