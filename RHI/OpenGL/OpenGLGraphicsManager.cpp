@@ -379,7 +379,7 @@ void OpenGLGraphicsManager::CalculateCameraPosition()
 	look_at.y = position.y + look_at.y;
 	look_at.z = position.z + look_at.z;
 
-	view_matrix_ = glm::lookAt(position, look_at, up);
+	view_matrix_ = glm::lookAtLH(position, look_at, up);
 }
 
 bool OpenGLGraphicsManager::InitializeShader(const char* vs_filename, const char* fs_filename)

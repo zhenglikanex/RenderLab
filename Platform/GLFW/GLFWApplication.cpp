@@ -8,7 +8,7 @@ using namespace Aurora;
 
 namespace Aurora
 {
-    GfxConfiguration config(8, 8, 8, 8, 24, 0, 0, 900, 500, "RenderLab");
+    GfxConfiguration config(8, 8, 8, 8, 24, 0, 0, 960, 540, "RenderLab");
     GLFWApplication app(config);
     IApplication* g_app = &app;
 }
