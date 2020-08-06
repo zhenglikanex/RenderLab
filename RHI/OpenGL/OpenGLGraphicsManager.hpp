@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <unordered_map>
 
@@ -43,14 +44,12 @@ namespace Aurora
 			GLenum mode;
 			GLenum type;
 			GLsizei count;
+			std::shared_ptr<glm::mat4> transform;
 		};
 
 		std::vector<DrawBathContext> VAO_;
 		std::unordered_map<std::string, uint32_t> buffers_;
 		
-		float position_x_ = 0, position_y_ = 0, position_z_ = -10;
-		float rotation_x_ = 0, rotaion_y_ = 0, rotation_z = 0;
-
 		glm::mat4 world_matrix_;
 		glm::mat4 view_matrix_;
 		glm::mat4 projection_matrix_;

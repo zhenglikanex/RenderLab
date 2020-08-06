@@ -32,9 +32,9 @@ namespace Aurora
 			return scene;
 		}
 	private:
-		void ConvertOddlStructureToSceneNode(const ODDL::Structure& structure, const std::unique_ptr<BaseSceneNode>& base_node,Scene& scene)
+		void ConvertOddlStructureToSceneNode(const ODDL::Structure& structure, const std::shared_ptr<BaseSceneNode>& base_node,Scene& scene)
 		{
-			std::unique_ptr<BaseSceneNode> node;
+			std::shared_ptr<BaseSceneNode> node;
 
 			switch (structure.GetStructureType())
 			{
@@ -45,56 +45,61 @@ namespace Aurora
 			break;
 			case OGEX::kStructureGeometryNode:
 			{
-				node = std::make_unique<SceneGeometryNode>(structure.GetStructureName());
-				SceneGeometryNode& _node = dynamic_cast<SceneGeometryNode&>(*node);
+				auto _node = std::make_shared<SceneGeometryNode>(structure.GetStructureName());
 				const OGEX::GeometryNodeStructure& _structure = dynamic_cast<const OGEX::GeometryNodeStructure&>(structure);
 
-				_node.SetVisibility(_structure.GetVisibleFlag());
-				_node.SetIfCastShadow(_structure.GetShadowFlag());
-				_node.SetIfMotionBlur(_structure.GetMotionBlurFlag());
+				_node->SetVisibility(_structure.GetVisibleFlag());
+				_node->SetIfCastShadow(_structure.GetShadowFlag());
+				_node->SetIfMotionBlur(_structure.GetMotionBlurFlag());
 
 				//¹Ò½ÓSceneObject
 				std::string _key = _structure.GetObjectStructure()->GetStructureName();
-				if (!scene_objects_[_key])
-				{
-					scene_objects_[_key] = std::make_shared<SceneObjectGeometry>();
-				}
-				_node.AddSceneObjectRef(std::dynamic_pointer_cast<SceneObjectGeometry>(scene_objects_[_key]));
+				_node->AddSceneObjectRef(_key);
 
 				auto materials = _structure.GetMaterialStructureArray();
 				auto materials_count = materials.GetElementCount();
+				std::string material_key;
 				for (auto i = 0; i < materials_count; ++i)
 				{
 					auto material = materials[i];
-					_key = material->GetStructureName();
-					if (!scene_objects_[_key])
-					{
-						scene_objects_[_key] = std::make_shared<SceneObjectMaterial>();
-					}
-					_node.AddSceneObjectRef(std::dynamic_pointer_cast<SceneObjectMaterial>(scene_objects_[_key]));
+					material_key = material->GetStructureName();
+					_node->AddMaterialRef(material_key);
 				}
+
+				scene.GeometryNodes.emplace(_key, _node);
+				node = _node;
 			}
 			break;
 			case OGEX::kStructureLightNode:
 			{
-				node = std::make_unique<SceneLightNode>(structure.GetStructureName());
+				auto _node = std::make_shared<SceneLightNode>(structure.GetStructureName());
+				const OGEX::LightNodeStructure& _structure = dynamic_cast<const OGEX::LightNodeStructure&>(structure);
+				_node->SetIfCastShadow(_structure.GetShadowFlag());
+
+				std::string _key = _structure.GetObjectStructure()->GetStructureName();
+				_node->AddSceneObjectRef(_key);
+
+				scene.LightNodes.emplace(_key, _node);
+				node = _node;
 			}
 			break;
 			case OGEX::kStructureCameraNode:
 			{
-				node = std::make_unique<SceneCameraNode>(structure.GetStructureName());
+				auto _node = std::make_shared<SceneCameraNode>(structure.GetStructureName());
+				const OGEX::CameraNodeStructure& _structure = dynamic_cast<const OGEX::CameraNodeStructure&>(structure);
+			
+				std::string _key = _structure.GetObjectStructure()->GetStructureName();
+				_node->AddSceneObjectRef(_key);
+
+				scene.CameraNodes.emplace(_key, _node);
+				node = _node;
 			}
 			break;
 			case OGEX::kStructureGeometryObject:
 			{
 				const OGEX::GeometryObjectStructure& _structeure = dynamic_cast<const OGEX::GeometryObjectStructure&>(structure);
 				std::string _key = _structeure.GetStructureName();
-				std::shared_ptr<SceneObjectGeometry> _object;
-				if (!scene_objects_[_key])
-				{
-					scene_objects_[_key] = std::shared_ptr<SceneObjectGeometry>();
-				}
-				_object = std::dynamic_pointer_cast<SceneObjectGeometry>(scene_objects_[_key]);
+				auto _object = std::make_shared<SceneObjectGeometry>();
 				_object->SetVisibility(_structeure.GetVisibleFlag());
 				_object->SetIfCastShadow(_structeure.GetShadowFlag());
 				_object->SetIfMotionBlur(_structeure.GetMotionBlurFlag());
@@ -260,41 +265,32 @@ namespace Aurora
 				}
 				scene.Geometries[_key] = _object;
 				
-			}break;
+			}return;
 			case OGEX::kStructureTransform:
 			{
 				int32_t index, count;
 				const OGEX::TransformStructure& _structure = dynamic_cast<const OGEX::TransformStructure&>(structure);
 				bool object_flag = _structure.GetObjectFlag();
 				glm::mat4 matrix;
-				std::unique_ptr<SceneObjectTransform> transform;
+				std::shared_ptr<SceneObjectTransform> transform;
 				
 				count = _structure.GetTransformCount();
 				for (index = 0; index < count; ++index)
 				{
 					const float* data = _structure.GetTransform(index);
 					memcpy(&matrix, data, sizeof(matrix));
-					transform = std::make_unique<SceneObjectTransform>(matrix, object_flag);
+					transform = std::make_shared<SceneObjectTransform>(matrix, object_flag);
 					base_node->AppendChild(std::move(transform));
-
 				}
-			}break;
+			}return;
 			case OGEX::kStructureMaterial:
 			{
 				const OGEX::MaterialStructure& _structure = dynamic_cast<const OGEX::MaterialStructure&>(structure);
 				std::string material_name;
 				const char* _name = _structure.GetMaterialName();
-				if (_name)
-				{
-					material_name = _name;
-				}
 				std::string _key = _structure.GetStructureName();
-				if (!scene_objects_[_key])
-				{
-					scene_objects_[_key] = std::make_shared<SceneObjectMaterial>();
-				}
-				std::shared_ptr<SceneObjectMaterial> material = std::dynamic_pointer_cast<SceneObjectMaterial>(scene_objects_[_key]);
-				material->SetName(material_name);
+				auto material = std::make_shared<SceneObjectMaterial>();
+				material->SetName(_name);
 
 				const ODDL::Structure* _sub_structure = _structure.GetFirstCoreSubnode();
 				while (_sub_structure) {
@@ -326,7 +322,72 @@ namespace Aurora
 					}
 					_sub_structure = _sub_structure->Next();
 				}
-			}
+				scene.Materials.emplace(_key, material);
+
+			}return;
+			case OGEX::kStructureLightObject:
+			{
+				const OGEX::LightObjectStructure& _structure = dynamic_cast<const OGEX::LightObjectStructure&>(structure);
+				std::string _type_str = _structure.GetTypeString();
+				const bool _bshadow = _structure.GetShadowFlag();
+				std::string _key = _structure.GetStructureName();
+				std::shared_ptr<SceneObjectLight> light;
+				
+				if (_type_str == "infinite")
+				{
+					return;
+				}
+				else if (_type_str == "point")
+				{
+					light = std::make_shared<SceneObjectOmniLight>();
+				}
+				else if (_type_str == "spot")
+				{
+					light = std::make_shared<SceneObjectSpotLight>();
+				}
+
+			}return;
+			case OGEX::kStructureCameraObject:
+			{
+				const OGEX::CameraObjectStructure& _structure = dynamic_cast<const OGEX::CameraObjectStructure&>(structure);
+				std::string _key = _structure.GetStructureName();
+				auto camera = std::make_shared<SceneObjectPerspectiveCamera>();
+
+				const ODDL::Structure* _sub_structure = _structure.GetFirstCoreSubnode();
+				while (_sub_structure)
+				{
+					std::string attrib, textureName;
+					glm::vec4 color;
+					float param;
+					switch (_sub_structure->GetStructureType())
+					{
+					case OGEX::kStructureColor:
+					{
+						attrib = dynamic_cast<const OGEX::ColorStructure*>(_sub_structure)->GetAttribString();
+						const float* _color = dynamic_cast<const OGEX::ColorStructure*>(_sub_structure)->GetColor();
+						memcpy(&color, _color, sizeof(glm::vec4));
+						camera->SetColor(attrib, color);
+						
+					}break;
+					case OGEX::kStructureParam:
+					{
+						attrib = dynamic_cast<const OGEX::ParamStructure*>(_sub_structure)->GetAttribString();
+						param = dynamic_cast<const OGEX::ParamStructure*>(_sub_structure)->GetParam();
+						camera->SetParam(attrib, param);
+					}break;
+					case OGEX::kStructureTexture:
+					{
+						attrib = dynamic_cast<const OGEX::TextureStructure*>(_sub_structure)->GetAttribString();
+						textureName = dynamic_cast<const OGEX::TextureStructure*>(_sub_structure)->GetTextureName();
+						camera->SetTexture(attrib, textureName);
+					}break;
+					default:
+						break;
+					}
+					_sub_structure = _sub_structure->Next();
+				}
+				scene.Cameras.emplace(_key, camera);
+			}return;
 			default:
 				return;
 			}
@@ -341,6 +402,5 @@ namespace Aurora
 			base_node->AppendChild(std::move(node));
 		}
 	private:
-		std::unordered_map<std::string, std::shared_ptr<BaseSceneObject>> scene_objects_;
 	};
 }

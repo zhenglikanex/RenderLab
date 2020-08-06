@@ -23,7 +23,7 @@ bool Engine::Initialize()
 		return false;
 	}
 
-	scene_manager_->LoadScene("Scene/cube.ogex");
+	scene_manager_->LoadScene("Scene/test.ogex");
 
 	if (!graphics_manager_ || !graphics_manager_->Initialize())
 	{

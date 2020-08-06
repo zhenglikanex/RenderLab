@@ -376,7 +376,7 @@ namespace Aurora
 			, ambient_occlusion_(ao)
 		{
 		}
-		void SetName(const std::string& name) {  }
+		void SetName(const std::string& name) { name_ = name; }
 		void SetColor(const std::string& attrib, const glm::vec4& color)
 		{
 			if (attrib == "diffuse")
@@ -453,25 +453,54 @@ namespace Aurora
 			Color&& color = glm::vec4(1.0f),
 			float intensity = 10.0f,
 			AttenFunc atten_func = DefaultAttenFunc,
-			float near_clip = 1.0f,
-			float far_clip = 100.0f,
 			bool cast_shadows = false)
 			: BaseSceneObject(SceneObjectType::kSceneObjectTypeLight)
 			, light_color_(std::move(color))
 			, intensity_(intensity)
 			, light_attenuation_(atten_func)
-			, near_clip_distance_(near_clip)
-			, far_clip_distance_(far_clip)
 			, cast_shadows_(cast_shadows)
 		{
 		}
+		
+		void SetIfCastShadow(bool shadow) { cast_shadows_ = shadow; }
+		
+		void SetColor(const std::string& attrib, const glm::vec4& color)
+		{
+			if (attrib == "light")
+			{
+				light_color_ = Color(color);
+			}
+		}
+
+		void SetParam(const std::string& attrib, float param)
+		{
+			if (attrib == "intensity")
+			{
+				intensity_ = param;
+			}
+		}
+
+		void SetTexture(const std::string& attrib, const std::string& texture_name)
+		{
+			if (attrib == "projection")
+			{
+				texture_name_ = texture_name;
+			}
+		}
+
+		void SetAttenuation(AttenFunc func)
+		{
+			light_attenuation_ = func;
+		}
+
+		const Color& GetColor() const { return light_color_; }
+		float GetIntensity() const { return intensity_; }
 	protected:
 		Color light_color_;
 		float intensity_;
 		AttenFunc light_attenuation_;	//允許指定特殊的衰減的函數
-		float near_clip_distance_;
-		float far_clip_distance_;
 		bool cast_shadows_;
+		std::string texture_name_;
 	};
 
 	class SceneObjectOmniLight : public SceneObjectLight
@@ -492,7 +521,32 @@ namespace Aurora
 	class SceneObjectCamera : public BaseSceneObject
 	{
 	public:
-		SceneObjectCamera() : BaseSceneObject(SceneObjectType::kSceneObjectTypeCamera) {}
+		SceneObjectCamera() : BaseSceneObject(SceneObjectType::kSceneObjectTypeCamera),aspect_(16.0f/9.0f),near_clip_distance_(1.0f),far_clip_distance_(100.f){}
+
+		void SetColor(const std::string& attrib, const glm::vec4& color)
+		{
+
+		}
+
+		void SetParam(const std::string& attrib, float param)
+		{
+			if (attrib == "near")
+			{
+				near_clip_distance_ = param;
+			}
+			else if (attrib == "far")
+			{
+				far_clip_distance_ = param;
+			}
+		}
+
+		void SetTexture(const std::string& attrib, const std::string& texture_name)
+		{
+
+		}
+
+		float GetNearClipDistance() { return near_clip_distance_; }
+		float GetFarClipDistance() { return far_clip_distance_; }
 	protected:
 		float aspect_;
 		float near_clip_distance_;
@@ -506,6 +560,20 @@ namespace Aurora
 
 	class SceneObjectPerspectiveCamera : public SceneObjectCamera
 	{
+	public:
+		SceneObjectPerspectiveCamera(float fov = PI / 2.0) : SceneObjectCamera(), fov_(fov) {}
+
+		void SetParam(const std::string& attrib, float param)
+		{
+			if (attrib == "fov")
+			{
+				fov_ = param;
+			}
+
+			SceneObjectCamera::SetParam(attrib, param);
+		}
+
+		float GetFov() const { return fov_; }
 	protected:
 		float fov_;
 	};
@@ -515,6 +583,9 @@ namespace Aurora
 	public:
 		SceneObjectTransform() : matrix_(glm::identity<glm::mat4>()), scene_object_only_(false) {}
 		SceneObjectTransform(const glm::mat4& matrix, bool object_only = false) : matrix_(matrix), scene_object_only_(object_only) {}
+
+		operator glm::mat4() { return matrix_;}
+		operator const glm::mat4() const { return matrix_; }
 	protected:
 		glm::mat4 matrix_;
 		bool scene_object_only_;

@@ -22,6 +22,8 @@ SceneParser.hpp
 SceneParser.cpp
 SceneManager.hpp
 SceneManager.cpp
+Scene.hpp
+Scene.cpp
 OGEX.hpp
 Image.hpp
 main.cpp

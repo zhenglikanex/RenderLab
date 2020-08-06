@@ -9,8 +9,8 @@
 #include "Framework/Utils/FileUtils.hpp"
 #include "Framework/Utils/FileHandle.hpp"
 
-const char VS_SHADER_SOURCE_FILE[] = "Shaders/color.vs";
-const char PS_SHADER_SOURCE_FILE[] = "Shaders/color.ps";
+const char VS_SHADER_SOURCE_FILE[] = "Shaders/basic.vs";
+const char PS_SHADER_SOURCE_FILE[] = "Shaders/basic.ps";
 
 using namespace Aurora;
 
@@ -110,18 +110,13 @@ bool OpenGLGraphicsManager::Initialize()
         glEnable(GL_DEPTH_TEST);
 
         // Set the polygon winding to front facing for the left handed system.
-        glFrontFace(GL_CW);
+        glFrontFace(GL_CCW);
 
         // Enable back face culling.
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
 		world_matrix_ = glm::identity<glm::mat4>();
-
-		float fov = PI / 4.0f;
-		const GfxConfiguration& conf = g_app->GetConfiguration();
-		
-		projection_matrix_ = glm::perspectiveFovLH(fov, (float)conf.screen_width, (float)conf.screen_height, screen_near, screen_depth);
     }
 
 	InitializeShader(VS_SHADER_SOURCE_FILE, PS_SHADER_SOURCE_FILE);
@@ -160,11 +155,6 @@ void OpenGLGraphicsManager::Clear()
 
 void OpenGLGraphicsManager::Draw()
 {
-	CalculateCameraPosition();
-
-	glUseProgram(shader_program_);
-	SetShaderParameters(glm::value_ptr(world_matrix_), glm::value_ptr(view_matrix_), glm::value_ptr(projection_matrix_));
-
 	RenderBuffers();
 
 	glFlush();
@@ -201,9 +191,10 @@ bool OpenGLGraphicsManager::SetShaderParameters(float* world_matrix, float* view
 bool OpenGLGraphicsManager::InitializeBuffers()
 {
 	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
-	auto geometry = scene.GetFirstGeometry();
-	while (geometry)
+	auto geometry_node = scene.GetFirstGeometryNode();
+	while (geometry_node)
 	{
+		auto geometry = scene.GetGeometry(geometry_node->GetSceneObjectRef());
 		auto mesh = geometry->GetMesh().lock();
 		if (!mesh) return false;
 
@@ -328,18 +319,37 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 		dbc.mode = mode;
 		dbc.type = type;
 		dbc.count = index_count;
+		dbc.transform = geometry_node->GetCalculatedTransform();
 
 		VAO_.push_back(std::move(dbc));
 
-		geometry = scene.GetNextGeometry();
+		geometry_node = scene.GetNextGeometryNode();
 	}
     return true;
 }
 
 void OpenGLGraphicsManager::RenderBuffers()
 {
+	static float rotateAngle = 0.0f;
+
+	// Update world matrix to rotate the model
+	rotateAngle += PI / 120;
+	//glm::mat4 rotationMatrixY = glm::identity<glm::mat4>();
+	glm::mat4 rotationMatrixZ = glm::identity<glm::mat4>();
+	//rotationMatrixY = glm::rotate(rotationMatrixY, rotateAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+	rotationMatrixZ = glm::rotate(rotationMatrixZ, rotateAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+
+	//world_matrix_ = rotationMatrixY * rotationMatrixZ;
+	world_matrix_ = rotationMatrixZ;
+
+	CalculateCameraPosition();
+
 	for (auto& dbc : VAO_)
 	{
+		glUseProgram(shader_program_);
+		glm::mat4 model_matrix = world_matrix_ * *dbc.transform;
+		SetShaderParameters(glm::value_ptr(model_matrix), glm::value_ptr(view_matrix_), glm::value_ptr(projection_matrix_));
+
 		glBindVertexArray(dbc.vao);
 
 		glDrawElements(dbc.mode, dbc.count, dbc.type, 0);
@@ -348,38 +358,23 @@ void OpenGLGraphicsManager::RenderBuffers()
 
 void OpenGLGraphicsManager::CalculateCameraPosition()
 {
-	glm::vec3 up, position, look_at;
-	float yaw, pitch, roll;
-	glm::mat4 rotation_matrix = glm::identity<glm::mat4>();
+	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
+	auto camera_node = scene.GetFirstCameraNode();
+	if (camera_node)
+	{
+		view_matrix_ = glm::inverse(*camera_node->GetCalculatedTransform());
+	}
+	else 
+	{
+		glm::vec3 position = { 0,0,5 }, look_at = { 0,0,0 }, up = { 0,1,0 };
+		view_matrix_ = glm::lookAtLH(position, look_at, up);
+	}
+	
+	auto camera = scene.GetCamera(camera_node->GetSceneObjectRef());
 
-	up.x = 0.0f;
-	up.y = 1.0f;
-	up.z = 0.0f;
-
-	position.x = position_x_;
-	position.y = position_y_;
-	position.z = position_z_;
-
-	look_at.x = 0.0f;
-	look_at.y = 0.0f;
-	look_at.z = 1.0f;
-
-	pitch = rotation_x_ * RAD;
-	yaw = rotation_x_ * RAD;
-	roll = rotation_x_ * RAD;
-
-	rotation_matrix = glm::rotate(rotation_matrix, pitch, glm::vec3(1.0f, 0.0f, 0.0f));
-	rotation_matrix = glm::rotate(rotation_matrix, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
-	rotation_matrix = glm::rotate(rotation_matrix, roll, glm::vec3(0.0f, 0.0f, 1.0f));
-
-	look_at = rotation_matrix * glm::vec4(look_at,0.0f);
-	up = rotation_matrix * glm::vec4(up, 0.0f);
-
-	look_at.x = position.x + look_at.x;
-	look_at.y = position.y + look_at.y;
-	look_at.z = position.z + look_at.z;
-
-	view_matrix_ = glm::lookAtLH(position, look_at, up);
+	float fov = std::dynamic_pointer_cast<SceneObjectPerspectiveCamera>(camera)->GetFov();
+	const GfxConfiguration& conf = g_app->GetConfiguration();
+	projection_matrix_ = glm::perspectiveFovRH(fov, (float)conf.screen_width, (float)conf.screen_height,camera->GetNearClipDistance(),camera->GetFarClipDistance());
 }
 
 bool OpenGLGraphicsManager::InitializeShader(const char* vs_filename, const char* fs_filename)
@@ -431,7 +426,7 @@ bool OpenGLGraphicsManager::InitializeShader(const char* vs_filename, const char
 	glAttachShader(shader_program_, fragment_shader_);
 
 	glBindAttribLocation(shader_program_, 0, "inputPosition");
-	glBindAttribLocation(shader_program_, 1, "inputColor");
+	glBindAttribLocation(shader_program_, 1, "inputNormal");
 
 	glLinkProgram(shader_program_);
 

@@ -1,5 +1,6 @@
 build
 3rdparty/build
+*.lib
 
 # Cmake files
 CMakeCache.txt
