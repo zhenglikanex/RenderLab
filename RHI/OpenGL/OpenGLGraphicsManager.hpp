@@ -24,20 +24,26 @@ namespace Aurora
 		void Clear() override;
 		void Draw() override;
 	private:
-		bool SetShaderParameters(float* world_matrix, float* view_matrix, float* projection_matrix);
+		bool SetPerBatchShaderParameters(const std::string& param_name, float* param);
+		bool SetPerBatchShaderParameters();
 
 		bool InitializeBuffers();
 		void RenderBuffers();
-		void CalculateCameraPosition();
+		void CalculateCameraMatrix();
+		void CalculateLights();
 		bool InitializeShader(const char* vs_filename, const char* fs_filename);
 	private:
 		uint32_t vertex_shader_;
 		uint32_t fragment_shader_;
 		uint32_t shader_program_;
 
-		const bool VSYNC_ENABLED = true;
-		const float screen_depth = 1000.0f;
-		const float screen_near = 0.1f;
+		struct DrawFrameContext {
+			glm::mat4 world_matrix;
+			glm::mat4 view_matrix;
+			glm::mat4 projection_matrix;
+			glm::vec3 light_position;
+			glm::vec4 light_color;
+		};
 
 		struct DrawBathContext {
 			GLuint vao;
@@ -47,12 +53,9 @@ namespace Aurora
 			std::shared_ptr<glm::mat4> transform;
 		};
 
+		DrawFrameContext draw_frame_context_;
 		std::vector<DrawBathContext> VAO_;
 		std::unordered_map<std::string, uint32_t> buffers_;
-		
-		glm::mat4 world_matrix_;
-		glm::mat4 view_matrix_;
-		glm::mat4 projection_matrix_;
 
 		GLADloadproc loader_;
 	};

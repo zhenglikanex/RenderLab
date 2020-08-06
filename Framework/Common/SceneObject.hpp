@@ -443,7 +443,7 @@ namespace Aurora
 	
 	inline float DefaultAttenFunc(float intensity, float distance)
 	{
-		return intensity / (1 + distance);
+		return intensity / pow((1 + distance),2.0f);
 	}
 
 	class SceneObjectLight : public BaseSceneObject
@@ -461,7 +461,7 @@ namespace Aurora
 			, cast_shadows_(cast_shadows)
 		{
 		}
-		
+	public:
 		void SetIfCastShadow(bool shadow) { cast_shadows_ = shadow; }
 		
 		void SetColor(const std::string& attrib, const glm::vec4& color)

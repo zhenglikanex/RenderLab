@@ -345,6 +345,50 @@ namespace Aurora
 				{
 					light = std::make_shared<SceneObjectSpotLight>();
 				}
+				light->SetIfCastShadow(_structure.GetShadowFlag());
+
+				const ODDL::Structure* _sub_structure = _structure.GetFirstCoreSubnode();
+				while (_sub_structure) {
+					std::string attrib, textureName;
+					glm::vec4 color;
+					float param;
+					switch (_sub_structure->GetStructureType())
+					{
+					case OGEX::kStructureColor:
+					{
+						attrib = dynamic_cast<const OGEX::ColorStructure*>(_sub_structure)->GetAttribString();
+						const float* _color = dynamic_cast<const OGEX::ColorStructure*>(_sub_structure)->GetColor();
+						memcpy(&color,_color, sizeof(glm::vec4));
+						light->SetColor(attrib, color);
+					}
+					break;
+					case OGEX::kStructureParam:
+					{
+						attrib = dynamic_cast<const OGEX::ParamStructure*>(_sub_structure)->GetAttribString();
+						param = dynamic_cast<const OGEX::ParamStructure*>(_sub_structure)->GetParam();
+						light->SetParam(attrib, param);
+					}
+					break;
+					case OGEX::kStructureTexture:
+					{
+						attrib = dynamic_cast<const OGEX::TextureStructure*>(_sub_structure)->GetAttribString();
+						textureName = dynamic_cast<const OGEX::TextureStructure*>(_sub_structure)->GetTextureName();
+						light->SetTexture(attrib, textureName);
+					}
+					break;
+					case OGEX::kStructureAtten:
+					{
+						// TODO: truly implement it
+						light->SetAttenuation(DefaultAttenFunc);
+					}
+					break;
+					default:
+						;
+					};
+
+					_sub_structure = _sub_structure->Next();
+				}
+				scene.Lights[_key] = light;
 
 			}return;
 			case OGEX::kStructureCameraObject:
