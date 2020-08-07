@@ -282,7 +282,9 @@ namespace Aurora
 		void AddVertexArray(SceneObjectVertexArray&& array) { vertex_array_.push_back(std::move(array)); }
 		void SetPrimitiveType(PrimitiveType type) { primitive_type_ = type; }
 
-		size_t GetIndexCount() const { return index_array_.empty() ? 0 : index_array_[0].GetIndexCount(); }
+		//sub mesh 两种submesh的分发，1.从顶点就区分，2.同一套顶点，划分不同的顶点索引，这里使用的是第二种(第二种可以减少顶点数量buffer读取也更加友好,不需要切vao)
+		size_t GetIndexGroupCount() const { return index_array_.size(); }
+		size_t GetIndexCount(const size_t index) const { return index >= index_array_.size() ? 0 : index_array_[index].GetIndexCount(); }
 		size_t GetVertexCount() const { return vertex_array_.empty() ? 0 : vertex_array_[0].GetVertexCount(); }
 		size_t GetVertexPropertiesCount() const { return vertex_array_.size(); }
 		const SceneObjectVertexArray& GetVertexPropertyArray(const size_t index) const { return vertex_array_[index]; }
@@ -501,6 +503,12 @@ namespace Aurora
 		AttenFunc light_attenuation_;	//允許指定特殊的衰減的函數
 		bool cast_shadows_;
 		std::string texture_name_;
+	};
+
+	class SceneObjectInfiniteLight : public SceneObjectLight
+	{
+	public:
+		using SceneObjectLight::SceneObjectLight;
 	};
 
 	class SceneObjectOmniLight : public SceneObjectLight

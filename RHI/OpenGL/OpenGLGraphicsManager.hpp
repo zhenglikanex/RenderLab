@@ -49,7 +49,7 @@ namespace Aurora
 			GLuint vao;
 			GLenum mode;
 			GLenum type;
-			GLsizei count;
+			std::vector<GLsizei> counts;
 			std::shared_ptr<glm::mat4> transform;
 		};
 
