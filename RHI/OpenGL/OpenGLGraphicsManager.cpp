@@ -127,11 +127,25 @@ bool OpenGLGraphicsManager::Initialize()
 
 void OpenGLGraphicsManager::Finalize()
 {
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
+	for (auto& dbc : draw_batch_context_)
+	{
+		glDeleteVertexArrays(1, &dbc.vao);
+	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	draw_batch_context_.clear();
+
 	
+	//È¥³ýindex buffer;
+	for (auto i = 0; i < buffers_.size() - 1; i++)
+	{
+		glDisableVertexAttribArray(i);
+	}
+
+	for (auto& buf : buffers_)
+	{
+		glDeleteBuffers(1, &buf);
+	}
+	buffers_.clear();	
 
 	glDetachShader(shader_program_, vertex_shader_);
 	glDetachShader(shader_program_, fragment_shader_);
@@ -288,7 +302,7 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 				break;
 			}
 
-			buffers_[v_property_array.GetAttributeName()] = buffer_id;
+			buffers_.push_back(buffer_id);
 		}
 
 		glGenBuffers(1, &buffer_id);
@@ -343,7 +357,7 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 			continue;
 		}
 
-		buffers_["index"] = buffer_id;
+		buffers_.push_back(buffer_id);
 
 		DrawBathContext& dbc = *(new DrawBathContext);
 		dbc.vao = vao;
@@ -352,7 +366,7 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 		dbc.count = index_count;
 		dbc.transform = geometry_node->GetCalculatedTransform();
 
-		VAO_.push_back(std::move(dbc));
+		draw_batch_context_.push_back(std::move(dbc));
 
 		geometry_node = scene.GetNextGeometryNode();
 	}
@@ -378,7 +392,7 @@ void OpenGLGraphicsManager::RenderBuffers()
 
 	SetPerBatchShaderParameters();
 
-	for (auto& dbc : VAO_)
+	for (auto& dbc : draw_batch_context_)
 	{
 		glUseProgram(shader_program_);
 		glm::mat4 model_matrix = *dbc.transform;
@@ -491,7 +505,7 @@ void OpenGLGraphicsManager::CalculateLights()
 	}
 	else
 	{
-		draw_frame_context_.light_position = { 10.0f,10.0f,10.0f };
+		draw_frame_context_.light_position = { 10.0f,10.0f,-10.0f };
 		draw_frame_context_.light_color = { 1.0f,1.0f,1.0f,1.0f };
 	}
 }

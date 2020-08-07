@@ -54,8 +54,8 @@ namespace Aurora
 		};
 
 		DrawFrameContext draw_frame_context_;
-		std::vector<DrawBathContext> VAO_;
-		std::unordered_map<std::string, uint32_t> buffers_;
+		std::vector<DrawBathContext> draw_batch_context_;
+		std::vector<uint32_t> buffers_;
 
 		GLADloadproc loader_;
 	};
