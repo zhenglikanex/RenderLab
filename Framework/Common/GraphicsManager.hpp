@@ -16,6 +16,9 @@ namespace Aurora
 
 		virtual void Clear();
 		virtual void Draw();
+
+		void WorldRotateX();
+		void WorldRotateY();
 	private:
 	};
 }

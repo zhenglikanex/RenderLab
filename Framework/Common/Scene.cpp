@@ -88,3 +88,11 @@ const std::shared_ptr<SceneGeometryNode> Scene::GetNextGeometryNode() const
 	if (_it == GeometryNodes.cend()) return nullptr;
 	return (++_it == GeometryNodes.cend()) ? nullptr : _it->second;
 }
+
+void Scene::LoadResource()
+{
+	for (auto& material : Materials)
+	{
+		material.second->LoadTextures();
+	}
+}

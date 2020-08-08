@@ -26,6 +26,10 @@ Scene.hpp
 Scene.cpp
 OGEX.hpp
 Image.hpp
+ImageParser.hpp
+ImageParser.cpp
+InputManager.hpp
+InputManager.cpp
 main.cpp
 )
 

@@ -9,8 +9,8 @@
 #include "Framework/Utils/FileUtils.hpp"
 #include "Framework/Utils/FileHandle.hpp"
 
-const char VS_SHADER_SOURCE_FILE[] = "Shaders/basic.vs";
-const char PS_SHADER_SOURCE_FILE[] = "Shaders/basic.ps";
+const char VS_SHADER_SOURCE_FILE[] = "Shaders/basic_vs.glsl";
+const char PS_SHADER_SOURCE_FILE[] = "Shaders/basic_ps.glsl";
 
 using namespace Aurora;
 
@@ -135,7 +135,7 @@ void OpenGLGraphicsManager::Finalize()
 	draw_batch_context_.clear();
 
 	
-	//去除index buffer;
+	//-1去除index buffer;
 	for (auto i = 0; i < buffers_.size() - 1; i++)
 	{
 		glDisableVertexAttribArray(i);
@@ -145,7 +145,14 @@ void OpenGLGraphicsManager::Finalize()
 	{
 		glDeleteBuffers(1, &buf);
 	}
-	buffers_.clear();	
+
+	for (auto& texture : textures_)
+	{
+		glDeleteTextures(1, &texture);
+	}
+
+	buffers_.clear();
+	textures_.clear();
 
 	glDetachShader(shader_program_, vertex_shader_);
 	glDetachShader(shader_program_, fragment_shader_);
@@ -220,7 +227,7 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters()
     return true;
 }
 
-bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, float* param)
+bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const glm::mat4& param)
 {
 	unsigned int location;
 	location = glGetUniformLocation(shader_program_,param_name.c_str());
@@ -228,8 +235,53 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param
 	{
 		return false;
 	}
-	glUniformMatrix4fv(location, 1, false, param);
+	glUniformMatrix4fv(location, 1, false,glm::value_ptr(param));
 
+	return true;
+}
+
+bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const glm::vec3& param)
+{
+	unsigned int location;
+
+	location = glGetUniformLocation(shader_program_, param_name.c_str());
+	if (location == -1)
+	{
+		std::cout << "set param error param_name:" << param_name << std::endl;
+		return false;
+	}
+	glUniform3fv(location, 1, glm::value_ptr(param));
+
+	return true;
+}
+
+bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const float param)
+{
+	unsigned int location;
+	
+	location = glGetUniformLocation(shader_program_, param_name.c_str());
+	if (location == -1)
+	{
+		return false;
+	}
+	glUniform1f(location, param);
+
+	return true;
+}
+
+bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const GLint texture_index)
+{
+	unsigned int location;
+
+	location = glGetUniformLocation(shader_program_, param_name.c_str());
+	if (location == -1)
+	{
+		return false;
+	}
+	if (texture_index < GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS)
+	{
+		glUniform1i(location, texture_index);
+	}
 	return true;
 }
 
@@ -367,12 +419,48 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 
 				buffers_.push_back(buffer_id);
 
+				size_t material_index = index_array.GetMaterialIndex();
+				std::string material_key = geometry_node->GetMaterialRef(material_index);
+				auto material = scene.GetMaterial(material_key);
+				if (material)
+				{
+					auto color = material->GetBaseColor();
+					if (color.ValueMap)
+					{
+						auto texture = color.ValueMap->GetTexture();
+						auto it = texture_index_.find(material_key);
+						if (it == texture_index_.end())
+						{
+							GLuint texture_id;
+							glGenTextures(1, &texture_id);
+							glActiveTexture(GL_TEXTURE0 + texture_id);
+							glBindTexture(GL_TEXTURE_2D, texture_id);
+							if (texture.bitcount == 3)
+							{
+								glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.Width, texture.Height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
+							}
+							else if(texture.bitcount == 4)
+							{
+								glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.Width, texture.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
+							}
+							glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+							glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+							glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+							glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+							texture_index_[color.ValueMap->GetName()] = texture_id;
+							textures_.push_back(texture_id);
+						}
+					}
+				}
+
 				DrawBathContext& dbc = *(new DrawBathContext);
 				dbc.vao = vao;
 				dbc.mode = mode;
 				dbc.type = type;
-				dbc.counts.push_back(index_count);
+				dbc.count = index_count;
 				dbc.transform = geometry_node->GetCalculatedTransform();
+				dbc.material = material;
 
 				draw_batch_context_.push_back(std::move(dbc));
 			}
@@ -404,18 +492,39 @@ void OpenGLGraphicsManager::RenderBuffers()
 	for (auto& dbc : draw_batch_context_)
 	{
 		glUseProgram(shader_program_);
-		glm::mat4 model_matrix = *dbc.transform;
-		SetPerBatchShaderParameters("modelMatrix", glm::value_ptr(model_matrix));		
+		SetPerBatchShaderParameters("modelMatrix", *dbc.transform);
 
 		glBindVertexArray(dbc.vao);
+		//后面根据材质进行分组渲染
+		if (dbc.material)
+		{
+			Color color = dbc.material->GetBaseColor();
+			if (color.ValueMap)
+			{
+				SetPerBatchShaderParameters("defaultSampler", texture_index_[color.ValueMap->GetName()]);
+				
+				// 告诉shader使用texture
+				SetPerBatchShaderParameters("diffuseColor", glm::vec3(-1.0f));
+			}
+			else
+			{
+				SetPerBatchShaderParameters("diffuseColor", color.Value);
+			}
+			
+			color = dbc.material->GetSpecularColor();
+			SetPerBatchShaderParameters("specularColor", color.Value);
 
-		//glDrawElements(dbc.mode, dbc.count, dbc.type, 0);
+			Parameter param = dbc.material->GetSpecularPower();
+			SetPerBatchShaderParameters("specularPower", param.Value);
+		}
 
-		auto index_buffer_count = dbc.counts.size();
+		glDrawElements(dbc.mode, dbc.count, dbc.type, 0);
+
+		/*auto index_buffer_count = dbc.counts.size();
 		const GLvoid** indicies = new const GLvoid*[index_buffer_count];
 		memset(indicies, 0x00, sizeof(GLvoid*) * index_buffer_count);
 		glMultiDrawElements(dbc.mode, dbc.counts.data(), dbc.type, indicies, index_buffer_count);
-		delete[] indicies;
+		delete[] indicies;*/
 	}
 }
 
@@ -499,6 +608,7 @@ bool OpenGLGraphicsManager::InitializeShader(const char* vs_filename, const char
 
 	glBindAttribLocation(shader_program_, 0, "inputPosition");
 	glBindAttribLocation(shader_program_, 1, "inputNormal");
+	glBindAttribLocation(shader_program_, 2, "inputUV");
 
 	glLinkProgram(shader_program_);
 

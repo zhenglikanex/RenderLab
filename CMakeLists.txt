@@ -6,6 +6,7 @@ SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/3rdparty/glm/include")
 include_directories("${PROJECT_SOURCE_DIR}/3rdparty/opengex/include")
+include_directories("${PROJECT_SOURCE_DIR}/3rdparty/stb/")
 
 IF(${UNIX})
 	

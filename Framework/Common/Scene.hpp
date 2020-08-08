@@ -43,5 +43,7 @@ namespace Aurora
 		const std::shared_ptr<SceneObjectGeometry> GetGeometry(const std::string& key) const;
 		const std::shared_ptr<SceneGeometryNode> GetFirstGeometryNode() const;
 		const std::shared_ptr<SceneGeometryNode> GetNextGeometryNode() const;
+
+		void LoadResource();
 	};
 }

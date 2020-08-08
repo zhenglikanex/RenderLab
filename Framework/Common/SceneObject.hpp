@@ -8,6 +8,7 @@
 #include "Framework/Common/GeomMath.hpp"
 #include "Framework/Common/Guid.hpp"
 #include "Framework/Common/Image.hpp"
+#include "Framework/Common/ImageParser.hpp"
 
 using namespace xg;
 
@@ -198,7 +199,8 @@ namespace Aurora
 
 		SceneObjectIndexArray& operator=(SceneObjectIndexArray&) = default;
 		SceneObjectIndexArray& operator=(SceneObjectIndexArray&&) = default;
-
+		
+		const uint32_t GetMaterialIndex() const { return material_index_; }
 		const IndexDataType GetIndexType() const { return data_type_; }
 		const void* GetData() const { return data_; }
 		size_t GetDataSize() const
@@ -303,7 +305,7 @@ namespace Aurora
 	class SceneObjectTexture : public BaseSceneObject
 	{
 	public:
-		SceneObjectTexture() : BaseSceneObject(SceneObjectType::kSceneObjectTypeTexture) {}
+		SceneObjectTexture() : BaseSceneObject(SceneObjectType::kSceneObjectTypeTexture) ,tex_coord_index_(0) {}
 		SceneObjectTexture(const std::string& name) : BaseSceneObject(SceneObjectType::kSceneObjectTypeTexture),tex_coord_index_(0), name_(name) {}
 		SceneObjectTexture(uint32_t tex_coord_index,const std::string& name)
 			: BaseSceneObject(SceneObjectType::kSceneObjectTypeTexture)
@@ -322,6 +324,28 @@ namespace Aurora
 			, tex_coord_index_(tex_coord_index)
 			, image_(std::move(image))
 		{
+		}
+
+		void AddTransform(const glm::mat4& matrix) { transforms_.push_back(matrix); }
+		void SetName(const std::string& name) { name_ = name; }
+		const std::string& GetName() const { return name_; }
+		void LoadTexture()
+		{
+			if (!image_)
+			{
+				ImageParser parser;
+				image_ = parser.Parser(name_);
+			}
+		}
+
+		const Image& GetTexture()
+		{
+			if (!image_)
+			{
+				LoadTexture();
+			}
+
+			return *image_;
 		}
 	protected:
 		uint32_t tex_coord_index_;
@@ -360,36 +384,62 @@ namespace Aurora
 	class SceneObjectMaterial : public BaseSceneObject
 	{
 	public:
-		SceneObjectMaterial(const std::string& name) : BaseSceneObject(SceneObjectType::kSceneObjectTypeMaterial) {}
-		SceneObjectMaterial(
-			const std::string& name = "",
-			Color&& base_color = glm::vec4(1.0f),
-			Parameter&& metallic = 0.0f,
-			Parameter&& roughness = 0.0f,
-			Normal&& normal = glm::vec3(0.0f, 0.0f, 1.0f),
-			Parameter&& specular = 0.0f,
-			Parameter&& ao = 0.0f)
-			: BaseSceneObject(SceneObjectType::kSceneObjectTypeMaterial)
-			, base_color_(base_color)
-			, metallic_(metallic)
-			, roughness_(roughness)
-			, normal_(normal)
-			, specular_(specular)
-			, ambient_occlusion_(ao)
+		SceneObjectMaterial(void)
+			: BaseSceneObject(SceneObjectType::kSceneObjectTypeMaterial),
+			name_(""),
+			base_color_(glm::vec4(1.0f)),
+			metallic_(0.0f),
+			roughness_(0.0f),
+			normal_(glm::vec3(0.0f, 0.0f, 1.0f)),
+			specular_(glm::vec4(0.0f)),
+			specular_power_(1.0f),
+			ambient_occlusion_(1.0f),
+			opacity_(glm::vec4(1.0f)),
+			transparency_(glm::vec4(0.0f)),
+			emission_(glm::vec4(0.0f)) {};
+		SceneObjectMaterial(const std::string& name) : SceneObjectMaterial()
 		{
-		}
+			name_ = name;
+		};
+
+		const Color& GetBaseColor() const { return base_color_; }
+		const Color& GetSpecularColor() const { return specular_; }
+		const Parameter& GetSpecularPower() const { return specular_power_; }
 		void SetName(const std::string& name) { name_ = name; }
 		void SetColor(const std::string& attrib, const glm::vec4& color)
 		{
 			if (attrib == "diffuse")
 			{
-				base_color_ = color;
+				base_color_ = Color(color);
+			}
+
+			if (attrib == "specular")
+			{
+				specular_ = Color(color);
+			}
+
+			if (attrib == "emission")
+			{
+				emission_ = Color(color);
+			}
+
+			if (attrib == "opacity")
+			{
+				opacity_ = Color(color);
+			}
+
+			if (attrib == "transparency")
+			{
+				transparency_ = Color(color);
 			}
 		}
 
-		void SetParam(std::string attrib, float param)
+		void SetParam(const std::string& attrib, float param)
 		{
-
+			if (attrib == "specular_power")
+			{
+				specular_power_ = Parameter(param);
+			}
 		}
 
 		void SetTexture(const std::string& attrib, const std::string& texture_name)
@@ -397,6 +447,36 @@ namespace Aurora
 			if (attrib == "diffuse")
 			{
 				base_color_ = std::make_shared<SceneObjectTexture>(texture_name);
+			}
+
+			if (attrib == "specular")
+			{
+				specular_ = std::make_shared<SceneObjectTexture>(texture_name);
+			}
+
+			if (attrib == "specular_power")
+			{
+				specular_power_ = std::make_shared<SceneObjectTexture>(texture_name);
+			}
+
+			if (attrib == "emission")
+			{
+				emission_ = std::make_shared<SceneObjectTexture>(texture_name);
+			}
+
+			if (attrib == "opactiy")
+			{
+				opacity_ = std::make_shared<SceneObjectTexture>(texture_name);
+			}
+
+			if (attrib == "transparency")
+			{
+				transparency_ = std::make_shared<SceneObjectTexture>(texture_name);
+			}
+
+			if (attrib == "normal")
+			{
+				normal_ = std::make_shared<SceneObjectTexture>(texture_name);
 			}
 		}
 		
@@ -406,6 +486,74 @@ namespace Aurora
 			{
 				base_color_ = texture;
 			}
+
+			if (attrib == "specular")
+			{
+				specular_ = texture;
+			}
+
+			if (attrib == "specular_power")
+			{
+				specular_power_ = texture;
+			}
+
+			if (attrib == "emission")
+			{
+				emission_ = texture;
+			}
+
+			if (attrib == "opactiy")
+			{
+				opacity_ = texture;
+			}
+
+			if (attrib == "transparency")
+			{
+				transparency_ = texture;
+			}
+
+			if (attrib == "normal")
+			{
+				normal_ = texture;
+			}
+		}
+
+		void LoadTextures()
+		{
+			if (base_color_.ValueMap)
+			{
+				base_color_.ValueMap->LoadTexture();
+			}
+
+			if (normal_.ValueMap)
+			{
+				normal_.ValueMap->LoadTexture();
+			}
+
+			if (specular_.ValueMap)
+			{
+				specular_.ValueMap->LoadTexture();
+			}
+
+			if (specular_power_.ValueMap)
+			{
+				specular_power_.ValueMap->LoadTexture();
+			}
+
+			if(opacity_.ValueMap)
+			{
+				opacity_.ValueMap->LoadTexture();
+			}
+
+			if (transparency_.ValueMap)
+			{
+				transparency_.ValueMap->LoadTexture();
+			}
+
+			if (emission_.ValueMap)
+			{
+				emission_.ValueMap->LoadTexture();
+			}
 		}
 	protected:
 		std::string name_;
@@ -413,8 +561,12 @@ namespace Aurora
 		Parameter metallic_;
 		Parameter roughness_;
 		Normal normal_;
-		Parameter specular_;
+		Color specular_;
+		Parameter specular_power_;
 		Parameter ambient_occlusion_;
+		Color opacity_;
+		Color transparency_;
+		Color emission_;
 	};
 
 	class SceneObjectGeometry : public BaseSceneObject

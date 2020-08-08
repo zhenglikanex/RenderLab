@@ -78,6 +78,14 @@ namespace Aurora
 
 		using SceneNode::AddSceneObjectRef;
 		void AddMaterialRef(const std::string& material) { materials_.push_back(material); }
+		std::string GetMaterialRef(const size_t index)
+		{
+			if (index < materials_.size())
+			{
+				return materials_[index];
+			}
+			return "";
+		}
 	protected:
 		bool visible_;
 		bool shadow_;

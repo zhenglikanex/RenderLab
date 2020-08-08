@@ -23,7 +23,7 @@ bool Engine::Initialize()
 		return false;
 	}
 
-	scene_manager_->LoadScene("Scene/aili_cycle.ogex");
+	scene_manager_->LoadScene("Scene/car.ogex");
 
 	if (!graphics_manager_ || !graphics_manager_->Initialize())
 	{

@@ -28,6 +28,10 @@ void SceneManager::Tick()
 void SceneManager::LoadScene(const char* scene_file_name)
 {
 	LoadOgexScene(scene_file_name);
+	if (scene_)
+	{
+		scene_->LoadResource();
+	}
 }
 
 void SceneManager::LoadOgexScene(const char* ogex_scene_file_name)
