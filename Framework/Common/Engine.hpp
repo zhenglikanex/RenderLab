@@ -3,13 +3,12 @@
 #include <memory>
 
 #include "Framework/Common/IRuntimeModule.hpp"
+#include "Framework/Common/GraphicsManager.hpp"
+#include "Framework/Common/SceneManager.hpp"
+#include "Framework/Common/InputManager.hpp"
 
 namespace Aurora
 {
-	class GraphicsManager;
-	class SceneManager;
-	class InputManager;
-	
 	class Engine : public IRuntimeModule
 	{
 	public:

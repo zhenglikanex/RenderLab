@@ -20,35 +20,23 @@ namespace Aurora
 		bool Initialize() override;
 		void Finalize() override;
 
-		void Tick() override;
-
 		void Clear() override;
 		void Draw() override;
-	private:
+	protected:
 		bool SetPerBatchShaderParameters(const std::string& param_name, const glm::mat4& param);
 		bool SetPerBatchShaderParameters(const std::string& param_name, const glm::vec3& param);
 		bool SetPerBatchShaderParameters(const std::string& param_name, const float param);
-		bool SetPerBatchShaderParameters(const std::string& param_name, const GLint texture_index);
+		bool SetPerBatchShaderParameters(const std::string& param_name, const int param);
 		bool SetPerBatchShaderParameters();
 
 		bool InitializeBuffers();
-		void RenderBuffers();
-		void CalculateCameraMatrix();
-		void CalculateLights();
 		bool InitializeShader(const char* vs_filename, const char* fs_filename);
+		void RenderBuffers();
 	private:
 		uint32_t vertex_shader_;
 		uint32_t fragment_shader_;
 		uint32_t shader_program_;
 		std::unordered_map<std::string, GLint> texture_index_;
-
-		struct DrawFrameContext {
-			glm::mat4 world_matrix;
-			glm::mat4 view_matrix;
-			glm::mat4 projection_matrix;
-			glm::vec3 light_position;
-			glm::vec4 light_color;
-		};
 
 		struct DrawBathContext {
 			GLuint vao;
@@ -58,8 +46,6 @@ namespace Aurora
 			std::shared_ptr<glm::mat4> transform;
 			std::shared_ptr<SceneObjectMaterial> material;
 		};
-
-		DrawFrameContext draw_frame_context_;
 		std::vector<DrawBathContext> draw_batch_context_;
 		std::vector<uint32_t> buffers_;
 		std::vector<GLuint> textures_;

@@ -115,12 +115,11 @@ bool OpenGLGraphicsManager::Initialize()
         // Enable back face culling.
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
-
-		draw_frame_context_.world_matrix = glm::identity<glm::mat4>();
     }
 
 	InitializeShader(VS_SHADER_SOURCE_FILE, PS_SHADER_SOURCE_FILE);
 	InitializeBuffers();
+	InitConstants();
 
 	return true;
 }
@@ -161,11 +160,6 @@ void OpenGLGraphicsManager::Finalize()
 	glDeleteShader(fragment_shader_);
 
 	glDeleteProgram(shader_program_);
-}
-
-void OpenGLGraphicsManager::Tick()
-{
-
 }
 
 void OpenGLGraphicsManager::Clear()
@@ -269,7 +263,7 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param
 	return true;
 }
 
-bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const GLint texture_index)
+bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const int param)
 {
 	unsigned int location;
 
@@ -278,10 +272,8 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param
 	{
 		return false;
 	}
-	if (texture_index < GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS)
-	{
-		glUniform1i(location, texture_index);
-	}
+	glUniform1i(location, param);
+
 	return true;
 }
 
@@ -484,9 +476,6 @@ void OpenGLGraphicsManager::RenderBuffers()
 	//world_matrix_ = rotationMatrixY * rotationMatrixZ;
 	draw_frame_context_.world_matrix = rotationMatrixZ;
 
-	CalculateCameraMatrix();
-	CalculateLights();
-
 	SetPerBatchShaderParameters();
 
 	for (auto& dbc : draw_batch_context_)
@@ -526,36 +515,6 @@ void OpenGLGraphicsManager::RenderBuffers()
 		glMultiDrawElements(dbc.mode, dbc.counts.data(), dbc.type, indicies, index_buffer_count);
 		delete[] indicies;*/
 	}
-}
-
-void OpenGLGraphicsManager::CalculateCameraMatrix()
-{
-	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
-	auto camera_node = scene.GetFirstCameraNode();
-	if (camera_node)
-	{
-		draw_frame_context_.view_matrix = glm::inverse(*camera_node->GetCalculatedTransform());
-	}
-	else 
-	{
-		glm::vec3 position = { 0,-5,0 }, look_at = { 0,0,0 }, up = { 0,0,1 };
-		draw_frame_context_.view_matrix = glm::lookAtLH(position, look_at, up);
-	}
-	
-	float fov = PI / 2.0f;
-	float near_clip_distance = 1.0f;
-	float far_clip_distance = 100.0f;
-
-	if (camera_node)
-	{
-		auto camera = scene.GetCamera(camera_node->GetSceneObjectRef());
-		fov = std::dynamic_pointer_cast<SceneObjectPerspectiveCamera>(camera)->GetFov();
-		near_clip_distance = 1.0f;
-		far_clip_distance = 100.0f;
-	}
-
-	const GfxConfiguration& conf = g_app->GetConfiguration();
-	draw_frame_context_.projection_matrix = glm::perspectiveFovRH(fov, (float)conf.screen_width, (float)conf.screen_height, near_clip_distance, far_clip_distance);
 }
 
 bool OpenGLGraphicsManager::InitializeShader(const char* vs_filename, const char* fs_filename)
@@ -620,26 +579,4 @@ bool OpenGLGraphicsManager::InitializeShader(const char* vs_filename, const char
 	}
 
     return true;
-}
-
-void OpenGLGraphicsManager::CalculateLights()
-{
-	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
-	auto light_node = scene.GetFirstLightNode();
-	if (light_node)
-	{
-		draw_frame_context_.light_position = { 0.0f,0.0f,0.0f };
-		draw_frame_context_.light_position = (*light_node->GetCalculatedTransform()) * glm::vec4(0.0, 0.0, 0.0, 1.0f);
-
-		auto light = scene.GetLight(light_node->GetSceneObjectRef());
-		if (light)
-		{
-			draw_frame_context_.light_color = light->GetColor().Value;
-		}
-	}
-	else
-	{
-		draw_frame_context_.light_position = { -1.0f, -5.0f, 0.0f };
-		draw_frame_context_.light_color = { 1.0f,1.0f,1.0f,1.0f };
-	}
 }
