@@ -2,8 +2,8 @@
 
 #include "Framework/Common/Engine.hpp"
 #include "Framework/Common/SceneManager.hpp"
+#include "Framework/Common/InputManager.hpp"
 #include "RHI/OpenGL/OpenGLGraphicsManager.hpp"
-
 using namespace Aurora;
 
 namespace Aurora
@@ -11,6 +11,28 @@ namespace Aurora
     GfxConfiguration config(8, 8, 8, 8, 24, 0, 0, 960, 540, "RenderLab");
     GLFWApplication app(config);
     IApplication* g_app = &app;
+}
+
+void GLFWApplication::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (action == GLFW_PRESS)
+    {
+        switch (key)
+        {
+        case GLFW_KEY_LEFT:
+            g_app->GetEngine()->GetInputManager()->LeftArrowKeyDown();
+            break;
+        case GLFW_KEY_RIGHT:
+            g_app->GetEngine()->GetInputManager()->RightArrowKeyDown();
+            break;
+        case GLFW_KEY_UP:
+            g_app->GetEngine()->GetInputManager()->UpArrowKeyDown();
+            break;
+        case GLFW_KEY_DOWN:
+            g_app->GetEngine()->GetInputManager()->DownArrowKeyDown();
+            break;
+        }
+    }    
 }
 
 GLFWApplication::GLFWApplication(GfxConfiguration& cfg)
@@ -52,6 +74,7 @@ bool GLFWApplication::Initialize()
     }
 
     glfwMakeContextCurrent(window_);
+    glfwSetKeyCallback(window_, GLFWApplication::KeyCallback);
     //glfwSetFramebufferSizeCallback(window, FrameBufferSizeCallback);
     if (!engine_ || !engine_->Initialize())
     {

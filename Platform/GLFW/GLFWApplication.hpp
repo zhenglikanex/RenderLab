@@ -8,6 +8,8 @@ namespace Aurora
 	class GLFWApplication : public BaseApplication
 	{
 	public:
+		static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	public:
 		GLFWApplication(GfxConfiguration& cfg);
 		~GLFWApplication();
 

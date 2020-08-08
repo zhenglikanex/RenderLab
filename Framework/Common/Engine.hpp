@@ -8,6 +8,7 @@ namespace Aurora
 {
 	class GraphicsManager;
 	class SceneManager;
+	class InputManager;
 	
 	class Engine : public IRuntimeModule
 	{
@@ -21,8 +22,10 @@ namespace Aurora
 
 		const std::unique_ptr<GraphicsManager>& GetGraphicsManager() const { return graphics_manager_; }
 		const std::unique_ptr<SceneManager>& GetSceneManager() const { return scene_manager_; }
+		const std::unique_ptr<InputManager>& GetInputManager() const { return input_manager_; }
 	private:
 		std::unique_ptr<GraphicsManager> graphics_manager_;
 		std::unique_ptr<SceneManager> scene_manager_;
+		std::unique_ptr<InputManager> input_manager_;
 	};
 }
