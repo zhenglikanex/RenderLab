@@ -103,6 +103,24 @@ namespace Aurora
 				_object->SetVisibility(_structeure.GetVisibleFlag());
 				_object->SetIfCastShadow(_structeure.GetShadowFlag());
 				_object->SetIfMotionBlur(_structeure.GetMotionBlurFlag());
+
+				// extensions
+				ODDL::Structure* extension = _structeure.GetFirstExtensionSubnode();
+				while (extension)
+				{
+					const OGEX::ExtensionStructure* _extension = dynamic_cast<const OGEX::ExtensionStructure*>(extension);
+					auto _appid = _extension->GetApplicationString();
+					if (_appid == "MyGameEngine")
+					{
+						auto _type = _extension->GetTypeString();
+						if (_type == "collision")
+						{
+							const ODDL::Structure* sub_structure = _extension->GetFirstCoreSubnode();
+						}
+					}
+					extension = extension->Next();
+				}
+
 				const ODDL::Map<OGEX::MeshStructure>* _meshs = _structeure.GetMeshMap();
 				int32_t _count = _meshs->GetElementCount();
 				for (int32_t i = 0; i < _count; ++i)

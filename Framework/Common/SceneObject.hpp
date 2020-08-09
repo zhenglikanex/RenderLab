@@ -28,6 +28,23 @@ namespace Aurora
 		kSceneObjectTypeGeometry
 	};
 
+	enum class SceneObjectCollisionType
+	{
+		kSceneObjectCollisionTypeNone,
+		kSceneObjectCollisionTypeSphere,
+		kSceneObjectCollisionTypeBox,
+		kSceneObjectCollisionTypeCylinder,
+		kSceneObjectCollisionTypeCapsule,
+		kSceneObjectCollisionTypeCone,
+		kSceneObjectCollisionTypeMultiSphere,
+		kSceneObjectCollisionTypeConvexHull,
+		kSceneObjectCollisionTypeConvexMesh,
+		kSceneObjectCollisionTypeBvhMesh,
+		kSceneObjectCollisionTypeHeightfield,
+		kSceneObjectCollisionTypePlane
+
+	};
+
 	std::ostream& operator<<(std::ostream& out, SceneObjectType type);
 
 	class BaseSceneObject
@@ -262,11 +279,8 @@ namespace Aurora
 	class SceneObjectMesh : public BaseSceneObject
 	{
 	public:
-		SceneObjectMesh(bool visible = true,bool shadow = true,bool motion_blur = true)
+		SceneObjectMesh()
 			: BaseSceneObject(SceneObjectType::kSceneObjectTypeMesh)
-			, visible_(visible)
-			, shadow_(shadow)
-			, motion_blur_(motion_blur)
 		{
 		}
 		SceneObjectMesh(SceneObjectMesh&& mesh)
@@ -274,9 +288,6 @@ namespace Aurora
 			, index_array_(std::move(mesh.index_array_))
 			, vertex_array_(std::move(mesh.vertex_array_))
 			, primitive_type_(mesh.primitive_type_)
-			, visible_(mesh.visible_)
-			, shadow_(mesh.shadow_)
-			, motion_blur_(mesh.motion_blur_)
 		{
 		}
 
@@ -296,10 +307,6 @@ namespace Aurora
 		std::vector<SceneObjectIndexArray> index_array_;
 		std::vector<SceneObjectVertexArray> vertex_array_;
 		PrimitiveType primitive_type_;
-
-		bool visible_ = true;
-		bool shadow_ = false;
-		bool motion_blur_ = false;
 	};
 
 	class SceneObjectTexture : public BaseSceneObject
@@ -572,7 +579,7 @@ namespace Aurora
 	class SceneObjectGeometry : public BaseSceneObject
 	{
 	public:
-		SceneObjectGeometry() : BaseSceneObject(SceneObjectType::kSceneObjectTypeGeometry) {}
+		SceneObjectGeometry() : BaseSceneObject(SceneObjectType::kSceneObjectTypeGeometry), collision_type_(SceneObjectCollisionType::kSceneObjectCollisionTypeNone) {}
 		
 		void SetVisibility(bool visible) { visible_ = visible; }
 		bool IsVisible() const { return visible_; }
@@ -580,6 +587,8 @@ namespace Aurora
 		bool IsCastVisible() const { return cast_shadow_; }
 		void SetIfMotionBlur(bool motion_blur) { motion_blur_ = motion_blur; }
 		bool IsMotionBlur() const { return motion_blur_; }
+		void SetCollisionType(SceneObjectCollisionType collision_type) { collision_type_ = collision_type; }
+		SceneObjectCollisionType CollisionType() const { return collision_type_; }
 
 		void AddMesh(const std::shared_ptr<SceneObjectMesh>& mesh) { meshs_.push_back(mesh); }
 		void AddMesh(std::shared_ptr<SceneObjectMesh>&& mesh) { meshs_.push_back(std::move(mesh)); }
@@ -590,6 +599,7 @@ namespace Aurora
 		bool visible_;
 		bool cast_shadow_;
 		bool motion_blur_;
+		SceneObjectCollisionType collision_type_;
 	};
 
 	//输入为光源的强度和到光源的距离，输出为光照强度的函数的指针

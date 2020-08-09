@@ -31,6 +31,7 @@ void SceneManager::LoadScene(const char* scene_file_name)
 	if (scene_)
 	{
 		scene_->LoadResource();
+		dirty_flag_ = true;
 	}
 }
 
@@ -42,7 +43,13 @@ void SceneManager::LoadOgexScene(const char* ogex_scene_file_name)
 	scene_ = ogex_parser.Parser(ogex_text);
 }
 
+bool SceneManager::IsSceneChanged()
+{
+	return dirty_flag_;
+}
+
 const Scene& SceneManager::GetSceneForRendering()
 {
+	dirty_flag_ = false;
 	return *scene_;
 }

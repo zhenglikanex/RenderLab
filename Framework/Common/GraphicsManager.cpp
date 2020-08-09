@@ -19,6 +19,11 @@ void GraphicsManager::Finalize()
 
 void GraphicsManager::Tick()
 {
+	if (g_app->GetEngine()->GetSceneManager()->IsSceneChanged())
+	{
+		Finalize();
+		Initialize();
+	}
 	CalculateCameraMatrix();
 	CalculateLights();
 }

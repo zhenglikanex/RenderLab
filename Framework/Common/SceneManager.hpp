@@ -17,10 +17,12 @@ namespace Aurora
 
 		void LoadScene(const char* scene_file_name);
 		
+		bool IsSceneChanged();
 		const Scene& GetSceneForRendering();
 	protected:
 		void LoadOgexScene(const char* ogex_scene_file_name);
 	private:
 		std::unique_ptr<Scene> scene_;
+		bool dirty_flag_ = false;
 	};
 }
