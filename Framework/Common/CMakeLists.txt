@@ -30,6 +30,7 @@ ImageParser.hpp
 ImageParser.cpp
 InputManager.hpp
 InputManager.cpp
+Buffer.hpp
 main.cpp
 )
 

@@ -44,7 +44,7 @@ void InputManager::DownArrowKeyUp()
 
 void InputManager::LeftArrowKeyDown()
 {
-
+    g_app->GetEngine()->GetGraphicsManager()->WorldRotateY(PI / 60.0f);
 }
 
 void InputManager::LeftArrowKeyUp()
@@ -54,7 +54,7 @@ void InputManager::LeftArrowKeyUp()
 
 void InputManager::RightArrowKeyDown()
 {
-
+    g_app->GetEngine()->GetGraphicsManager()->WorldRotateY(-PI / 60.0f);
 }
 
 void InputManager::RightArrowKeyUp()

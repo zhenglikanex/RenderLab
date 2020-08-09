@@ -35,12 +35,12 @@ void GraphicsManager::Draw()
 
 void GraphicsManager::WorldRotateX(float radians)
 {
-	
+	draw_frame_context_.world_matrix *= glm::rotate(glm::identity<glm::mat4>(), radians, glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 void GraphicsManager::WorldRotateY(float radians)
 {
-
+	draw_frame_context_.world_matrix *= glm::rotate(glm::identity<glm::mat4>(), radians, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 bool GraphicsManager::SetPerBatchShaderParameters()

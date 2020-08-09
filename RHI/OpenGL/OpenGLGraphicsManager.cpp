@@ -464,17 +464,17 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 
 void OpenGLGraphicsManager::RenderBuffers()
 {
-	static float rotateAngle = 0.0f;
+	//static float rotateAngle = 0.0f;
 
-	// Update world matrix to rotate the model
-	rotateAngle += PI / 360;
-	//glm::mat4 rotationMatrixY = glm::identity<glm::mat4>();
-	glm::mat4 rotationMatrixZ = glm::identity<glm::mat4>();
-	//rotationMatrixY = glm::rotate(rotationMatrixY, rotateAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-	rotationMatrixZ = glm::rotate(rotationMatrixZ, rotateAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+	//// Update world matrix to rotate the model
+	//rotateAngle += PI / 360;
+	////glm::mat4 rotationMatrixY = glm::identity<glm::mat4>();
+	//glm::mat4 rotationMatrixZ = glm::identity<glm::mat4>();
+	////rotationMatrixY = glm::rotate(rotationMatrixY, rotateAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+	//rotationMatrixZ = glm::rotate(rotationMatrixZ, rotateAngle, glm::vec3(0.0f, 0.0f, 1.0f));
 
-	//world_matrix_ = rotationMatrixY * rotationMatrixZ;
-	draw_frame_context_.world_matrix = rotationMatrixZ;
+	////world_matrix_ = rotationMatrixY * rotationMatrixZ;
+	//draw_frame_context_.world_matrix = rotationMatrixZ;
 
 	SetPerBatchShaderParameters();
 
