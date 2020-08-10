@@ -14,6 +14,8 @@ Guid.hpp
 Guid.cpp
 Engine.hpp
 Engine.cpp
+PhysicsManager.hpp
+PhysicsManager.cpp
 SceneObject.hpp
 SceneObject.cpp
 SceneNode.hpp
@@ -35,3 +37,5 @@ main.cpp
 )
 
 target_include_directories(Common PUBLIC "${PROJECT_SOURCE_DIR}/3rdparty/glm/include")
+
+target_link_libraries(Common ${OPENGEX_LIBRARY} ${OPENDDL_LIBRARY} ${BULLET_COLLISION_LIBRARY} ${BULLET_DYNAMICS_LIBRARY} ${BULLET_LINEARMATH_LIBRARY})

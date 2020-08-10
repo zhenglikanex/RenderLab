@@ -12,6 +12,7 @@ bool GraphicsManager::Initialize()
 {
 	return true;
 }
+
 void GraphicsManager::Finalize()
 {
 
@@ -23,9 +24,14 @@ void GraphicsManager::Tick()
 	{
 		Finalize();
 		Initialize();
+
+		g_app->GetEngine()->GetSceneManager()->NotifySceneIsRenderingQueued();
 	}
 	CalculateCameraMatrix();
 	CalculateLights();
+
+	Clear();
+	Draw();
 }
 
 void GraphicsManager::Clear()

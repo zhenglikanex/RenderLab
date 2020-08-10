@@ -86,11 +86,27 @@ namespace Aurora
 			}
 			return "";
 		}
+
+		void LinkRigidBody(void* rigidbody)
+		{
+			rigidbody_ = rigidbody;
+		}
+
+		void* UnlinkRigidBody()
+		{
+			void* rigidbody = rigidbody_;
+			rigidbody_ = nullptr;
+
+			return rigidbody;
+		}
+
+		void* RigidBody() const { return rigidbody_; }
 	protected:
 		bool visible_;
 		bool shadow_;
 		bool motion_blur_;
 		std::vector<std::string> materials_;
+		void* rigidbody_ = nullptr;
 	};
 
 	class SceneLightNode : public SceneNode<SceneObjectLight>

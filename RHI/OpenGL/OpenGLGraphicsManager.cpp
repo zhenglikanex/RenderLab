@@ -6,6 +6,7 @@
 #include "Framework/Common/IApplication.hpp"
 #include "Framework/Common/Engine.hpp"
 #include "Framework/Common/SceneManager.hpp"
+#include "Framework/Common/SceneNode.hpp"
 #include "Framework/Utils/FileUtils.hpp"
 #include "Framework/Utils/FileHandle.hpp"
 
@@ -285,7 +286,6 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 	{
 		if (geometry_node->IsVisible())
 		{
-
 			auto geometry = scene.GetGeometry(geometry_node->GetSceneObjectRef());
 			auto mesh = geometry->GetMesh().lock();
 			if (!mesh) return false;
@@ -451,7 +451,7 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 				dbc.mode = mode;
 				dbc.type = type;
 				dbc.count = index_count;
-				dbc.transform = geometry_node->GetCalculatedTransform();
+				dbc.node = geometry_node;
 				dbc.material = material;
 
 				draw_batch_context_.push_back(std::move(dbc));
@@ -481,7 +481,24 @@ void OpenGLGraphicsManager::RenderBuffers()
 	for (auto& dbc : draw_batch_context_)
 	{
 		glUseProgram(shader_program_);
-		SetPerBatchShaderParameters("modelMatrix", *dbc.transform);
+
+		glm::mat4 trans = *dbc.node->GetCalculatedTransform();
+		if (void* rigidbody = dbc.node->RigidBody())
+		{
+			auto simulated_result = g_app->GetEngine()->GetPhysicsManager()->GetRigidBodyTransform(rigidbody);
+
+			// replace the translation part of the matrix with simlation result directly
+			trans[3] = simulated_result[3];
+			
+			// apply the rotation part of the simlation result
+			glm::mat4 rotation = glm::identity<glm::mat4>();
+			rotation[0] = rotation[0];
+			rotation[1] = rotation[1];
+			rotation[2] = rotation[2];
+			trans = trans * rotation;
+		}
+
+		SetPerBatchShaderParameters("modelMatrix", trans);
 
 		glBindVertexArray(dbc.vao);
 		//后面根据材质进行分组渲染

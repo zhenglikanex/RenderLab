@@ -116,6 +116,20 @@ namespace Aurora
 						if (_type == "collision")
 						{
 							const ODDL::Structure* sub_structure = _extension->GetFirstCoreSubnode();
+							const ODDL::DataStructure<ODDL::StringDataType>* dataStructure = static_cast<const ODDL::DataStructure<ODDL::StringDataType>*>(sub_structure);
+							auto collision_type = dataStructure->GetDataElement(0);
+							if (collision_type == "plane")
+							{
+								_object->SetCollisionType(SceneObjectCollisionType::kSceneObjectCollisionTypePlane);
+							}
+							else if (collision_type == "sphere")
+							{
+								_object->SetCollisionType(SceneObjectCollisionType::kSceneObjectCollisionTypeSphere);
+							}
+							else if (collision_type == "box")
+							{
+								_object->SetCollisionType(SceneObjectCollisionType::kSceneObjectCollisionTypeBox);
+							}
 						}
 					}
 					extension = extension->Next();

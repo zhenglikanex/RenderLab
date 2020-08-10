@@ -50,6 +50,10 @@ bool SceneManager::IsSceneChanged()
 
 const Scene& SceneManager::GetSceneForRendering()
 {
-	dirty_flag_ = false;
 	return *scene_;
+}
+
+void SceneManager::NotifySceneIsRenderingQueued()
+{
+	dirty_flag_ = false;
 }

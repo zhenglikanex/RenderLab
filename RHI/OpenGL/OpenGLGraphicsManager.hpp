@@ -7,6 +7,7 @@
 #include "Framework/Common/GraphicsManager.hpp"
 #include "Framework/Common/GeomMath.hpp"
 #include "Framework/Common/SceneObject.hpp"
+#include "Framework/Common/SceneNode.hpp"
 
 #include "glad/glad.h"
 
@@ -43,7 +44,7 @@ namespace Aurora
 			GLenum mode;
 			GLenum type;
 			GLsizei count;
-			std::shared_ptr<glm::mat4> transform;
+			std::shared_ptr<SceneGeometryNode> node;
 			std::shared_ptr<SceneObjectMaterial> material;
 		};
 		std::vector<DrawBathContext> draw_batch_context_;

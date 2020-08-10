@@ -6,13 +6,14 @@
 #include "Framework/Common/GraphicsManager.hpp"
 #include "Framework/Common/SceneManager.hpp"
 #include "Framework/Common/InputManager.hpp"
+#include "Framework/Common/PhysicsManager.hpp"
 
 namespace Aurora
 {
 	class Engine : public IRuntimeModule
 	{
 	public:
-		Engine(std::unique_ptr<GraphicsManager>&& graphics_manager,std::unique_ptr<SceneManager>&& scene_manager);
+		Engine(std::unique_ptr<GraphicsManager>&& graphics_manager,std::unique_ptr<SceneManager>&& scene_manager,std::unique_ptr<InputManager>&& input_manager,std::unique_ptr<PhysicsManager>&& physics_manager);
 
 		bool Initialize() override;
 		void Finalize() override;
@@ -22,9 +23,11 @@ namespace Aurora
 		const std::unique_ptr<GraphicsManager>& GetGraphicsManager() const { return graphics_manager_; }
 		const std::unique_ptr<SceneManager>& GetSceneManager() const { return scene_manager_; }
 		const std::unique_ptr<InputManager>& GetInputManager() const { return input_manager_; }
+		const std::unique_ptr<PhysicsManager>& GetPhysicsManager() const { return physics_manager_; }
 	private:
 		std::unique_ptr<GraphicsManager> graphics_manager_;
 		std::unique_ptr<SceneManager> scene_manager_;
 		std::unique_ptr<InputManager> input_manager_;
+		std::unique_ptr<PhysicsManager> physics_manager_;
 	};
 }
