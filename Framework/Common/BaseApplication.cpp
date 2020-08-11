@@ -4,8 +4,9 @@
 
 using namespace Aurora;
 
-BaseApplication::BaseApplication(GfxConfiguration& cfg)
-	:config_(cfg)
+BaseApplication::BaseApplication(GfxConfiguration& cfg,std::unique_ptr<Engine>&& engine)
+	: config_(cfg)
+	, engine_(std::move(engine))
 {
 	
 }

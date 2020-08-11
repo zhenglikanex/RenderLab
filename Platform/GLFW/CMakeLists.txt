@@ -1,14 +1,26 @@
-add_executable(GlfwEngineOpenGL
+find_package(OpenGL REQUIRED)
+
+add_library(PlatformInterface
 GLFWApplication.hpp
 GLFWApplication.cpp)
 
-target_link_directories(GlfwEngineOpenGL PRIVATE "${PROJECT_SOURCE_DIR}/3rdparty/glfw3")
+target_link_directories(PlatformInterface PUBLIC "${PROJECT_SOURCE_DIR}/3rdparty/glfw3")
 
-target_include_directories(GlfwEngineOpenGL PRIVATE "${PROJECT_SOURCE_DIR}/3rdparty/glfw3/include")
-#target_include_directories(GlfwEngineOpenGL PRIVATE "${PROJECT_SOURCE_DIR}/3rdparty/glad/include")
+target_include_directories(PlatformInterface PRIVATE "${PROJECT_SOURCE_DIR}/3rdparty/glfw3/include")
+target_include_directories(PlatformInterface PRIVATE "${PROJECT_SOURCE_DIR}/3rdparty/glad/include")
 
-target_link_libraries(GlfwEngineOpenGL Common Utils OpenGLRHI opengl32 glfw3)
+target_link_libraries(PlatformInterface Common Utils glfw3 ${OPENGL_LIBRARIES})
 
-set_target_properties(GlfwEngineOpenGL PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Asset)
+SET_PROPERTY(TARGET PlatformInterface PROPERTY FOLDER "Platform")
 
-SET_PROPERTY(TARGET GlfwEngineOpenGL PROPERTY FOLDER "Platform")
+add_library(EngineOpenGL
+OpenGLApplication.cpp)
+
+target_include_directories(EngineOpenGL PRIVATE "${PROJECT_SOURCE_DIR}/3rdparty/glfw3/include")
+
+target_link_libraries(EngineOpenGL
+PlatformInterface
+OpenGLRHI
+)
+
+SET_PROPERTY(TARGET EngineOpenGL PROPERTY FOLDER "Platform")

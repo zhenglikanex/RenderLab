@@ -10,7 +10,7 @@ namespace Aurora
 	class BaseApplication : public IApplication
 	{
 	public:
-		BaseApplication(GfxConfiguration& cfg);
+		BaseApplication(GfxConfiguration& cfg,std::unique_ptr<Engine>&& engine);
 		virtual ~BaseApplication();
 
 		bool Initialize() override;

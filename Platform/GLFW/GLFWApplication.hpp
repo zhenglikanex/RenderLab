@@ -1,7 +1,6 @@
 #include "Framework/Common/BaseApplication.hpp"
 
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
+struct GLFWwindow;
 
 namespace Aurora
 {
@@ -10,7 +9,7 @@ namespace Aurora
 	public:
 		static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	public:
-		GLFWApplication(GfxConfiguration& cfg);
+		GLFWApplication(GfxConfiguration& cfg,std::unique_ptr<Engine>&& engine);
 		~GLFWApplication();
 
 		bool Initialize() override;

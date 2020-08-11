@@ -34,6 +34,7 @@ InputManager.hpp
 InputManager.cpp
 Buffer.hpp
 GameLogic.hpp
+GameLogic.cpp
 main.cpp
 )
 

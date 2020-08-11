@@ -4,6 +4,7 @@
 
 #include "Framework/Common/GraphicsManager.hpp"
 #include "Framework/Common/SceneManager.hpp"
+#include "Framework/Common/GameLogic.hpp"
 
 using namespace Aurora;
 
@@ -46,13 +47,22 @@ bool Engine::Initialize()
 		return false;
 	}
 
-	scene_manager_->LoadScene("Scene/physics_1.ogex");
+	if (!g_pGameLogic || !g_pGameLogic->Initialize()) 
+	{
+		std::cout << "GameLogic initialize faild" << std::endl;
+		return false;
+	}
 
 	return true;
 }
 
 void Engine::Finalize()
 {
+	if (g_pGameLogic)
+	{
+		g_pGameLogic->Finalize();
+	}
+
 	if (physics_manager_)
 	{
 		physics_manager_->Finalize();
@@ -94,5 +104,10 @@ void Engine::Tick()
 	if (graphics_manager_)
 	{
 		graphics_manager_->Tick();
+	}
+
+	if (g_pGameLogic)
+	{
+		g_pGameLogic->Tick();
 	}
 }

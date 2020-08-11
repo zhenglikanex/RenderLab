@@ -5,14 +5,9 @@
 #include "Framework/Common/InputManager.hpp"
 #include "RHI/OpenGL/OpenGLGraphicsManager.hpp"
 
-using namespace Aurora;
+#include "GLFW/glfw3.h"
 
-namespace Aurora
-{
-    GfxConfiguration config(8, 8, 8, 8, 24, 0, 0, 960, 540, "RenderLab");
-    GLFWApplication app(config);
-    IApplication* g_app = &app;
-}
+using namespace Aurora;
 
 void GLFWApplication::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -50,16 +45,10 @@ void GLFWApplication::KeyCallback(GLFWwindow* window, int key, int scancode, int
 	}
 }
 
-GLFWApplication::GLFWApplication(GfxConfiguration& cfg)
-    :BaseApplication(cfg)
+GLFWApplication::GLFWApplication(GfxConfiguration& cfg,std::unique_ptr<Engine>&& engine)
+    :BaseApplication(cfg,std::move(engine))
     ,window_(nullptr)
 {
-    engine_ = std::make_unique<Engine>(
-        std::make_unique<OpenGLGraphicsManager>((GLADloadproc)glfwGetProcAddress),
-        std::make_unique<SceneManager>(),
-		std::make_unique<InputManager>(),
-		std::make_unique<PhysicsManager>()
-        );
 }
 
 GLFWApplication::~GLFWApplication() 
