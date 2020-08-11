@@ -5,6 +5,10 @@
 #include "Framework/Common/IRuntimeModule.hpp"
 #include "Framework/Common/SceneManager.hpp"
 
+#ifndef BT_USE_DOUBLE_PRECISION
+#define BT_USE_DOUBLE_PRECISION 1
+#endif
+
 #include "bullet/btBulletDynamicsCommon.h"
 
 namespace Aurora

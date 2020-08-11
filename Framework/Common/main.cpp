@@ -14,6 +14,7 @@ int main()
 	if (!g_app->Initialize())
 	{
 		std::cout << "App Initialize failed!" << std::endl;
+		getchar();
 		return -1;
 	}
 

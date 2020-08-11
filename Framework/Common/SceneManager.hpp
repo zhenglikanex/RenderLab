@@ -16,7 +16,8 @@ namespace Aurora
 		void Tick() override;
 
 		void LoadScene(const char* scene_file_name);
-		
+		void ResetScene();
+
 		bool IsSceneChanged();
 		const Scene& GetSceneForRendering();
 		void NotifySceneIsRenderingQueued();

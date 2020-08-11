@@ -16,24 +16,38 @@ namespace Aurora
 
 void GLFWApplication::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        switch (key)
-        {
-        case GLFW_KEY_LEFT:
-            g_app->GetEngine()->GetInputManager()->LeftArrowKeyDown();
-            break;
-        case GLFW_KEY_RIGHT:
-            g_app->GetEngine()->GetInputManager()->RightArrowKeyDown();
-            break;
-        case GLFW_KEY_UP:
-            g_app->GetEngine()->GetInputManager()->UpArrowKeyDown();
-            break;
-        case GLFW_KEY_DOWN:
-            g_app->GetEngine()->GetInputManager()->DownArrowKeyDown();
-            break;
-        }
-    }    
+	if (action == GLFW_PRESS || action == GLFW_REPEAT)
+	{
+		switch (key)
+		{
+		case GLFW_KEY_LEFT:
+			g_app->GetEngine()->GetInputManager()->LeftArrowKeyDown();
+			break;
+		case GLFW_KEY_RIGHT:
+			g_app->GetEngine()->GetInputManager()->RightArrowKeyDown();
+			break;
+		case GLFW_KEY_UP:
+			g_app->GetEngine()->GetInputManager()->UpArrowKeyDown();
+			break;
+		case GLFW_KEY_DOWN:
+			g_app->GetEngine()->GetInputManager()->DownArrowKeyDown();
+			break;
+		}
+	}
+
+	if (action == GLFW_PRESS)
+	{
+		switch (key)
+		{
+		case GLFW_KEY_R:
+			g_app->GetEngine()->GetInputManager()->ResetKeyDown();
+			break;
+			{
+		default:
+			break;
+			}
+		}
+	}
 }
 
 GLFWApplication::GLFWApplication(GfxConfiguration& cfg)
@@ -44,7 +58,7 @@ GLFWApplication::GLFWApplication(GfxConfiguration& cfg)
         std::make_unique<OpenGLGraphicsManager>((GLADloadproc)glfwGetProcAddress),
         std::make_unique<SceneManager>(),
 		std::make_unique<InputManager>(),
-		nullptr
+		std::make_unique<PhysicsManager>()
         );
 }
 

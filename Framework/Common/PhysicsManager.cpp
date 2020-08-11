@@ -87,15 +87,17 @@ void PhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectG
 	break;
 	case SceneObjectCollisionType::kSceneObjectCollisionTypeBox:
 	{
-		btCollisionShape* box = new btBoxShape(btVector3(2.5f, 2.5f, 0.5f));
+		btCollisionShape* box = new btBoxShape(btVector3(5.f, 5.f, 0.01f));
 		bt_collision_shapes_.push_back(box);
 
 		const auto trans = *node.GetCalculatedTransform();
+		btTransform startTransform;
+		startTransform.setIdentity();
+		startTransform.setOrigin(btVector3(trans[3][0], trans[3][1], trans[3][2]));
 		btDefaultMotionState* motionState =
 			new btDefaultMotionState(
 				btTransform(
-					btQuaternion(0.0f, 0.0f, 0.0f, 1.0f),
-					btVector3(trans[3][0], trans[3][1], trans[3][2] - 0.5f)
+					startTransform
 				)
 			);
 		btRigidBody::btRigidBodyConstructionInfo
@@ -110,12 +112,12 @@ void PhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectG
 		bt_collision_shapes_.push_back(plane);
 
 		const auto trans = node.GetCalculatedTransform();
+		btTransform startTransform;
+		startTransform.setIdentity();
+		startTransform.setOrigin(btVector3((*trans)[3].x, (*trans)[3].y, (*trans)[3].z));
 		btDefaultMotionState* motionState =
 			new btDefaultMotionState(
-				btTransform(
-					btQuaternion(0.0f, 0.0f, 0.0f, 1.0f),
-					btVector3(0.0f, 0.0f, 0.0f)
-				)
+					startTransform
 			);
 		btRigidBody::btRigidBodyConstructionInfo
 			rigidBodyCI(0.0f, motionState, plane, btVector3(0.0f, 0.0f, 0.0f));
@@ -134,8 +136,11 @@ void PhysicsManager::DeleteRigidBody(SceneGeometryNode& node)
 {
 	btRigidBody* rigidBody = reinterpret_cast<btRigidBody*>(node.UnlinkRigidBody());
 	if (rigidBody) {
-		delete rigidBody->getMotionState();
+		bt_dynamics_world_->removeRigidBody(rigidBody);
+		if (auto motionState = rigidBody->getMotionState())
+			delete motionState;
 		delete rigidBody;
+		//m_btDynamicsWorld->removeCollisionObject(rigidBody);
 	}
 }
 
@@ -169,6 +174,8 @@ void PhysicsManager::ClearRigidBodies()
 
 	for (auto shape : bt_collision_shapes_)
 		delete shape;
+
+	bt_collision_shapes_.clear();
 
 }
 

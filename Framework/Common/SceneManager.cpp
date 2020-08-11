@@ -43,6 +43,11 @@ void SceneManager::LoadOgexScene(const char* ogex_scene_file_name)
 	scene_ = ogex_parser.Parser(ogex_text);
 }
 
+void SceneManager::ResetScene()
+{
+	dirty_flag_ = true;
+}
+
 bool SceneManager::IsSceneChanged()
 {
 	return dirty_flag_;

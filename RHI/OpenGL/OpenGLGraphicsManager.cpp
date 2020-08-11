@@ -134,9 +134,9 @@ void OpenGLGraphicsManager::Finalize()
 
 	draw_batch_context_.clear();
 
-	
+	int size = buffers_.size();
 	//-1È¥³ýindex buffer;
-	for (auto i = 0; i < buffers_.size() - 1; i++)
+	for (int i = 0; i < size - 1; i++)
 	{
 		glDisableVertexAttribArray(i);
 	}
@@ -281,9 +281,9 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(const std::string& param
 bool OpenGLGraphicsManager::InitializeBuffers()
 {
 	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
-	auto geometry_node = scene.GetFirstGeometryNode();
-	while (geometry_node)
+	for (auto& obj : scene.GeometryNodes)
 	{
+		auto& geometry_node = obj.second;
 		if (geometry_node->IsVisible())
 		{
 			auto geometry = scene.GetGeometry(geometry_node->GetSceneObjectRef());
@@ -457,7 +457,6 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 				draw_batch_context_.push_back(std::move(dbc));
 			}
 		}
-		geometry_node = scene.GetNextGeometryNode();
 	}
     return true;
 }
@@ -488,14 +487,15 @@ void OpenGLGraphicsManager::RenderBuffers()
 			auto simulated_result = g_app->GetEngine()->GetPhysicsManager()->GetRigidBodyTransform(rigidbody);
 
 			// replace the translation part of the matrix with simlation result directly
-			trans[3] = simulated_result[3];
+			trans[3] = glm::vec4(0.0f,0.0f,0.0f,trans[3].w);
 			
 			// apply the rotation part of the simlation result
 			glm::mat4 rotation = glm::identity<glm::mat4>();
-			rotation[0] = rotation[0];
-			rotation[1] = rotation[1];
-			rotation[2] = rotation[2];
+			rotation[0] = simulated_result[0];
+			rotation[1] = simulated_result[1];
+			rotation[2] = simulated_result[2];
 			trans = trans * rotation;
+			trans[3] = glm::vec4(simulated_result[3].x, simulated_result[3].y, simulated_result[3].z,trans[3].w);
 		}
 
 		SetPerBatchShaderParameters("modelMatrix", trans);

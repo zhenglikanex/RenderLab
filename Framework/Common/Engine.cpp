@@ -18,7 +18,7 @@ Engine::Engine(std::unique_ptr<GraphicsManager>&& graphics_manager,std::unique_p
 
 bool Engine::Initialize()
 {
-	if (!input_manager_ || input_manager_->Initialize())
+	if (!input_manager_ || !input_manager_->Initialize())
 	{
 		std::cout << "InputManager initialize failed" << std::endl;
 		
@@ -31,8 +31,6 @@ bool Engine::Initialize()
 
 		return false;
 	}
-
-	scene_manager_->LoadScene("Scene/car.ogex");
 
 	if (!graphics_manager_ || !graphics_manager_->Initialize())
 	{
@@ -47,6 +45,8 @@ bool Engine::Initialize()
 
 		return false;
 	}
+
+	scene_manager_->LoadScene("Scene/physics_1.ogex");
 
 	return true;
 }

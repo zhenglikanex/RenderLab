@@ -19,6 +19,7 @@ namespace Aurora
         void LeftArrowKeyUp();
         void RightArrowKeyDown();
         void RightArrowKeyUp();
+		void ResetKeyDown();
 	private:
 	};
 }

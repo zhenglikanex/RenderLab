@@ -61,3 +61,8 @@ void InputManager::RightArrowKeyUp()
 {
 
 }
+
+void InputManager::ResetKeyDown()
+{
+	g_app->GetEngine()->GetSceneManager()->ResetScene();
+}

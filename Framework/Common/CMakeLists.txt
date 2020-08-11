@@ -33,6 +33,7 @@ ImageParser.cpp
 InputManager.hpp
 InputManager.cpp
 Buffer.hpp
+GameLogic.hpp
 main.cpp
 )
 
