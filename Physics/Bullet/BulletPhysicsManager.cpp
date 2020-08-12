@@ -45,6 +45,8 @@ void BulletPhysicsManager::Tick()
 	{
 		this->ClearRigidBodies();
 		this->CreateRigidBodies();
+
+		g_app->GetEngine()->GetSceneManager()->NotifySceneIsPhysicsSimulationQueued();
 	}
 
 	bt_dynamics_world_->stepSimulation(1.0f / 60.0f, 10);
@@ -139,7 +141,7 @@ void BulletPhysicsManager::DeleteRigidBody(SceneGeometryNode& node)
 
 int BulletPhysicsManager::CreateRigidBodies()
 {
-	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
+	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForPhysicsSimulation();
 
 	// Geometries
 	for (auto _it : scene.GeometryNodes)

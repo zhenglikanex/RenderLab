@@ -3,6 +3,7 @@
 #include "Framework/Common/IRuntimeModule.hpp"
 #include "Framework/Common/GeomMath.hpp"
 #include "Framework/Common/SceneObject.hpp"
+#include "Framework/Common/Scene.hpp"
 
 namespace Aurora
 {
@@ -16,6 +17,12 @@ namespace Aurora
 
 		virtual void Tick();
 
+		virtual void InitConstants();
+		virtual bool InitializeShader(const char* vs_filename, const char* fs_filename);
+		virtual void ClearShader();
+		virtual void InitializeBuffers(const Scene& scene);
+		virtual void ClearBuffers();
+
 		virtual void Clear();
 		virtual void Draw();
 
@@ -27,20 +34,16 @@ namespace Aurora
 		virtual void DrawBox(const glm::vec3& bbMin, const glm::vec3 bbMax, const glm::vec3& color);
 		virtual void ClearDebugBuffers();
 #endif
-
 	protected:
-		bool SetPerBatchShaderParameters();
-		bool SetPerBatchShaderParameters(const std::string& param_name, const glm::mat4& param);
-		bool SetPerBatchShaderParameters(const std::string& param_name, const glm::vec3& param);
-		bool SetPerBatchShaderParameters(const std::string& param_name, const float param);
-		bool SetPerBatchShaderParameters(const std::string& param_name, const int texture_index);
+		virtual bool SetPerBatchShaderParameters();
+		virtual bool SetPerBatchShaderParameters(const std::string& param_name, const glm::mat4& param);
+		virtual bool SetPerBatchShaderParameters(const std::string& param_name, const glm::vec3& param);
+		virtual bool SetPerBatchShaderParameters(const std::string& param_name, const float param);
+		virtual bool SetPerBatchShaderParameters(const std::string& param_name, const int texture_index);
 
-		void InitConstants();
-		bool InitializeShader(const char* vs_filename, const char* fs_filename);
-		void InitializeBuffers();
-		void CalculateCameraMatrix();
-		void CalculateLights();
-		void RenderBuffers();
+		virtual void CalculateCameraMatrix();
+		virtual void CalculateLights();
+		virtual void RenderBuffers();
 	protected:
 		struct DrawFrameContext {
 			glm::mat4 world_matrix;

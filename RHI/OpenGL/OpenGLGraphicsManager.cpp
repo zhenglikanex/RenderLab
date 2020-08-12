@@ -89,6 +89,11 @@ OpenGLGraphicsManager::OpenGLGraphicsManager(GLADloadproc loader)
 
 bool OpenGLGraphicsManager::Initialize()
 {
+	if (!GraphicsManager::Initialize())
+	{
+		return false;
+	}
+
     if (loader_)
     {
         if (gladLoadGLLoader(loader_) != 1)
@@ -122,13 +127,6 @@ bool OpenGLGraphicsManager::Initialize()
         glCullFace(GL_BACK);
     }
 
-	InitializeShader(VS_SHADER_SOURCE_FILE, PS_SHADER_SOURCE_FILE);
-
-#ifdef DEBUG
-	InitializeShader(DEBUG_VS_SHADER_SOURCE_FILE, DEBUG_PS_SHADER_SOURCE_FILE);
-#endif // DEBUG
-
-	InitializeBuffers();
 	InitConstants();
 
 	return true;
@@ -136,32 +134,7 @@ bool OpenGLGraphicsManager::Initialize()
 
 void OpenGLGraphicsManager::Finalize()
 {
-	for (auto& dbc : draw_batch_context_)
-	{
-		glDeleteVertexArrays(1, &dbc.vao);
-	}
-
-	draw_batch_context_.clear();
-
-	int size = buffers_.size();
-	//-1去除index buffer;
-	for (int i = 0; i < size - 1; i++)
-	{
-		glDisableVertexAttribArray(i);
-	}
-
-	for (auto& buf : buffers_)
-	{
-		glDeleteBuffers(1, &buf);
-	}
-
-	for (auto& texture : textures_)
-	{
-		glDeleteTextures(1, &texture);
-	}
-
-	buffers_.clear();
-	textures_.clear();
+	ClearBuffers();
 
 	glDetachShader(shader_program_, vertex_shader_);
 	glDetachShader(shader_program_, fragment_shader_);
@@ -450,9 +423,8 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(GLuint shader, const std
 	return true;
 }
 
-bool OpenGLGraphicsManager::InitializeBuffers()
+void OpenGLGraphicsManager::InitializeBuffers(const Scene& scene)
 {
-	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
 	for (auto& obj : scene.GeometryNodes)
 	{
 		auto& geometry_node = obj.second;
@@ -460,7 +432,7 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 		{
 			auto geometry = scene.GetGeometry(geometry_node->GetSceneObjectRef());
 			auto mesh = geometry->GetMesh().lock();
-			if (!mesh) return false;
+			if (!mesh) continue;;
 
 			// 顶点属性数量
 			auto vertex_properties_count = mesh->GetVertexPropertiesCount();
@@ -630,8 +602,38 @@ bool OpenGLGraphicsManager::InitializeBuffers()
 			}
 		}
 	}
-    return true;
 }
+
+void Aurora::OpenGLGraphicsManager::ClearBuffers()
+{
+	for (auto& dbc : draw_batch_context_)
+	{
+		glDeleteVertexArrays(1, &dbc.vao);
+	}
+
+	draw_batch_context_.clear();
+
+	int size = buffers_.size();
+	//-1去除index buffer;
+	for (int i = 0; i < size - 1; i++)
+	{
+		glDisableVertexAttribArray(i);
+	}
+
+	for (auto& buf : buffers_)
+	{
+		glDeleteBuffers(1, &buf);
+	}
+
+	for (auto& texture : textures_)
+	{
+		glDeleteTextures(1, &texture);
+	}
+
+	buffers_.clear();
+	textures_.clear();
+}
+
 
 void OpenGLGraphicsManager::RenderBuffers()
 {
@@ -782,3 +784,4 @@ bool OpenGLGraphicsManager::InitializeShader(const char* vs_filename, const char
 
     return true;
 }
+

@@ -21,6 +21,10 @@ namespace Aurora
 		bool Initialize() override;
 		void Finalize() override;
 
+		void InitializeBuffers(const Scene& scene) override;
+		void ClearBuffers() override;
+		bool InitializeShader(const char* vs_filename, const char* fs_filename) override;
+
 		void Clear() override;
 		void Draw() override;
 
@@ -37,9 +41,7 @@ namespace Aurora
 		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const int param);
 		bool SetPerBatchShaderParameters(GLuint shader);
 
-		bool InitializeBuffers();
-		bool InitializeShader(const char* vs_filename, const char* fs_filename);
-		void RenderBuffers();
+		void RenderBuffers() override;
 	private:
 		GLuint vertex_shader_;
 		GLuint fragment_shader_;

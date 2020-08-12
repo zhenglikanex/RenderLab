@@ -8,8 +8,13 @@
 
 using namespace Aurora;
 
+const char VS_SHADER_SOURCE_FILE[] = "Shaders/basic_vs.glsl";
+const char PS_SHADER_SOURCE_FILE[] = "Shaders/basic_ps.glsl";
+
 bool GraphicsManager::Initialize()
 {
+	InitConstants();
+
 	return true;
 }
 
@@ -22,8 +27,10 @@ void GraphicsManager::Tick()
 {
 	if (g_app->GetEngine()->GetSceneManager()->IsSceneChanged())
 	{
-		Finalize();
-		Initialize();
+		ClearBuffers();
+		InitializeShader(VS_SHADER_SOURCE_FILE,PS_SHADER_SOURCE_FILE);
+		auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
+		InitializeBuffers(scene);
 
 		g_app->GetEngine()->GetSceneManager()->NotifySceneIsRenderingQueued();
 	}
@@ -107,9 +114,19 @@ bool GraphicsManager::InitializeShader(const char* vs_filename, const char* fs_f
 	return true;
 }
 
-void GraphicsManager::InitializeBuffers()
+void GraphicsManager::ClearShader()
+{
+	std::cout << "[RHI] void GraphicsManager::ClearShader()" << std::endl;
+}
+
+void GraphicsManager::InitializeBuffers(const Scene& scene)
 {
 	std::cout << "[RHI] void GraphicsManager::InitializeBuffers()" << std::endl;
+}
+
+void GraphicsManager::ClearBuffers()
+{
+	std::cout << "[RIH] void GraphicsManager::ClearBuffers()" << std::endl;
 }
 
 void GraphicsManager::CalculateCameraMatrix()

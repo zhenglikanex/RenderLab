@@ -31,7 +31,7 @@ void SceneManager::LoadScene(const char* scene_file_name)
 	if (scene_)
 	{
 		scene_->LoadResource();
-		dirty_flag_ = true;
+		ResetScene();
 	}
 }
 
@@ -46,6 +46,8 @@ void SceneManager::LoadOgexScene(const char* ogex_scene_file_name)
 void SceneManager::ResetScene()
 {
 	dirty_flag_ = true;
+	rendering_queued_ = false;
+	physics_simulation_queued_ = false;
 }
 
 bool SceneManager::IsSceneChanged()
@@ -58,9 +60,29 @@ const Scene& SceneManager::GetSceneForRendering()
 	return *scene_;
 }
 
+const Scene& SceneManager::GetSceneForPhysicsSimulation()
+{
+	return *scene_;
+}
+
 void SceneManager::NotifySceneIsRenderingQueued()
 {
-	dirty_flag_ = false;
+	rendering_queued_ = true;
+
+	if (physics_simulation_queued_)
+	{
+		dirty_flag_ = false;
+	}
+}
+
+void SceneManager::NotifySceneIsPhysicsSimulationQueued()
+{
+	physics_simulation_queued_ = true;
+
+	if (rendering_queued_)
+	{
+		dirty_flag_ = false;
+	}
 }
 
 std::weak_ptr<SceneGeometryNode> SceneManager::GetSceneGeometryNode(const std::string& name)

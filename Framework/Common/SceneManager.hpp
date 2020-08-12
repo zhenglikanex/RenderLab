@@ -20,7 +20,9 @@ namespace Aurora
 
 		bool IsSceneChanged();
 		const Scene& GetSceneForRendering();
+		const Scene& GetSceneForPhysicsSimulation();
 		void NotifySceneIsRenderingQueued();
+		void NotifySceneIsPhysicsSimulationQueued();
 
 		std::weak_ptr<SceneGeometryNode> GetSceneGeometryNode(const std::string& name);
 	protected:
@@ -28,5 +30,7 @@ namespace Aurora
 	private:
 		std::shared_ptr<Scene> scene_;
 		bool dirty_flag_ = false;
+		bool rendering_queued_ = true;
+		bool physics_simulation_queued_ = true;
 	};
 }
