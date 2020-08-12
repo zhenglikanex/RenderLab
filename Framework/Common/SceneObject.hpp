@@ -589,6 +589,12 @@ namespace Aurora
 		bool IsMotionBlur() const { return motion_blur_; }
 		void SetCollisionType(SceneObjectCollisionType collision_type) { collision_type_ = collision_type; }
 		SceneObjectCollisionType CollisionType() const { return collision_type_; }
+		void SetCollisionParameters(const float* param, int32_t count)
+		{
+			assert(count > 0 && count < 10);
+			memcpy(collision_pamameters_, param, count * sizeof(float));
+		}
+		const float* GetCollisionParameters() const { return collision_pamameters_; }
 
 		void AddMesh(const std::shared_ptr<SceneObjectMesh>& mesh) { meshs_.push_back(mesh); }
 		void AddMesh(std::shared_ptr<SceneObjectMesh>&& mesh) { meshs_.push_back(std::move(mesh)); }
@@ -600,6 +606,7 @@ namespace Aurora
 		bool cast_shadow_;
 		bool motion_blur_;
 		SceneObjectCollisionType collision_type_;
+		float collision_pamameters_[10];
 	};
 
 	//输入为光源的强度和到光源的距离，输出为光照强度的函数的指针

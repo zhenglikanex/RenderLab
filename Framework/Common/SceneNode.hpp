@@ -38,7 +38,7 @@ namespace Aurora
 
 			return result;
 		}
-
+		const std::string& GetName() const { return name_; }
 	protected:
 		virtual void dump(std::ostream& out) const {}
 	protected:

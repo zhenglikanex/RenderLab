@@ -21,6 +21,8 @@ namespace Aurora
 		bool IsSceneChanged();
 		const Scene& GetSceneForRendering();
 		void NotifySceneIsRenderingQueued();
+
+		std::weak_ptr<SceneGeometryNode> GetSceneGeometryNode(const std::string& name);
 	protected:
 		void LoadOgexScene(const char* ogex_scene_file_name);
 	private:

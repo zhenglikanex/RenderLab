@@ -62,3 +62,16 @@ void SceneManager::NotifySceneIsRenderingQueued()
 {
 	dirty_flag_ = false;
 }
+
+std::weak_ptr<SceneGeometryNode> SceneManager::GetSceneGeometryNode(const std::string& name)
+{
+	auto iter = scene_->LUT_name_GeometryNodes.find(name);
+	if (iter != scene_->LUT_name_GeometryNodes.end())
+	{
+		return iter->second;
+	}
+	else 
+	{
+		return std::weak_ptr<SceneGeometryNode>();
+	}
+}

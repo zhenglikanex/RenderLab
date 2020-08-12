@@ -32,13 +32,13 @@ void BilliardGameLogic::Tick()
 
 void BilliardGameLogic::OnLeftKey()
 {
-	/*auto ptr = g_app->GetEngine()->GetSceneManager()->GetSceneGeometryNode("pbb_cue");
+	auto ptr = g_app->GetEngine()->GetSceneManager()->GetSceneGeometryNode("pbb_cue");
 	if (auto node = ptr.lock())
 	{
 		auto rigidBody = node->RigidBody();
 		if (rigidBody)
 		{
-			g_pPhysicsManager->ApplyCentralForce(rigidBody, Vector3f(-100.0f, 0.0f, 0.0f));
+			g_app->GetEngine()->GetPhysicsManager()->ApplyCentralForce(rigidBody, glm::vec3(-100.0f, 0.0f, 0.0f));
 		}
-	}*/
+	}
 }

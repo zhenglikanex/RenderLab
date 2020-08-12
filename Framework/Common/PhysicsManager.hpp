@@ -27,7 +27,7 @@ namespace Aurora
 		virtual void ClearRigidBodies();
 
 		glm::mat4 GetRigidBodyTransform(void* rigidbody);
-		
+		void ApplyCentralForce(void* rigidboy, const glm::vec3& force);
 	protected:
 		btBroadphaseInterface* bt_broadphase_;
 		btDefaultCollisionConfiguration* bt_collision_configuration_;

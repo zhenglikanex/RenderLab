@@ -53,28 +53,21 @@ void PhysicsManager::Tick()
 void PhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectGeometry& geometry)
 {
 	btRigidBody* rigidBody = nullptr;
-
+	auto param = geometry.GetCollisionParameters();
 	switch (geometry.CollisionType())
 	{
 	case SceneObjectCollisionType::kSceneObjectCollisionTypeSphere:
 	{
-		btCollisionShape* sphere = new btSphereShape(1.0f);
+		btCollisionShape* sphere = new btSphereShape(param[0]);
 		bt_collision_shapes_.push_back(sphere);
 
 		const auto trans = *node.GetCalculatedTransform();
+		btTransform startTransform;
+		startTransform.setIdentity();
+		startTransform.setOrigin(btVector3(trans[3][0], trans[3][1], trans[3][2]));
 		btDefaultMotionState* motionState =
 			new btDefaultMotionState(
-				btTransform(
-					btQuaternion(0.0f, 0.0f, 0.0f, 1.0f),
-					/* we should not use this because it contains not only rotation but
-					   also scale, which my makes bullet not working properly
-					btMatrix3x3(trans->data[0][0], trans->data[1][0], trans->data[2][0],
-								trans->data[0][1], trans->data[1][1], trans->data[2][1],
-								trans->data[0][2], trans->data[1][2], trans->data[2][2]
-								),
-					*/
-					btVector3(trans[3][0], trans[3][1], trans[3][2])
-				)
+				startTransform
 			);
 		btScalar mass = 1.0f;
 		btVector3 fallInertia(0.0f, 0.0f, 0.0f);
@@ -87,7 +80,7 @@ void PhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectG
 	break;
 	case SceneObjectCollisionType::kSceneObjectCollisionTypeBox:
 	{
-		btCollisionShape* box = new btBoxShape(btVector3(5.f, 5.f, 0.01f));
+		btCollisionShape* box = new btBoxShape(btVector3(param[0], param[1], param[2]));
 		bt_collision_shapes_.push_back(box);
 
 		const auto trans = *node.GetCalculatedTransform();
@@ -108,7 +101,7 @@ void PhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectG
 	break;
 	case SceneObjectCollisionType::kSceneObjectCollisionTypePlane:
 	{
-		btCollisionShape* plane = new btStaticPlaneShape(btVector3(0.0f, 0.0f, 1.0f), 0);
+		btCollisionShape* plane = new btStaticPlaneShape(btVector3(param[0],param[1],param[2]), param[3]);
 		bt_collision_shapes_.push_back(plane);
 
 		const auto trans = node.GetCalculatedTransform();
@@ -201,4 +194,12 @@ glm::mat4 PhysicsManager::GetRigidBodyTransform(void* rigidBody)
 	result[3][2] = origin.getZ();
 
 	return result;
+}
+
+void PhysicsManager::ApplyCentralForce(void* rigidboy, const glm::vec3& force)
+{
+	btRigidBody* bt_rigidboy = reinterpret_cast<btRigidBody*>(rigidboy);
+	btVector3 _force(force.x, force.y, force.z);	
+	bt_rigidboy->activate(true);
+	bt_rigidboy->applyCentralForce(_force);
 }

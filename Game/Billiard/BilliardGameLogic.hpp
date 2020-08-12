@@ -11,6 +11,6 @@ namespace Aurora
 		void Finalize() override;
 		void Tick() override;
 
-		virtual void OnLeftKey();
+		void OnLeftKey() override;
 	};
 }

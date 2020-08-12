@@ -1,6 +1,7 @@
 #include "InputManager.hpp"
 
 #include "Framework/Common/IApplication.hpp"
+#include "Framework/Common/GameLogic.hpp"
 #include "Framework/Common/Engine.hpp"
 #include "Framework/Common/GraphicsManager.hpp"
 #include "Framework/Common/GeomMath.hpp"
@@ -44,7 +45,8 @@ void InputManager::DownArrowKeyUp()
 
 void InputManager::LeftArrowKeyDown()
 {
-    g_app->GetEngine()->GetGraphicsManager()->WorldRotateY(PI / 60.0f);
+    //g_app->GetEngine()->GetGraphicsManager()->WorldRotateY(PI / 60.0f);
+	g_pGameLogic->OnLeftKey();
 }
 
 void InputManager::LeftArrowKeyUp()

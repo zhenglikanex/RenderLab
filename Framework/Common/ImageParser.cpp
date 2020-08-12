@@ -16,7 +16,7 @@ std::shared_ptr<Image> ImageParser::Parser(const std::string& file_name)
 	if (!path.empty())
 	{
 		int width, height, bitcount;
-		stbi_set_flip_vertically_on_load(true);
+		//stbi_set_flip_vertically_on_load(true);
 		uint8_t* data = (uint8_t*)stbi_load(path.string().c_str(), &width, &height, &bitcount, 0);
 		if (data)
 		{

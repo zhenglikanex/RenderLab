@@ -35,6 +35,7 @@ InputManager.cpp
 Buffer.hpp
 GameLogic.hpp
 GameLogic.cpp
+../Geometries/Geometry.hpp
 main.cpp
 )
 
