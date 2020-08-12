@@ -16,6 +16,9 @@ ELSEIF(${WIN32})
 ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES Orbis)
 ENDIF(${UNIX})
 
+set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
+
 set(OPENGEX_LIB_PATH ${PROJECT_SOURCE_DIR}/3rdparty/opengex/lib)
 SET(BULLET_LIB_PATH ${PROJECT_SOURCE_DIR}/3rdparty/bullet/lib)
 
@@ -28,5 +31,6 @@ find_library(BULLET_LINEARMATH_LIBRARY NAMES LinearMath PATHS ${BULLET_LIB_PATH}
 add_subdirectory(Framework)
 add_subdirectory(RHI)
 add_subdirectory(Platform)
+add_subdirectory(Physics)
 add_subdirectory(Test)
 add_subdirectory(Game)

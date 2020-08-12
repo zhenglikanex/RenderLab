@@ -23,20 +23,27 @@ namespace Aurora
 
 		void Clear() override;
 		void Draw() override;
+
+#ifdef DEBUG
+		void DrawLien(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) override;
+		void DrawBox(const glm::vec3& bbMin, const glm::vec3 bbMax, const glm::vec3& color) override;
+		void ClearDebugBuffers() override;
+#endif
+
 	protected:
-		bool SetPerBatchShaderParameters(const std::string& param_name, const glm::mat4& param);
-		bool SetPerBatchShaderParameters(const std::string& param_name, const glm::vec3& param);
-		bool SetPerBatchShaderParameters(const std::string& param_name, const float param);
-		bool SetPerBatchShaderParameters(const std::string& param_name, const int param);
-		bool SetPerBatchShaderParameters();
+		bool SetPerBatchShaderParameters(GLuint shader,const std::string& param_name, const glm::mat4& param);
+		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const glm::vec3& param);
+		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const float param);
+		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const int param);
+		bool SetPerBatchShaderParameters(GLuint shader);
 
 		bool InitializeBuffers();
 		bool InitializeShader(const char* vs_filename, const char* fs_filename);
 		void RenderBuffers();
 	private:
-		uint32_t vertex_shader_;
-		uint32_t fragment_shader_;
-		uint32_t shader_program_;
+		GLuint vertex_shader_;
+		GLuint fragment_shader_;
+		GLuint shader_program_;
 		std::unordered_map<std::string, GLint> texture_index_;
 
 		struct DrawBathContext {
@@ -48,8 +55,23 @@ namespace Aurora
 			std::shared_ptr<SceneObjectMaterial> material;
 		};
 		std::vector<DrawBathContext> draw_batch_context_;
-		std::vector<uint32_t> buffers_;
+		std::vector<GLuint> buffers_;
 		std::vector<GLuint> textures_;
+
+		struct DebugDrawBathContext {
+			GLuint vao;
+			GLenum mode;
+			GLsizei count;
+			glm::vec3 color;
+		};
+
+#ifdef DEBUG
+		GLuint debug_vertex_shader_;
+		GLuint debug_fragment_shader_;
+		GLuint debug_shader_progam_;
+		std::vector<DebugDrawBathContext> debug_draw_batch_contenxt_;
+		std::vector<GLuint> debug_buffers_;
+#endif
 		GLADloadproc loader_;
 	};
 }

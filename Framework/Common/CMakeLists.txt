@@ -15,8 +15,6 @@ Guid.cpp
 Engine.hpp
 Engine.cpp
 IPhysicsManager.hpp
-BulletPhysicsManager.hpp
-BulletPhysicsManager.cpp
 SceneObject.hpp
 SceneObject.cpp
 SceneNode.hpp

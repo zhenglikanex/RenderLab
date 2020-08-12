@@ -21,6 +21,13 @@ namespace Aurora
 
 		void WorldRotateX(float radians);
 		void WorldRotateY(float radians);
+
+#ifdef DEBUG
+		virtual void DrawLien(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color);
+		virtual void DrawBox(const glm::vec3& bbMin, const glm::vec3 bbMax, const glm::vec3& color);
+		virtual void ClearDebugBuffers();
+#endif
+
 	protected:
 		bool SetPerBatchShaderParameters();
 		bool SetPerBatchShaderParameters(const std::string& param_name, const glm::mat4& param);

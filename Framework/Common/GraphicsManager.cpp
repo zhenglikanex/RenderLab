@@ -54,6 +54,18 @@ void GraphicsManager::WorldRotateY(float radians)
 	draw_frame_context_.world_matrix *= glm::rotate(glm::identity<glm::mat4>(), radians, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
+void Aurora::GraphicsManager::DrawLien(const glm::vec3 & from, const glm::vec3 & to, const glm::vec3 & color)
+{
+}
+
+void Aurora::GraphicsManager::DrawBox(const glm::vec3 & bbMin, const glm::vec3 bbMax, const glm::vec3 & color)
+{
+}
+
+void Aurora::GraphicsManager::ClearDebugBuffers()
+{
+}
+
 bool GraphicsManager::SetPerBatchShaderParameters()
 {
 	std::cout << "[RHI] bool GraphicsManager::SetPerBatchShaderParameters()" << std::endl;
