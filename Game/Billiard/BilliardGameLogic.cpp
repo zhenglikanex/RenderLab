@@ -3,7 +3,7 @@
 #include "Framework/Common/BaseApplication.hpp"
 #include "Framework/Common/Engine.hpp"
 #include "Framework/Common/SceneManager.hpp"
-#include "Framework/Common/PhysicsManager.hpp"
+#include "Framework/Common/IPhysicsManager.hpp"
 #include "Framework/Utils/FileUtils.hpp"
 
 using namespace Aurora;

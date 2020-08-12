@@ -1,4 +1,4 @@
-#include "PhysicsManager.hpp"
+#include "BulletPhysicsManager.hpp"
 
 #include <iostream>
 
@@ -8,7 +8,7 @@
 using namespace Aurora;
 using namespace std;
 
-bool PhysicsManager::Initialize()
+bool BulletPhysicsManager::Initialize()
 {
 	// Build the broadphase
 	bt_broadphase_ = new btDbvtBroadphase();
@@ -27,7 +27,7 @@ bool PhysicsManager::Initialize()
 	return true;
 }
 
-void PhysicsManager::Finalize()
+void BulletPhysicsManager::Finalize()
 {
 	// Clean up
 	ClearRigidBodies();
@@ -39,7 +39,7 @@ void PhysicsManager::Finalize()
 	delete bt_broadphase_;
 }
 
-void PhysicsManager::Tick()
+void BulletPhysicsManager::Tick()
 {
 	if (g_app->GetEngine()->GetSceneManager()->IsSceneChanged())
 	{
@@ -50,7 +50,7 @@ void PhysicsManager::Tick()
 	bt_dynamics_world_->stepSimulation(1.0f / 60.0f, 10);
 }
 
-void PhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectGeometry& geometry)
+void BulletPhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectGeometry& geometry)
 {
 	btRigidBody* rigidBody = nullptr;
 	auto param = geometry.GetCollisionParameters();
@@ -125,7 +125,7 @@ void PhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectG
 	node.LinkRigidBody(rigidBody);
 }
 
-void PhysicsManager::DeleteRigidBody(SceneGeometryNode& node)
+void BulletPhysicsManager::DeleteRigidBody(SceneGeometryNode& node)
 {
 	btRigidBody* rigidBody = reinterpret_cast<btRigidBody*>(node.UnlinkRigidBody());
 	if (rigidBody) {
@@ -137,7 +137,7 @@ void PhysicsManager::DeleteRigidBody(SceneGeometryNode& node)
 	}
 }
 
-int PhysicsManager::CreateRigidBodies()
+int BulletPhysicsManager::CreateRigidBodies()
 {
 	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
 
@@ -154,7 +154,7 @@ int PhysicsManager::CreateRigidBodies()
 	return 0;
 }
 
-void PhysicsManager::ClearRigidBodies()
+void BulletPhysicsManager::ClearRigidBodies()
 {
 	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
 
@@ -172,7 +172,7 @@ void PhysicsManager::ClearRigidBodies()
 
 }
 
-glm::mat4 PhysicsManager::GetRigidBodyTransform(void* rigidBody)
+glm::mat4 BulletPhysicsManager::GetRigidBodyTransform(void* rigidBody)
 {
 	glm::mat4 result = glm::identity<glm::mat4>();
 	btTransform trans;
@@ -196,7 +196,7 @@ glm::mat4 PhysicsManager::GetRigidBodyTransform(void* rigidBody)
 	return result;
 }
 
-void PhysicsManager::ApplyCentralForce(void* rigidboy, const glm::vec3& force)
+void BulletPhysicsManager::ApplyCentralForce(void* rigidboy, const glm::vec3& force)
 {
 	btRigidBody* bt_rigidboy = reinterpret_cast<btRigidBody*>(rigidboy);
 	btVector3 _force(force.x, force.y, force.z);	

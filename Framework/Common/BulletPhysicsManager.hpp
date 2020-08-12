@@ -2,8 +2,7 @@
 
 #include <vector>
 
-#include "Framework/Common/IRuntimeModule.hpp"
-#include "Framework/Common/SceneManager.hpp"
+#include "Framework/Common/IPhysicsManager.hpp"
 
 #ifndef BT_USE_DOUBLE_PRECISION
 #define BT_USE_DOUBLE_PRECISION 1
@@ -13,21 +12,21 @@
 
 namespace Aurora
 {
-	class PhysicsManager : public IRuntimeModule
+	class BulletPhysicsManager : public IPhysicsManager
 	{
 	public:
 		bool Initialize() override;
 		void Finalize() override;
 		void Tick() override;
 
-		virtual void CreateRigidBody(SceneGeometryNode& node, const SceneObjectGeometry& geometry);
-		virtual void DeleteRigidBody(SceneGeometryNode& node);
+		void CreateRigidBody(SceneGeometryNode& node, const SceneObjectGeometry& geometry) override;
+		void DeleteRigidBody(SceneGeometryNode& node) override;
 		
-		virtual int CreateRigidBodies();
-		virtual void ClearRigidBodies();
+		int CreateRigidBodies() override;
+		void ClearRigidBodies() override;
 
-		glm::mat4 GetRigidBodyTransform(void* rigidbody);
-		void ApplyCentralForce(void* rigidboy, const glm::vec3& force);
+		glm::mat4 GetRigidBodyTransform(void* rigidbody) override;
+		void ApplyCentralForce(void* rigidboy, const glm::vec3& force) override;
 	protected:
 		btBroadphaseInterface* bt_broadphase_;
 		btDefaultCollisionConfiguration* bt_collision_configuration_;

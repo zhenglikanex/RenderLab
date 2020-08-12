@@ -14,8 +14,9 @@ Guid.hpp
 Guid.cpp
 Engine.hpp
 Engine.cpp
-PhysicsManager.hpp
-PhysicsManager.cpp
+IPhysicsManager.hpp
+BulletPhysicsManager.hpp
+BulletPhysicsManager.cpp
 SceneObject.hpp
 SceneObject.cpp
 SceneNode.hpp
@@ -35,7 +36,6 @@ InputManager.cpp
 Buffer.hpp
 GameLogic.hpp
 GameLogic.cpp
-../Geometries/Geometry.hpp
 main.cpp
 )
 

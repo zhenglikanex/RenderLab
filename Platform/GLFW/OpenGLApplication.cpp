@@ -1,7 +1,7 @@
 #include "Framework/Common/IApplication.hpp"
 #include "Framework/Common/Engine.hpp"
 #include "Framework/Common/SceneManager.hpp"
-#include "Framework/Common/PhysicsManager.hpp"
+#include "Framework/Common/BulletPhysicsManager.hpp"
 #include "Framework/Common/InputManager.hpp"
 #include "Platform/GLFW/GLFWApplication.hpp"
 #include "RHI/OpenGL/OpenGLGraphicsManager.hpp"
@@ -15,7 +15,7 @@ namespace Aurora
 			std::make_unique<OpenGLGraphicsManager>((GLADloadproc)glfwGetProcAddress),
 			std::make_unique<SceneManager>(),
 			std::make_unique<InputManager>(),
-			std::make_unique<PhysicsManager>()
+			std::make_unique<BulletPhysicsManager>()
 		));
 	IApplication* g_app = &app;
 }
