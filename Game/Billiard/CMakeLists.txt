@@ -6,7 +6,7 @@ BilliardGameLogic.cpp
 
 target_link_libraries(BilliardGame
 EngineOpenGL
-BulletPhysicsManager
+BulletPhysics
 )
 
 SET_PROPERTY(TARGET BilliardGame PROPERTY FOLDER "Game")

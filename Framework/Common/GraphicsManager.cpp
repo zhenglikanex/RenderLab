@@ -8,9 +8,6 @@
 
 using namespace Aurora;
 
-const char VS_SHADER_SOURCE_FILE[] = "Shaders/basic_vs.glsl";
-const char PS_SHADER_SOURCE_FILE[] = "Shaders/basic_ps.glsl";
-
 bool GraphicsManager::Initialize()
 {
 	InitConstants();
@@ -28,7 +25,8 @@ void GraphicsManager::Tick()
 	if (g_app->GetEngine()->GetSceneManager()->IsSceneChanged())
 	{
 		ClearBuffers();
-		InitializeShader(VS_SHADER_SOURCE_FILE,PS_SHADER_SOURCE_FILE);
+		ClearShaders();
+		InitializeShaders();
 		auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
 		InitializeBuffers(scene);
 
@@ -39,6 +37,7 @@ void GraphicsManager::Tick()
 
 	Clear();
 	Draw();
+	ClearDebugBuffers();
 }
 
 void GraphicsManager::Clear()
@@ -61,7 +60,8 @@ void GraphicsManager::WorldRotateY(float radians)
 	draw_frame_context_.world_matrix *= glm::rotate(glm::identity<glm::mat4>(), radians, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
-void Aurora::GraphicsManager::DrawLien(const glm::vec3 & from, const glm::vec3 & to, const glm::vec3 & color)
+#ifdef DEBUG
+void Aurora::GraphicsManager::DrawLine(const glm::vec3 & from, const glm::vec3 & to, const glm::vec3 & color)
 {
 }
 
@@ -72,49 +72,19 @@ void Aurora::GraphicsManager::DrawBox(const glm::vec3 & bbMin, const glm::vec3 b
 void Aurora::GraphicsManager::ClearDebugBuffers()
 {
 }
-
-bool GraphicsManager::SetPerBatchShaderParameters()
-{
-	std::cout << "[RHI] bool GraphicsManager::SetPerBatchShaderParameters()" << std::endl;
-	return true;
-}
-
-bool GraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const glm::mat4& param)
-{
-	std::cout << "[RHI] GraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const glm::mat4& param)" << std::endl;
-	return true;
-}
-
-bool GraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const glm::vec3& param)
-{
-	std::cout << "[RHI] bool GraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const glm::vec3& param)" << std::endl;
-	return true;
-}
-
-bool GraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const float param)
-{
-	std::cout << "[RHI] bool GraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const float param)" << std::endl;
-	return true;
-}
-
-bool GraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const int texture_index)
-{
-	std::cout << "[RHI] bool GraphicsManager::SetPerBatchShaderParameters(const std::string& param_name, const int texture_index)" << std::endl;
-	return true;
-}
-
+#endif
 void GraphicsManager::InitConstants()
 {
 	draw_frame_context_.world_matrix = glm::identity<glm::mat4>();
 }
 
-bool GraphicsManager::InitializeShader(const char* vs_filename, const char* fs_filename)
+bool GraphicsManager::InitializeShaders()
 {
 	std::cout << "[RHI] bool GraphicsManager::InitializeShader(const char* vs_filename, const char* fs_filename)" << std::endl;
 	return true;
 }
 
-void GraphicsManager::ClearShader()
+void GraphicsManager::ClearShaders()
 {
 	std::cout << "[RHI] void GraphicsManager::ClearShader()" << std::endl;
 }

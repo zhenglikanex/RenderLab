@@ -14,7 +14,7 @@ Engine::Engine(std::unique_ptr<GraphicsManager>&& graphics_manager,std::unique_p
 	, input_manager_(std::move(input_manager))
 	, physics_manager_(std::move(physics_manager))
 {
-	
+	debug_manager_ = std::make_unique<DebugManager>();
 }
 
 bool Engine::Initialize()
@@ -43,6 +43,13 @@ bool Engine::Initialize()
 	if (!physics_manager_ || !physics_manager_->Initialize())
 	{
 		std::cout << "PhysicsManager initialize failed" << std::endl;
+
+		return false;
+	}
+
+	if (!debug_manager_ || !debug_manager_->Initialize())
+	{
+		std::cout << "DebugManager initialize failed" << std::endl;
 
 		return false;
 	}
@@ -94,6 +101,11 @@ void Engine::Tick()
 	if (scene_manager_)
 	{
 		scene_manager_->Tick();
+	}
+
+	if (debug_manager_)
+	{
+		debug_manager_->Tick();
 	}
 
 	if (physics_manager_)

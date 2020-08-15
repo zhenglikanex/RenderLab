@@ -68,3 +68,10 @@ void InputManager::ResetKeyDown()
 {
 	g_app->GetEngine()->GetSceneManager()->ResetScene();
 }
+
+#ifdef DEBUG
+void InputManager::DebugKeyDown()
+{
+	g_app->GetEngine()->GetDebugManager()->ToggleDebugInfo();
+}
+#endif

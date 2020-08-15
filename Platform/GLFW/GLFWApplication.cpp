@@ -37,10 +37,12 @@ void GLFWApplication::KeyCallback(GLFWwindow* window, int key, int scancode, int
 		case GLFW_KEY_R:
 			g_app->GetEngine()->GetInputManager()->ResetKeyDown();
 			break;
-			{
+		case GLFW_KEY_D:
+#ifdef DEBUG
+			g_app->GetEngine()->GetInputManager()->DebugKeyDown();
+#endif
 		default:
 			break;
-			}
 		}
 	}
 }

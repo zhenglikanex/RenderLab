@@ -18,8 +18,8 @@ namespace Aurora
 		virtual void Tick();
 
 		virtual void InitConstants();
-		virtual bool InitializeShader(const char* vs_filename, const char* fs_filename);
-		virtual void ClearShader();
+		virtual bool InitializeShaders();
+		virtual void ClearShaders();
 		virtual void InitializeBuffers(const Scene& scene);
 		virtual void ClearBuffers();
 
@@ -30,17 +30,11 @@ namespace Aurora
 		void WorldRotateY(float radians);
 
 #ifdef DEBUG
-		virtual void DrawLien(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color);
+		virtual void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color);
 		virtual void DrawBox(const glm::vec3& bbMin, const glm::vec3 bbMax, const glm::vec3& color);
 		virtual void ClearDebugBuffers();
 #endif
 	protected:
-		virtual bool SetPerBatchShaderParameters();
-		virtual bool SetPerBatchShaderParameters(const std::string& param_name, const glm::mat4& param);
-		virtual bool SetPerBatchShaderParameters(const std::string& param_name, const glm::vec3& param);
-		virtual bool SetPerBatchShaderParameters(const std::string& param_name, const float param);
-		virtual bool SetPerBatchShaderParameters(const std::string& param_name, const int texture_index);
-
 		virtual void CalculateCameraMatrix();
 		virtual void CalculateLights();
 		virtual void RenderBuffers();

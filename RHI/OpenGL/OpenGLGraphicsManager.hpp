@@ -23,13 +23,13 @@ namespace Aurora
 
 		void InitializeBuffers(const Scene& scene) override;
 		void ClearBuffers() override;
-		bool InitializeShader(const char* vs_filename, const char* fs_filename) override;
+		bool InitializeShaders() override;
 
 		void Clear() override;
 		void Draw() override;
 
 #ifdef DEBUG
-		void DrawLien(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) override;
+		void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) override;
 		void DrawBox(const glm::vec3& bbMin, const glm::vec3 bbMax, const glm::vec3& color) override;
 		void ClearDebugBuffers() override;
 #endif
@@ -70,7 +70,7 @@ namespace Aurora
 #ifdef DEBUG
 		GLuint debug_vertex_shader_;
 		GLuint debug_fragment_shader_;
-		GLuint debug_shader_progam_;
+		GLuint debug_shader_program_;
 		std::vector<DebugDrawBathContext> debug_draw_batch_contenxt_;
 		std::vector<GLuint> debug_buffers_;
 #endif

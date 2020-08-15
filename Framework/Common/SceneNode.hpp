@@ -36,8 +36,21 @@ namespace Aurora
 				*result = *result * static_cast<glm::mat4>(*trans);
 			}
 
+			*result *= runtime_transform_;
+
 			return result;
 		}
+
+		void RotateBy(float rotation_angle_x, float rotation_angle_y, float rotaion_angle_z)
+		{
+			glm::mat4 rotate = glm::identity<glm::mat4>();
+			glm::mat4 rotate_x = glm::rotate(rotate, rotation_angle_x, glm::vec3(1.0f, 0.0f, 0.0f));
+			glm::mat4 rotate_y = glm::rotate(rotate, rotation_angle_y, glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 rotate_z = glm::rotate(rotate, rotaion_angle_z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+			runtime_transform_ = runtime_transform_ * rotate_x * rotate_y * rotate_z;
+		}
+
 		const std::string& GetName() const { return name_; }
 	protected:
 		virtual void dump(std::ostream& out) const {}
@@ -45,6 +58,7 @@ namespace Aurora
 		std::string name_;
 		std::list<std::shared_ptr<BaseSceneNode>> children_;
 		std::list<std::shared_ptr<SceneObjectTransform>> transforms_;
+		glm::mat4 runtime_transform_ = glm::identity<glm::mat4>();
 	};
 
 	template<typename T>

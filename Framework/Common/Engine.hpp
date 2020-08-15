@@ -7,6 +7,7 @@
 #include "Framework/Common/SceneManager.hpp"
 #include "Framework/Common/InputManager.hpp"
 #include "Framework/Common/IPhysicsManager.hpp"
+#include "Framework/Common/DebugManager.hpp"
 
 namespace Aurora
 {
@@ -24,10 +25,12 @@ namespace Aurora
 		const std::unique_ptr<SceneManager>& GetSceneManager() const { return scene_manager_; }
 		const std::unique_ptr<InputManager>& GetInputManager() const { return input_manager_; }
 		const std::unique_ptr<IPhysicsManager>& GetPhysicsManager() const { return physics_manager_; }
+		const std::unique_ptr<DebugManager>& GetDebugManager() const { return debug_manager_; }
 	private:
 		std::unique_ptr<GraphicsManager> graphics_manager_;
 		std::unique_ptr<SceneManager> scene_manager_;
 		std::unique_ptr<InputManager> input_manager_;
 		std::unique_ptr<IPhysicsManager> physics_manager_;
+		std::unique_ptr<DebugManager> debug_manager_;
 	};
 }

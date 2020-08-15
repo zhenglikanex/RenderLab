@@ -85,6 +85,11 @@ void SceneManager::NotifySceneIsPhysicsSimulationQueued()
 	}
 }
 
+std::weak_ptr<BaseSceneNode> SceneManager::GetRootNode()
+{
+	return scene_->SceneGraph;
+}
+
 std::weak_ptr<SceneGeometryNode> SceneManager::GetSceneGeometryNode(const std::string& name)
 {
 	auto iter = scene_->LUT_name_GeometryNodes.find(name);
