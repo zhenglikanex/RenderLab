@@ -653,6 +653,7 @@ void OpenGLGraphicsManager::RenderBuffers()
 	//draw_frame_context_.world_matrix = rotationMatrixZ;
 
 	glUseProgram(shader_program_);
+
 	SetPerBatchShaderParameters(shader_program_);
 
 	for (auto& dbc : draw_batch_context_)

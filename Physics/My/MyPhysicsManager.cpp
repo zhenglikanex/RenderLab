@@ -28,6 +28,8 @@ void MyPhysicsManager::Tick()
 		CreateRigidBodies();
 		g_app->GetEngine()->GetSceneManager()->NotifySceneIsPhysicsSimulationQueued();
 	}
+
+	DrawDebugInfo();
 }
 
 void MyPhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectGeometry& geometry)
@@ -116,5 +118,10 @@ void MyPhysicsManager::DrawDebugInfo()
 	glm::vec3 to(10.0f, 0.0f, 0.0f);
 	glm::vec3 color(1.0f, 0.0f, 0.0f);
 	g_app->GetEngine()->GetGraphicsManager()->DrawLine(from, to, color);
+
+	glm::vec3 bbmin(-2.0f, -2.0f, -2.0f);
+	glm::vec3 bbmax(2.0f, 2.0f, 2.0f);
+	glm::vec3 color1(0.5f, 0.5f, 0.5f);
+	g_app->GetEngine()->GetGraphicsManager()->DrawBox(bbmin, bbmax, color1);
 }
 #endif

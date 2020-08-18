@@ -4,7 +4,7 @@
 #include "Framework/Common/InputManager.hpp"
 #include "Platform/GLFW/GLFWApplication.hpp"
 #include "RHI/OpenGL/OpenGLGraphicsManager.hpp"
-#include "Physics/Bullet/BulletPhysicsManager.hpp"
+#include "Physics/My/MyPhysicsManager.hpp"
 
 #include "GLFW/glfw3.h"
 
@@ -15,7 +15,7 @@ namespace Aurora
 			std::make_unique<OpenGLGraphicsManager>((GLADloadproc)glfwGetProcAddress),
 			std::make_unique<SceneManager>(),
 			std::make_unique<InputManager>(),
-			std::make_unique<BulletPhysicsManager>()
+			std::make_unique<MyPhysicsManager>()
 		));
 	IApplication* g_app = &app;
 }

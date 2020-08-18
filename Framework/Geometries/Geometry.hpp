@@ -18,7 +18,7 @@ namespace Aurora
 	class Geometry
 	{
 	public:
-		Geometry(GeometryType geometry_type);
+		Geometry(GeometryType geometry_type) : geometry_type_(geometry_type_) {}
 		Geometry() = delete;
 		virtual ~Geometry() = default;
 

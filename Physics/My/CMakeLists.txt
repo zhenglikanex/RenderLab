@@ -4,5 +4,7 @@ add_library(MyPhysics
         RigidBody.hpp
         MotionState.hpp
 )
+target_link_libraries(MyPhysics
+Geometries)
 
 SET_PROPERTY(TARGET MyPhysics PROPERTY FOLDER "Physics")

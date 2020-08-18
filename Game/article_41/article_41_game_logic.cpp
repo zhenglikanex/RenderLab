@@ -15,7 +15,7 @@ bool Article41GameLogic::Initialize()
 
 	cout << "Biiliard Game Logic Initialize" << endl;
 	cout << "Start Loading Game Scene" << endl;
-	g_app->GetEngine()->GetSceneManager()->LoadScene("Scene/billiard.ogex");
+	g_app->GetEngine()->GetSceneManager()->LoadScene("Scene/test.ogex");
 
 	return true;
 }
