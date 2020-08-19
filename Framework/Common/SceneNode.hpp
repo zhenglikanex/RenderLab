@@ -3,27 +3,38 @@
 #include <memory>
 #include <list>
 #include <string>
+#include <map>
 
 #include "Framework/Common/SceneObject.hpp"
 #include "Framework/Common/GeomMath.hpp"
+#include "Framework/Algorism/Tree.hpp"
 
 namespace Aurora
 {
-	class BaseSceneNode
+	class BaseSceneNode : public TreeNode
 	{
 	public:
-		BaseSceneNode() {}
-		BaseSceneNode(const std::string& name) : name_(name) {}
+		BaseSceneNode() :TreeNode() {}
+		BaseSceneNode(const std::string& name) :TreeNode(),name_(name) {}
 		virtual ~BaseSceneNode() {}
 
-		void AppendChild(std::shared_ptr<BaseSceneNode>&& sub_node)
-		{
-			children_.push_back(std::move(sub_node));
-		}
-
-		void AppendChild(std::shared_ptr<SceneObjectTransform>&& transform)
+		void AppendTransform(const char* key,std::shared_ptr<SceneObjectTransform>&& transform)
 		{
 			transforms_.push_back(std::move(transform));
+			LUTtransform_.insert({ std::string(key),transform });
+		}
+
+		std::shared_ptr<SceneObjectTransform> GetTransform(const std::string& key)
+		{
+			auto it = LUTtransform_.find(key);
+			if (it != LUTtransform_.end())
+			{
+				return it->second;
+			}
+			else
+			{
+				return std::shared_ptr<SceneObjectTransform>();
+			}
 		}
 
 		const std::shared_ptr<glm::mat4> GetCalculatedTransform() const
@@ -31,8 +42,9 @@ namespace Aurora
 			std::shared_ptr<glm::mat4> result = std::make_shared<glm::mat4>(glm::identity<glm::mat4>());
 			
 			// TODO:cascading calculation
-			for (auto& trans : transforms_)
+			for (auto it = transforms_.rbegin();it != transforms_.rend();++it)
 			{
+				auto trans = *it;
 				*result = *result * static_cast<glm::mat4>(*trans);
 			}
 
@@ -56,8 +68,8 @@ namespace Aurora
 		virtual void dump(std::ostream& out) const {}
 	protected:
 		std::string name_;
-		std::list<std::shared_ptr<BaseSceneNode>> children_;
 		std::list<std::shared_ptr<SceneObjectTransform>> transforms_;
+		std::map<std::string, std::shared_ptr<SceneObjectTransform>> LUTtransform_;
 		glm::mat4 runtime_transform_ = glm::identity<glm::mat4>();
 	};
 

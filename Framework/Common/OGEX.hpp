@@ -317,13 +317,14 @@ namespace Aurora
 				glm::mat4 matrix;
 				std::shared_ptr<SceneObjectTransform> transform;
 				
+				const char* _key = _structure.GetStructureName();
 				count = _structure.GetTransformCount();
 				for (index = 0; index < count; ++index)
 				{
 					const float* data = _structure.GetTransform(index);
 					memcpy(&matrix, data, sizeof(matrix));
 					transform = std::make_shared<SceneObjectTransform>(matrix, object_flag);
-					base_node->AppendChild(std::move(transform));
+					base_node->AppendTransform(_key,std::move(transform));
 				}
 			}return;
 			case OGEX::kStructureTranslation:
@@ -332,6 +333,7 @@ namespace Aurora
 				bool object_flag = _structure.GetObjectFlag();
 				std::shared_ptr<SceneObjectTranslation> translation;
 
+				auto _key = _structure.GetStructureName();
 				auto kind = _structure.GetTranslationKind();
 				auto data = _structure.GetTranslation();
 				if (kind == "xyz")
@@ -342,7 +344,7 @@ namespace Aurora
 				{
 					translation = std::make_shared<SceneObjectTranslation>(kind[0], data[0]);
 				}
-				base_node->AppendChild(std::move(translation));
+				base_node->AppendTransform(_key,std::move(translation));
 			}return;
 			case OGEX::kStructureMaterial:
 			{

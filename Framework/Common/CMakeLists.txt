@@ -36,6 +36,7 @@ GameLogic.hpp
 GameLogic.cpp
 DebugManager.hpp
 DebugManager.cpp
+../Algorism/Tree.hpp
 main.cpp
 )
 
