@@ -4,7 +4,7 @@
 
 #include "Framework/Common/GeomMath.hpp"
 
-namespace My {
+namespace Aurora {
 	class MotionState
 	{
 	public:

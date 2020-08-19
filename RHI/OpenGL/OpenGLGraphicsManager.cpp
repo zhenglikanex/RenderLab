@@ -658,21 +658,25 @@ void OpenGLGraphicsManager::RenderBuffers()
 
 	for (auto& dbc : draw_batch_context_)
 	{
-		glm::mat4 trans = *dbc.node->GetCalculatedTransform();
+		glm::mat4 trans;
 		if (void* rigidbody = dbc.node->RigidBody())
 		{
 			auto simulated_result = g_app->GetEngine()->GetPhysicsManager()->GetRigidBodyTransform(rigidbody);
 
 			// replace the translation part of the matrix with simlation result directly
-			trans[3] = glm::vec4(0.0f,0.0f,0.0f,trans[3].w);
+			//trans[3] = glm::vec4(0.0f,0.0f,0.0f,trans[3].w);
 			
 			// apply the rotation part of the simlation result
-			glm::mat4 rotation = glm::identity<glm::mat4>();
-			rotation[0] = simulated_result[0];
-			rotation[1] = simulated_result[1];
-			rotation[2] = simulated_result[2];
-			trans = trans * rotation;
+			trans = glm::identity<glm::mat4>();
+			trans[0] = simulated_result[0];
+			trans[1] = simulated_result[1];
+			trans[2] = simulated_result[2];
+
 			trans[3] = glm::vec4(simulated_result[3].x, simulated_result[3].y, simulated_result[3].z,trans[3].w);
+		}
+		else
+		{
+			trans = *dbc.node->GetCalculatedTransform();
 		}
 
 		SetPerBatchShaderParameters(shader_program_,"modelMatrix", trans);

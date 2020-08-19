@@ -1,5 +1,7 @@
 #pragma once
 
+#include <numeric>
+
 #include "Framework/Common/GeomMath.hpp"
 
 namespace Aurora
@@ -39,6 +41,6 @@ namespace Aurora
 
 	protected:
 		GeometryType geometry_type_;
-		float margin_;
+		float margin_ = std::numeric_limits<float>::epsilon();
 	};
 }

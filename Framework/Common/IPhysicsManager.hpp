@@ -17,6 +17,7 @@ namespace Aurora
 		virtual void ClearRigidBodies() = 0;
 
 		virtual glm::mat4 GetRigidBodyTransform(void* rigidbody) = 0;
+		virtual void UpdateRigidBodyTransform(SceneGeometryNode& node) = 0;
 		virtual void ApplyCentralForce(void* rigidboy, const glm::vec3& force) = 0;
 	};
 }

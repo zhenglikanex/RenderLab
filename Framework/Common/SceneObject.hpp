@@ -303,6 +303,7 @@ namespace Aurora
 		const SceneObjectVertexArray& GetVertexPropertyArray(const size_t index) const { return vertex_array_[index]; }
 		const SceneObjectIndexArray& GetIndexArray(const size_t index) const { return index_array_[index]; }
 		const PrimitiveType& GetPrimitiveType() { return primitive_type_; }
+		glm::vec3 GetBoundingBox() const;
 	protected:
 		std::vector<SceneObjectIndexArray> index_array_;
 		std::vector<SceneObjectVertexArray> vertex_array_;
@@ -600,6 +601,7 @@ namespace Aurora
 		void AddMesh(std::shared_ptr<SceneObjectMesh>&& mesh) { meshs_.push_back(std::move(mesh)); }
 		const std::weak_ptr<SceneObjectMesh> GetMesh() { return meshs_.empty() ? nullptr : meshs_[0]; }
 		const std::weak_ptr<SceneObjectMesh> GetMeshLOD(size_t lod) { return lod < meshs_.size() ? meshs_[lod] : nullptr; }
+		glm::vec3 GetBoundingBox() const { return meshs_.empty() ? glm::vec3(0) : meshs_[0]->GetBoundingBox(); }
 	protected:
 		std::vector<std::shared_ptr<SceneObjectMesh>> meshs_;
 		bool visible_;

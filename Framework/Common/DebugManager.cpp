@@ -19,16 +19,20 @@ void DebugManager::Finalize()
 
 void DebugManager::Tick()
 {
+#ifdef DEBUG
 	if (draw_debug_info_)
 	{
 		DrawDebugInfo();
 		//g_app->GetEngine()->GetPhysicsManager()->
 	}
+#endif // DEBUG
 }
 
 void DebugManager::ToggleDebugInfo()
 {
+#ifdef DEBUG
 	draw_debug_info_ = !draw_debug_info_;
+#endif // DEBUG
 }
 
 void DebugManager::DrawDebugInfo()

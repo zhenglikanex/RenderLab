@@ -7,6 +7,8 @@
 #include "Framework/Geometries/Box.hpp"
 #include "Framework/Geometries/Plane.hpp"
 #include "Framework/Geometries/Sphere.hpp"
+#include "Physics/My/RigidBody.hpp"
+#include "Physics/My/MotionState.hpp"
 
 using namespace Aurora;
 
@@ -35,38 +37,63 @@ void MyPhysicsManager::Tick()
 void MyPhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectGeometry& geometry)
 {
 	const float* param = geometry.GetCollisionParameters();
-	Geometry* collision_box = nullptr;
+	RigidBody* rigidbody = nullptr;
 
 	switch (geometry.CollisionType())
 	{
 	case SceneObjectCollisionType::kSceneObjectCollisionTypeSphere:
 	{
-		collision_box = new Sphere(param[0]);
-		collision_shapes_.push_back(collision_box);
+		auto collision_box = std::make_shared<Sphere>(param[0]);
+		const auto trans = node.GetCalculatedTransform();
+
+		auto motion_state = std::make_shared<MotionState>(*trans);
+		rigidbody = new RigidBody(collision_box, motion_state);
 	}break;
 	case SceneObjectCollisionType::kSceneObjectCollisionTypeBox:
 	{
-		collision_box = new Box(glm::vec3(param[0], param[1], param[2]));
-		collision_shapes_.push_back(collision_box);
+		auto collision_box = std::make_shared<Box>(glm::vec3(param[0], param[1], param[2]));
+
+		const auto trans = node.GetCalculatedTransform();
+		auto motionState =
+			std::make_shared<MotionState>(
+				*trans
+				);
+		rigidbody = new RigidBody(collision_box, motionState);
 	}break;
 	case SceneObjectCollisionType::kSceneObjectCollisionTypePlane:
 	{
-		collision_box = new Plane(glm::vec3(param[0], param[1], param[2]), param[3]);
-		collision_shapes_.push_back(collision_box);
+		auto collision_box = std::make_shared<Plane>(glm::vec3(param[0], param[1], param[2]), param[3]);
+
+		const auto trans = node.GetCalculatedTransform();
+		auto motionState =
+			std::make_shared<MotionState>(
+				*trans
+				);
+		rigidbody = new RigidBody(collision_box, motionState);
 	}break;
 	default:
-		break;
+	{
+		// create AABB box according to Bounding Box 
+		auto collision_box = std::make_shared<Box>(geometry.GetBoundingBox());
+
+		const auto trans = node.GetCalculatedTransform();
+		auto motionState =
+			std::make_shared<MotionState>(
+				*trans
+				);
+		rigidbody = new RigidBody(collision_box, motionState);
+	}
 	}
 
-	node.LinkRigidBody(collision_box);
+	node.LinkRigidBody(rigidbody);
 }
 
 void MyPhysicsManager::DeleteRigidBody(SceneGeometryNode& node)
 {
-	Geometry* collision_box = reinterpret_cast<Geometry*>(node.UnlinkRigidBody());
-	if (collision_box)
+	RigidBody* rigidbody = reinterpret_cast<RigidBody*>(node.UnlinkRigidBody());
+	if (rigidbody)
 	{
-		delete collision_box;
+		delete rigidbody;
 	}
 }
 
@@ -86,24 +113,30 @@ int MyPhysicsManager::CreateRigidBodies()
 
 void MyPhysicsManager::ClearRigidBodies()
 {
-	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
+	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForPhysicalSimulation();
 	// Geometries
 	for (auto _it : scene.GeometryNodes)
 	{
 		auto pGeometryNode = _it.second;
 		DeleteRigidBody(*pGeometryNode);
 	}
-	for (auto shape : collision_shapes_)
-	{
-		delete shape;
-	}
-	collision_shapes_.clear();
 }
 
 glm::mat4 MyPhysicsManager::GetRigidBodyTransform(void* rigidbody)
 {
-	glm::mat4 trans = glm::identity<glm::mat4>();
+	RigidBody* _rigidBody = reinterpret_cast<RigidBody*>(rigidbody);
+	auto motionState = _rigidBody->GetMotionState();
+	glm::mat4 trans = motionState->GetTransition();
+	
 	return trans;
+}
+
+void MyPhysicsManager::UpdateRigidBodyTransform(SceneGeometryNode& node)
+{
+	const auto trans = node.GetCalculatedTransform();
+	auto rigidBody = node.RigidBody();
+	auto motionState = reinterpret_cast<RigidBody*>(rigidBody)->GetMotionState();
+	motionState->SetTransition(*trans);
 }
 
 void MyPhysicsManager::ApplyCentralForce(void* rigidboy, const glm::vec3& force)
@@ -114,14 +147,27 @@ void MyPhysicsManager::ApplyCentralForce(void* rigidboy, const glm::vec3& force)
 #ifdef DEBUG
 void MyPhysicsManager::DrawDebugInfo()
 {
-	glm::vec3 from(-10.0f, 0.0f, 0.0f);
-	glm::vec3 to(10.0f, 0.0f, 0.0f);
-	glm::vec3 color(1.0f, 0.0f, 0.0f);
-	g_app->GetEngine()->GetGraphicsManager()->DrawLine(from, to, color);
+	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForPhysicalSimulation();
 
-	glm::vec3 bbmin(-2.0f, -2.0f, -2.0f);
-	glm::vec3 bbmax(2.0f, 2.0f, 2.0f);
-	glm::vec3 color1(0.5f, 0.5f, 0.5f);
-	g_app->GetEngine()->GetGraphicsManager()->DrawBox(bbmin, bbmax, color1);
+	// Geometries
+	for (auto _it : scene.GeometryNodes)
+	{
+		auto pGeometryNode = _it.second;
+		if (void* rigidBody = pGeometryNode->RigidBody()) {
+			RigidBody* _rigidBody = reinterpret_cast<RigidBody*>(rigidBody);
+			glm::mat4 simulated_result = GetRigidBodyTransform(_rigidBody);
+			auto pGeometry = _rigidBody->GetCollisionShape();
+			DrawAabb(*pGeometry, simulated_result);
+		}
+	}
+}
+
+void MyPhysicsManager::DrawAabb(const Geometry& geometry, const glm::mat4& trans)
+{
+	glm::vec3 bbMin, bbMax;
+	glm::vec3 color(0.5f, 0.5f, 0.5f);
+
+	geometry.GetAabb(trans, bbMin, bbMax);
+	g_app->GetEngine()->GetGraphicsManager()->DrawBox(bbMin, bbMax, color);
 }
 #endif

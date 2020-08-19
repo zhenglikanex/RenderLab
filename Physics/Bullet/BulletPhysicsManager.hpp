@@ -26,6 +26,7 @@ namespace Aurora
 		void ClearRigidBodies() override;
 
 		glm::mat4 GetRigidBodyTransform(void* rigidbody) override;
+		void UpdateRigidBodyTransform(SceneGeometryNode& node) override;
 		void ApplyCentralForce(void* rigidboy, const glm::vec3& force) override;
 	protected:
 		btBroadphaseInterface* bt_broadphase_;

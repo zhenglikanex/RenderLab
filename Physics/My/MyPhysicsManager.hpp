@@ -14,6 +14,7 @@ namespace Aurora
 
 #ifdef DEBUG
 		void DrawDebugInfo() override;
+		void DrawAabb(const Geometry& geometry, const glm::mat4& trans);
 #endif
 
 		void CreateRigidBody(SceneGeometryNode& node, const SceneObjectGeometry& geometry) override;
@@ -23,6 +24,7 @@ namespace Aurora
 		void ClearRigidBodies() override;
 
 		glm::mat4 GetRigidBodyTransform(void* rigidbody) override;
+		void UpdateRigidBodyTransform(SceneGeometryNode& node);
 		void ApplyCentralForce(void* rigidboy, const glm::vec3& force) override;
 
 	protected:

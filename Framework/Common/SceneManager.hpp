@@ -20,7 +20,7 @@ namespace Aurora
 
 		bool IsSceneChanged();
 		const Scene& GetSceneForRendering();
-		const Scene& GetSceneForPhysicsSimulation();
+		const Scene& GetSceneForPhysicalSimulation();
 		void NotifySceneIsRenderingQueued();
 		void NotifySceneIsPhysicsSimulationQueued();
 

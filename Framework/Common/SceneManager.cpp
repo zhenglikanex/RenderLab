@@ -60,7 +60,7 @@ const Scene& SceneManager::GetSceneForRendering()
 	return *scene_;
 }
 
-const Scene& SceneManager::GetSceneForPhysicsSimulation()
+const Scene& SceneManager::GetSceneForPhysicalSimulation()
 {
 	return *scene_;
 }
