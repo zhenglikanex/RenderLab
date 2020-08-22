@@ -18,23 +18,9 @@ namespace Aurora
 		BaseSceneNode(const std::string& name) :TreeNode(),name_(name) {}
 		virtual ~BaseSceneNode() {}
 
-		void AppendTransform(const char* key,std::shared_ptr<SceneObjectTransform>&& transform)
+		void PrependTransform(std::shared_ptr<SceneObjectTransform>&& transform)
 		{
 			transforms_.push_back(std::move(transform));
-			LUTtransform_.insert({ std::string(key),transform });
-		}
-
-		std::shared_ptr<SceneObjectTransform> GetTransform(const std::string& key)
-		{
-			auto it = LUTtransform_.find(key);
-			if (it != LUTtransform_.end())
-			{
-				return it->second;
-			}
-			else
-			{
-				return std::shared_ptr<SceneObjectTransform>();
-			}
 		}
 
 		const std::shared_ptr<glm::mat4> GetCalculatedTransform() const
@@ -63,13 +49,27 @@ namespace Aurora
 			runtime_transform_ = runtime_transform_ * rotate_x * rotate_y * rotate_z;
 		}
 
+		void MoveBy(float distance_x, float distance_y, float distance_z)
+		{
+			glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(distance_x, distance_y, distance_z));
+			runtime_transform_ *= translation;
+		}
+
+		void MoveBy(const glm::vec3& distance)
+		{
+			MoveBy(distance.x, distance.y, distance.z);
+		}
+
+		virtual glm::mat3 GetLocalAxis()
+		{
+			return glm::identity<glm::mat3>();
+		}
 		const std::string& GetName() const { return name_; }
 	protected:
 		virtual void dump(std::ostream& out) const {}
 	protected:
 		std::string name_;
 		std::list<std::shared_ptr<SceneObjectTransform>> transforms_;
-		std::map<std::string, std::shared_ptr<SceneObjectTransform>> LUTtransform_;
 		glm::mat4 runtime_transform_ = glm::identity<glm::mat4>();
 	};
 
@@ -157,7 +157,22 @@ namespace Aurora
 
 		void SetTarget(const glm::vec3& target) { target_ = target; }
 		const glm::vec3& GetTarget() const { return target_; }
+
+		glm::mat3 GetLocalAxis() override
+		{
+			auto transform = *GetCalculatedTransform();
+			glm::vec3 target = GetTarget();
+			glm::vec3 camera_position = glm::vec3(0.0f);
+			camera_position = transform * glm::vec4(camera_position, 1.0f);
+			glm::vec3 camera_z_axis = camera_position - target_;
+			camera_z_axis = glm::normalize(camera_z_axis);
+			glm::vec3 up(0.0f, 1.0f, 0.0f);
+			glm::vec3 camera_x_axis = glm::cross(camera_z_axis, up);
+			glm::vec3 camera_y_axis = glm::cross(camera_x_axis, camera_z_axis);
+			glm::mat3 result(camera_x_axis, camera_y_axis, camera_z_axis);
+			return result;
+		}
 	protected:
-		glm::vec3 target_;
+		glm::vec3 target_ = glm::vec3(0.0f);
 	};
 }
