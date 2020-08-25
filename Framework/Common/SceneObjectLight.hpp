@@ -4,8 +4,29 @@
 
 namespace Aurora
 {
-	//输入为光源的强度和到光源的距离，输出为光照强度的函数的指针
-	using AttenFunc = float(*)(float /* Intensity */, float /* Distance */);
+	enum class AttenCurveType
+	{
+		kLinear = 0,
+		kSmooth = 1,
+		kInverse = 2,
+		kInverseSquare = 3
+	};
+
+	struct AttenCurve
+	{
+		AttenCurveType type;
+		union AttenCurveParams
+		{
+			struct LinearParam { float begin_atten; float end_atten; } linear_params;
+			struct SmoothParam { float begin_atten; float end_atten; } smooth_params;
+			struct InverseParam { float scale; float offset; float k1; float kc; } inverse_params;
+			struct InverseSquareParam { float scale; float offset; float kq; float k1; float kc; } inverse_squre_params;
+		}u;
+
+		AttenCurve() : type(AttenCurveType::kLinear), u({ {0.0f,1.0f} })
+		{
+		}
+	};
 
 	inline float DefaultAttenFunc(float intensity, float distance)
 	{
@@ -15,16 +36,7 @@ namespace Aurora
 	class SceneObjectLight : public BaseSceneObject
 	{
 	protected:
-		SceneObjectLight(
-			Color&& color = glm::vec4(1.0f),
-			float intensity = 10.0f,
-			AttenFunc atten_func = DefaultAttenFunc,
-			bool cast_shadows = false)
-			: BaseSceneObject(SceneObjectType::kSceneObjectTypeLight)
-			, light_color_(std::move(color))
-			, intensity_(intensity)
-			, light_attenuation_(atten_func)
-			, cast_shadows_(cast_shadows)
+		SceneObjectLight(SceneObjectType type) : BaseSceneObject(type),light_color_(glm::vec4(1.0f)),intensity_(1.0f),cast_shadows_(false)
 		{
 		}
 	public:
@@ -54,9 +66,14 @@ namespace Aurora
 			}
 		}
 
-		void SetAttenuation(AttenFunc func)
+		void SetDistanceAttenuation(AttenCurve curve)
 		{
-			light_attenuation_ = func;
+			light_distance_attenuation_ = curve;
+		}
+
+		const AttenCurve& GetDistanceAttenuation()
+		{
+			return light_distance_attenuation_;
 		}
 
 		const Color& GetColor() const { return light_color_; }
@@ -64,7 +81,7 @@ namespace Aurora
 	protected:
 		Color light_color_;
 		float intensity_;
-		AttenFunc light_attenuation_;	//允許指定特殊的衰減的函數
+		AttenCurve light_distance_attenuation_;	//允許指定特殊的衰減的函數
 		bool cast_shadows_;
 		std::string texture_name_;
 	};
@@ -72,22 +89,31 @@ namespace Aurora
 	class SceneObjectInfiniteLight : public SceneObjectLight
 	{
 	public:
-		using SceneObjectLight::SceneObjectLight;
+		SceneObjectInfiniteLight() : SceneObjectLight(SceneObjectType::kSceneObjectTypeLightInfi) {}
+		
 	};
 
 	class SceneObjectOmniLight : public SceneObjectLight
 	{
 	public:
-		using SceneObjectLight::SceneObjectLight;
+		SceneObjectOmniLight() : SceneObjectLight(SceneObjectType::kSceneObjectTypeLightOmni) {}
 	};
 
 	class SceneObjectSpotLight : public SceneObjectLight
 	{
 	public:
-		using SceneObjectLight::SceneObjectLight;
-		SceneObjectSpotLight() : SceneObjectLight(), cone_angle_(PI / 4.0f), penumbra_angle_(PI / 3.0f) { }
+		SceneObjectSpotLight() : SceneObjectLight(SceneObjectType::kSceneObjectTypeLightSpot) { }
+
+		void SetAngleAttenuation(AttenCurve curve)
+		{
+			light_angle_attenuation_ = curve;
+		}
+
+		const AttenCurve& GetAngleAttenuation()
+		{
+			return light_angle_attenuation_;
+		}
 	protected:
-		float cone_angle_;
-		float penumbra_angle_;
+		AttenCurve light_angle_attenuation_;
 	};
 }

@@ -326,7 +326,7 @@ void Aurora::OpenGLGraphicsManager::ClearDebugBuffers()
 
 bool OpenGLGraphicsManager::SetPerBatchShaderParameters(GLuint shader)
 {
-	unsigned int location;
+	int location;
 
 	location = glGetUniformLocation(shader, "worldMatrix");
 	if (location == -1)
@@ -354,7 +354,7 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(GLuint shader)
 	{
 		return false;
 	}
-	glUniform3fv(location, 1, glm::value_ptr(draw_frame_context_.light_position));
+	glUniform4fv(location, 1, glm::value_ptr(draw_frame_context_.light_position));
 	
 	location = glGetUniformLocation(shader, "lightColor");
 	if (location == -1)
@@ -366,6 +366,58 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(GLuint shader)
 	{
 		return false;
 	}
+
+	location = glGetUniformLocation(shader, "lightDirection");
+	if (location == -1)
+	{
+		return false;
+	}
+	glUniform3fv(location, 1, glm::value_ptr(draw_frame_context_.light_direction));
+	
+
+	location = glGetUniformLocation(shader, "lightIntensity");
+	if (location == -1)
+	{
+		return false;
+	}
+	glUniform1f(location,draw_frame_context_.light_intensity);
+
+	location = glGetUniformLocation(shader, "lightDistAttenCurveType");
+	if (location == -1)
+	{
+		return false;
+	}
+	GLint dist_atten_type = (GLint)draw_frame_context_.light_dist_atten_curve_type;
+	glUniform1i(location,dist_atten_type);
+	
+	location = glGetUniformLocation(shader, "lightDistAttenCurveParams");
+	if (location == -1)
+	{
+		return false;
+	}
+	glUniform1fv(location, 5, draw_frame_context_.light_dist_atten_curve_params);
+
+	location = glGetUniformLocation(shader, "lightAngleAttenCurveType");
+	if (location == -1)
+	{
+		return false;
+	}
+	GLint angle_atten_type = (GLint)draw_frame_context_.light_angle_atten_curve_type;
+	glUniform1i(location, angle_atten_type);
+	
+	location = glGetUniformLocation(shader, "lightAngleAttenCurveParams");
+	if (location == -1)
+	{
+		return false;
+	}
+	glUniform1fv(location, 5, draw_frame_context_.light_angle_atten_curve_params);
+
+	location = glGetUniformLocation(shader, "ambientColor");
+	if (location == -1)
+	{
+		return false;
+	}
+	glUniform3fv(location, 1, glm::value_ptr(draw_frame_context_.ambient_color));
 
     return true;
 }

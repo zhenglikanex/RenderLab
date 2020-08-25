@@ -11,6 +11,8 @@ namespace Aurora
 
 		const Guid& guid() const { return guid_; }
 
+		SceneObjectType GetType() const { return type_; }
+
 		friend std::ostream& operator<<(std::ostream& out, const BaseSceneObject& obj)
 		{
 			out << "SceneObject" << std::endl;

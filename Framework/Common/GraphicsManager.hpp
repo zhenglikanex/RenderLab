@@ -43,8 +43,15 @@ namespace Aurora
 			glm::mat4 world_matrix;
 			glm::mat4 view_matrix;
 			glm::mat4 projection_matrix;
-			glm::vec3 light_position;
+			glm::vec4 light_position;
 			glm::vec4 light_color;
+			glm::vec3 light_direction;
+			float light_intensity;
+			AttenCurveType light_dist_atten_curve_type;
+			float light_dist_atten_curve_params[5];
+			AttenCurveType light_angle_atten_curve_type;
+			float light_angle_atten_curve_params[5];
+			glm::vec3 ambient_color;
 		};
 		DrawFrameContext draw_frame_context_;
 	};

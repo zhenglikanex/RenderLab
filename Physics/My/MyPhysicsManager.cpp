@@ -157,7 +157,7 @@ void MyPhysicsManager::DrawDebugInfo()
 			RigidBody* _rigidBody = reinterpret_cast<RigidBody*>(rigidBody);
 			glm::mat4 simulated_result = GetRigidBodyTransform(_rigidBody);
 			auto pGeometry = _rigidBody->GetCollisionShape();
-			DrawAabb(*pGeometry, simulated_result);
+			//DrawAabb(*pGeometry, simulated_result);
 		}
 	}
 }

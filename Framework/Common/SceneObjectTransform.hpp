@@ -21,7 +21,7 @@ namespace Aurora
 	{
 	public:
 		SceneObjectTranslation() { type_ = SceneObjectType::kSceneObjectTypeTranslate; matrix_ = glm::identity<glm::mat4>(); }
-		SceneObjectTranslation(char axis, float amount, bool scene_object_only = false)\
+		SceneObjectTranslation(char axis, float amount, bool scene_object_only = false)
 			: SceneObjectTranslation()
 		{
 			switch (axis)
@@ -41,7 +41,7 @@ namespace Aurora
 			scene_object_only_ = scene_object_only;
 		}
 
-		SceneObjectTranslation(float x, float y, float z, bool object_only)
+		SceneObjectTranslation(float x, float y, float z, bool object_only = false)
 			:SceneObjectTranslation()
 		{
 			matrix_ = glm::translate(matrix_, glm::vec3(x, y, z));

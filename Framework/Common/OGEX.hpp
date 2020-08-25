@@ -440,7 +440,52 @@ namespace Aurora
 					case OGEX::kStructureAtten:
 					{
 						// TODO: truly implement it
-						light->SetAttenuation(DefaultAttenFunc);
+						auto atten = dynamic_cast<const OGEX::AttenStructure*>(_sub_structure);
+						AttenCurve curve;
+						if (atten->GetCurveType() == "linear")
+						{
+							curve.type = AttenCurveType::kLinear;
+							curve.u.linear_params.begin_atten = atten->GetBeginParam();
+							curve.u.linear_params.end_atten = atten->GetEndParam();
+						}
+						else if (atten->GetCurveType() == "smooth")
+						{
+							curve.type == AttenCurveType::kSmooth;
+							curve.u.smooth_params.begin_atten = atten->GetBeginParam();
+							curve.u.smooth_params.end_atten = atten->GetEndParam();
+						}
+						else if (atten->GetCurveType() == "inverse")
+						{
+							curve.type = AttenCurveType::kInverse;
+							curve.u.inverse_params.scale = atten->GetScaleParam();
+							curve.u.inverse_params.offset = atten->GetOffsetParam();
+							curve.u.inverse_params.k1 = atten->GetLinearParam();
+							curve.u.inverse_params.kc = atten->GetConstantParam();
+						}
+						else if (atten->GetCurveType() == "inverse_square")
+						{
+							curve.type = AttenCurveType::kInverseSquare;
+							curve.u.inverse_squre_params.scale = atten->GetScaleParam();
+							curve.u.inverse_squre_params.offset = atten->GetOffsetParam();
+							curve.u.inverse_squre_params.kq = atten->GetQuadraticParam();
+							curve.u.inverse_squre_params.k1 = atten->GetLinearParam();
+							curve.u.inverse_squre_params.kc = atten->GetConstantParam();
+						}
+						
+						if (atten->GetAttenKind() == "angle")
+						{
+							auto _light = std::dynamic_pointer_cast<SceneObjectSpotLight>(light);
+							_light->SetAngleAttenuation(curve);
+						}
+						else if(atten->GetAttenKind() == "cos_angle")
+						{
+							auto _light = std::dynamic_pointer_cast<SceneObjectSpotLight>(light);
+							_light->SetAngleAttenuation(curve);
+						}
+						else
+						{
+							light->SetDistanceAttenuation(curve);
+						}
 					}
 					break;
 					default:

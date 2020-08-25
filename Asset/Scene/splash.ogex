@@ -1,11 +1,11 @@
-Metric (key = distance) {float {1.0}}
-Metric (key = angle) {float {1.0}}
-Metric (key = time) {float {1.0}}
-Metric (key = up) {string {z}}
+Metric (key = "distance") {float {1.0}}
+Metric (key = "angle") {float {1.0}}
+Metric (key = "time") {float {1.0}}
+Metric (key = "up") {string {"z"}}
 
 GeometryNode $node1
 {
-	Name {string {Plane}}
+	Name {string {"Plane"}}
 	ObjectRef {ref {$geometry1}}
 	MaterialRef (index = 0) {ref {$material1}}
 
@@ -23,16 +23,16 @@ GeometryNode $node1
 
 GeometryNode $node2
 {
-	Name {string {Text}}
+	Name {string {"Text"}}
 	ObjectRef {ref {$geometry2}}
 	MaterialRef (index = 0) {ref {$material2}}
 
-	Rotation %zrot (kind = z)
+	Rotation %zrot (kind = "z")
 	{
 		float {0.0}
 	}
 
-	Rotation %xrot (kind = x)
+	Rotation %xrot (kind = "x")
 	{
 		float {0.0}
 	}
@@ -41,35 +41,35 @@ GeometryNode $node2
 	{
 		Track (target = %xrot)
 		{
-			Time (curve = bezier)
+			Time (curve = "bezier")
 			{
 				Key {float {0.0, 6.208333333333333}}
-				Key (kind = -control) {float {-2.423804759979248, 3.7845287322998047}}
-				Key (kind = +control) {float {2.423804759979248, 8.632137934366861}}
+				Key (kind = "-control") {float {-2.423804759979248, 3.7845287322998047}}
+				Key (kind = "+control") {float {2.423804759979248, 8.632137934366861}}
 			}
 
-			Value (curve = bezier)
+			Value (curve = "bezier")
 			{
 				Key {float {0.0, 1.3795047998428345}}
-				Key (kind = -control) {float {0.0, 1.3795047998428345}}
-				Key (kind = +control) {float {0.0, 1.3795047998428345}}
+				Key (kind = "-control") {float {0.0, 1.3795047998428345}}
+				Key (kind = "+control") {float {0.0, 1.3795047998428345}}
 			}
 		}
 
 		Track (target = %zrot)
 		{
-			Time (curve = bezier)
+			Time (curve = "bezier")
 			{
 				Key {float {0.0, 6.208333333333333}}
-				Key (kind = -control) {float {-2.423804759979248, 3.7845287322998047}}
-				Key (kind = +control) {float {2.423804759979248, 8.632137934366861}}
+				Key (kind = "-control") {float {-2.423804759979248, 3.7845287322998047}}
+				Key (kind = "+control") {float {2.423804759979248, 8.632137934366861}}
 			}
 
-			Value (curve = bezier)
+			Value (curve = "bezier")
 			{
 				Key {float {0.0, 0.7901575565338135}}
-				Key (kind = -control) {float {0.0, 0.7901575565338135}}
-				Key (kind = +control) {float {0.0, 0.7901575565338135}}
+				Key (kind = "-control") {float {0.0, 0.7901575565338135}}
+				Key (kind = "+control") {float {0.0, 0.7901575565338135}}
 			}
 		}
 	}
@@ -77,7 +77,7 @@ GeometryNode $node2
 
 LightNode $node3
 {
-	Name {string {Lamp}}
+	Name {string {"Lamp"}}
 	ObjectRef {ref {$light1}}
 
 	Transform
@@ -94,7 +94,7 @@ LightNode $node3
 
 CameraNode $node4
 {
-	Name {string {Camera}}
+	Name {string {"Camera"}}
 	ObjectRef {ref {$camera1}}
 
 	Transform
@@ -109,21 +109,21 @@ CameraNode $node4
 	}
 }
 
-GeometryObject $geometry1		 Plane
+GeometryObject $geometry1		// Plane
 {
-	Mesh (primitive = triangles)
+	Mesh (primitive = "triangles")
 	{
-		VertexArray (attrib = position)
+		VertexArray (attrib = "position")
 		{
-			float[3]		 4
+			float[3]		// 4
 			{
 				{-1.0, -1.0, 0.0}, {1.0, -1.0, 0.0}, {1.0, 1.0, 0.0}, {-1.0, 1.0, 0.0}
 			}
 		}
 
-		VertexArray (attrib = normal)
+		VertexArray (attrib = "normal")
 		{
-			float[3]		 4
+			float[3]		// 4
 			{
 				{0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}
 			}
@@ -131,7 +131,7 @@ GeometryObject $geometry1		 Plane
 
 		IndexArray
 		{
-			unsigned_int32[3]		 2
+			unsigned_int32[3]		// 2
 			{
 				{0, 1, 2}, {0, 2, 3}
 			}
@@ -139,13 +139,13 @@ GeometryObject $geometry1		 Plane
 	}
 }
 
-GeometryObject $geometry2		 Text
+GeometryObject $geometry2		// Text
 {
-	Mesh (primitive = triangles)
+	Mesh (primitive = "triangles")
 	{
-		VertexArray (attrib = position)
+		VertexArray (attrib = "position")
 		{
-			float[3]		 9153
+			float[3]		// 9153
 			{
 				{-5.15639591217041, 0.4573732912540436, 0.10600000619888306}, {-5.085956573486328, 0.4602181911468506, 0.10600000619888306}, {-5.105500221252441, 0.460500031709671, 0.10600000619888306}, {-5.067152976989746, 0.45932871103286743, 0.10600000619888306}, {-5.048828125, 0.4577656388282776, 0.10600000619888306}, {-5.030722141265869, 0.4554629623889923, 0.10600000619888306}, {-5.204833507537842, 0.4482361376285553, 0.10600000619888306}, {-5.012574672698975, 0.4523547291755676, 0.10600000619888306},
 				{-4.994124889373779, 0.44837498664855957, 0.10600000619888306}, {-4.9751129150390625, 0.4434577524662018, 0.10600000619888306}, {-5.2504377365112305, 0.43345314264297485, 0.10600000619888306}, {-4.955277919769287, 0.4375370442867279, 0.10600000619888306}, {-4.934359550476074, 0.4305468797683716, 0.10600000619888306}, {-5.29283332824707, 0.4133889079093933, 0.10600000619888306}, {-4.912097454071045, 0.42242130637168884, 0.10600000619888306}, {-4.88823127746582, 0.41309434175491333, 0.10600000619888306},
@@ -1295,9 +1295,9 @@ GeometryObject $geometry2		 Text
 			}
 		}
 
-		VertexArray (attrib = normal)
+		VertexArray (attrib = "normal")
 		{
-			float[3]		 9153
+			float[3]		// 9153
 			{
 				{0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0},
 				{0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 1.0},
@@ -2449,7 +2449,7 @@ GeometryObject $geometry2		 Text
 
 		IndexArray
 		{
-			unsigned_int32[3]		 7720
+			unsigned_int32[3]		// 7720
 			{
 				{0, 1, 2}, {0, 3, 1}, {0, 4, 3}, {0, 5, 4}, {6, 5, 0}, {6, 7, 5}, {6, 8, 7}, {6, 9, 8}, {10, 9, 6}, {10, 11, 9}, {10, 12, 11}, {13, 12, 10}, {13, 14, 12}, {13, 15, 14}, {16, 15, 13}, {17, 18, 19},
 				{16, 20, 21}, {20, 22, 21}, {22, 23, 21}, {23, 24, 21}, {24, 25, 21}, {25, 26, 21}, {26, 27, 21}, {28, 29, 18}, {29, 30, 18}, {31, 32, 21}, {32, 33, 21}, {34, 35, 16}, {35, 36, 16}, {36, 20, 16}, {34, 37, 35}, {34, 38, 37},
@@ -2939,44 +2939,44 @@ GeometryObject $geometry2		 Text
 	}
 }
 
-LightObject $light1 (type = spot)		 Lamp
+LightObject $light1 (type = "spot")		// Lamp
 {
-	Color (attrib = light) {float[3] {{1.0, 1.0, 1.0}}}
-	Param (attrib = intensity) {float {10.0}}
+	Color (attrib = "light") {float[3] {{1.0, 1.0, 1.0}}}
+	Param (attrib = "intensity") {float {10.0}}
 
-	Atten (curve = inverse_square)
+	Atten (curve = "inverse_square")
 	{
-		Param (attrib = scale) {float {3.9749193675182246}}
+		Param (attrib = "scale") {float {3.9749193675182246}}
 	}
 
-	Atten (kind = angle, curve = smooth)
+	Atten (kind = "angle", curve = "linear")
 	{
-		Param (attrib = begin) {float {0.334917597999862}}
-		Param (attrib = end) {float {0.5427974462509155}}
+		Param (attrib = "begin") {float {0.334917597999862}}
+		Param (attrib = "end") {float {0.5427974462509155}}
 	}
 }
 
-CameraObject $camera1		 Camera
+CameraObject $camera1		// Camera
 {
-	Param (attrib = fov) {float {0.8575560450553894}}
-	Param (attrib = near) {float {0.10000000149011612}}
-	Param (attrib = far) {float {100.0}}
+	Param (attrib = "fov") {float {0.8575560450553894}}
+	Param (attrib = "near") {float {0.10000000149011612}}
+	Param (attrib = "far") {float {100.0}}
 }
 
 Material $material1
 {
-	Name {string {Material.002}}
+	Name {string {"Material.002"}}
 
-	Color (attrib = diffuse) {float[3] {{0.20815077138171745, 0.2744338553314485, 0.640000066757203}}}
-	Color (attrib = specular) {float[3] {{0.5, 0.5, 0.5}}}
-	Param (attrib = specular_power) {float {50}}
+	Color (attrib = "diffuse") {float[3] {{0.20815077138171745, 0.2744338553314485, 0.640000066757203}}}
+	Color (attrib = "specular") {float[3] {{0.5, 0.5, 0.5}}}
+	Param (attrib = "specular_power") {float {50}}
 }
 
 Material $material2
 {
-	Name {string {Material.001}}
+	Name {string {"Material.001"}}
 
-	Color (attrib = diffuse) {float[3] {{0.6400000190734865, 0.6400000190734865, 0.6400000190734865}}}
-	Color (attrib = specular) {float[3] {{0.5, 0.5, 0.5}}}
-	Param (attrib = specular_power) {float {50}}
+	Color (attrib = "diffuse") {float[3] {{0.6400000190734865, 0.6400000190734865, 0.6400000190734865}}}
+	Color (attrib = "specular") {float[3] {{0.5, 0.5, 0.5}}}
+	Param (attrib = "specular_power") {float {50}}
 }
