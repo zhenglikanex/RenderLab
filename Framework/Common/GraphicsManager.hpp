@@ -39,10 +39,8 @@ namespace Aurora
 		virtual void CalculateLights();
 		virtual void RenderBuffers();
 	protected:
-		struct DrawFrameContext {
-			glm::mat4 world_matrix;
-			glm::mat4 view_matrix;
-			glm::mat4 projection_matrix;
+		struct Light
+		{
 			glm::vec4 light_position;
 			glm::vec4 light_color;
 			glm::vec3 light_direction;
@@ -51,7 +49,14 @@ namespace Aurora
 			float light_dist_atten_curve_params[5];
 			AttenCurveType light_angle_atten_curve_type;
 			float light_angle_atten_curve_params[5];
+		};
+
+		struct DrawFrameContext {
+			glm::mat4 world_matrix;
+			glm::mat4 view_matrix;
+			glm::mat4 projection_matrix;
 			glm::vec3 ambient_color;
+			std::vector<Light> lights;
 		};
 		DrawFrameContext draw_frame_context_;
 	};

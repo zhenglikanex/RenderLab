@@ -8,6 +8,8 @@
 
 using namespace Aurora;
 
+#define MAX_LIGHTS 10
+
 bool GraphicsManager::Initialize()
 {
 	InitConstants();
@@ -132,46 +134,41 @@ void GraphicsManager::CalculateCameraMatrix()
 void GraphicsManager::CalculateLights()
 {
 	draw_frame_context_.ambient_color = { 0.01f,0.01f,0.01f };
-
 	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
-	auto light_node = scene.GetFirstLightNode();
-	if (light_node)
+	draw_frame_context_.lights.clear();
+	for (auto& it : scene.LightNodes)
 	{
+		if (draw_frame_context_.lights.size() >= MAX_LIGHTS)
+		{
+			break;
+		}
+
+		auto light_node = it.second;
+		Light light_param;
 		auto trans_ptr = light_node->GetCalculatedTransform();
-		draw_frame_context_.light_position = { 0.0f,0.0f,0.0f,1.0f };
-		draw_frame_context_.light_position = (*trans_ptr) * draw_frame_context_.light_position;
-		draw_frame_context_.light_direction = { 0.0f,0.0f,-1.0f };
-		draw_frame_context_.light_direction = (*trans_ptr) * glm::vec4(draw_frame_context_.light_direction, 1.0f);
+		light_param.light_position = { 0.0f,0.0f,0.0f,1.0f };
+		light_param.light_position = (*trans_ptr) * light_param.light_position;
+		light_param.light_direction = { 0.0f,0.0f,-1.0f };
+		light_param.light_direction = (*trans_ptr) * glm::vec4(light_param.light_direction, 1.0f);
 
 		auto light = scene.GetLight(light_node->GetSceneObjectRef());
 		if (light)
 		{
-			draw_frame_context_.light_color = light->GetColor().Value;
-			draw_frame_context_.light_intensity = light->GetIntensity();
+			light_param.light_color = light->GetColor().Value;
+			light_param.light_intensity = light->GetIntensity();
 			const AttenCurve& atten_curve = light->GetDistanceAttenuation();
-			draw_frame_context_.light_dist_atten_curve_type = atten_curve.type;
-			memcpy(draw_frame_context_.light_dist_atten_curve_params, &atten_curve.u, sizeof(atten_curve.u));
+			light_param.light_dist_atten_curve_type = atten_curve.type;
+			memcpy(light_param.light_dist_atten_curve_params, &atten_curve.u, sizeof(atten_curve.u));
 			if (light->GetType() == SceneObjectType::kSceneObjectTypeLightSpot)
 			{
 				auto spot_light = std::dynamic_pointer_cast<SceneObjectSpotLight>(light);
 				const AttenCurve& angle_atten_curve = spot_light->GetAngleAttenuation();
-				draw_frame_context_.light_angle_atten_curve_type = angle_atten_curve.type;
-				memcpy(draw_frame_context_.light_angle_atten_curve_params, &angle_atten_curve.u, sizeof(angle_atten_curve.u));
+				light_param.light_angle_atten_curve_type = angle_atten_curve.type;
+				memcpy(light_param.light_angle_atten_curve_params, &angle_atten_curve.u, sizeof(angle_atten_curve.u));
 			}
 		}
-	}
-	else
-	{
-		draw_frame_context_.light_position = { -1.0f, -5.0f, 0.0f,1.0f };
-		draw_frame_context_.light_color = { 1.0f,1.0f,1.0f,1.0f };
-		draw_frame_context_.light_direction = { 0.0f,0.0f,-1.0f };
-		draw_frame_context_.light_intensity = 1.0f;
-		draw_frame_context_.light_dist_atten_curve_type = AttenCurveType::kLinear;
-		draw_frame_context_.light_dist_atten_curve_params[0] = 0.0f;
-		draw_frame_context_.light_dist_atten_curve_params[1] = 1.0f;
-		draw_frame_context_.light_angle_atten_curve_type = AttenCurveType::kLinear;
-		draw_frame_context_.light_angle_atten_curve_params[0] = PI;
-		draw_frame_context_.light_angle_atten_curve_params[1] = PI;
+
+		draw_frame_context_.lights.emplace_back(std::move(light_param));
 	}
 }
 

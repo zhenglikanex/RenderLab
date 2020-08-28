@@ -349,75 +349,94 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(GLuint shader)
 	}
 	glUniformMatrix4fv(location, 1, false, glm::value_ptr(draw_frame_context_.projection_matrix));
 
-	location = glGetUniformLocation(shader, "lightPosition");
-	if (location == -1) 
-	{
-		return false;
-	}
-	glUniform4fv(location, 1, glm::value_ptr(draw_frame_context_.light_position));
-	
-	location = glGetUniformLocation(shader, "lightColor");
-	if (location == -1)
-	{
-		return false;
-	}
-	glUniform4fv(location, 1, glm::value_ptr(draw_frame_context_.light_color));
-	if (location == -1)
-	{
-		return false;
-	}
-
-	location = glGetUniformLocation(shader, "lightDirection");
-	if (location == -1)
-	{
-		return false;
-	}
-	glUniform3fv(location, 1, glm::value_ptr(draw_frame_context_.light_direction));
-	
-
-	location = glGetUniformLocation(shader, "lightIntensity");
-	if (location == -1)
-	{
-		return false;
-	}
-	glUniform1f(location,draw_frame_context_.light_intensity);
-
-	location = glGetUniformLocation(shader, "lightDistAttenCurveType");
-	if (location == -1)
-	{
-		return false;
-	}
-	GLint dist_atten_type = (GLint)draw_frame_context_.light_dist_atten_curve_type;
-	glUniform1i(location,dist_atten_type);
-	
-	location = glGetUniformLocation(shader, "lightDistAttenCurveParams");
-	if (location == -1)
-	{
-		return false;
-	}
-	glUniform1fv(location, 5, draw_frame_context_.light_dist_atten_curve_params);
-
-	location = glGetUniformLocation(shader, "lightAngleAttenCurveType");
-	if (location == -1)
-	{
-		return false;
-	}
-	GLint angle_atten_type = (GLint)draw_frame_context_.light_angle_atten_curve_type;
-	glUniform1i(location, angle_atten_type);
-	
-	location = glGetUniformLocation(shader, "lightAngleAttenCurveParams");
-	if (location == -1)
-	{
-		return false;
-	}
-	glUniform1fv(location, 5, draw_frame_context_.light_angle_atten_curve_params);
-
 	location = glGetUniformLocation(shader, "ambientColor");
 	if (location == -1)
 	{
 		return false;
 	}
 	glUniform3fv(location, 1, glm::value_ptr(draw_frame_context_.ambient_color));
+	
+	location = glGetUniformLocation(shader, "numLights");
+	if (location == -1)
+	{
+		return false;
+	}
+	glUniform1i(location,draw_frame_context_.lights.size());
+
+	std::string name;
+	for (int i = 0; i < draw_frame_context_.lights.size(); ++i)
+	{
+		auto& light = draw_frame_context_.lights[i];
+		name = "allLights[" + std::to_string(i) + "].lightPosition";
+		location = glGetUniformLocation(shader, name.c_str());
+		if (location == -1)
+		{
+			return false;
+		}
+		glUniform4fv(location, 1, glm::value_ptr(light.light_position));
+
+		name = "allLights[" + std::to_string(i) + "].lightColor";
+		location = glGetUniformLocation(shader, name.c_str());
+		if (location == -1)
+		{
+			return false;
+		}
+		glUniform4fv(location, 1, glm::value_ptr(light.light_color));
+		if (location == -1)
+		{
+			return false;
+		}
+
+		name = "allLights[" + std::to_string(i) + "].lightDirection";
+		location = glGetUniformLocation(shader, name.c_str());
+		if (location == -1)
+		{
+			return false;
+		}
+		glUniform3fv(location, 1, glm::value_ptr(light.light_direction));
+
+		name = "allLights[" + std::to_string(i) + "].lightIntensity";
+		location = glGetUniformLocation(shader, name.c_str());
+		if (location == -1)
+		{
+			return false;
+		}
+		glUniform1f(location, light.light_intensity);
+
+		name = "allLights[" + std::to_string(i) + "].lightDistAttenCurveType";
+		location = glGetUniformLocation(shader, name.c_str());
+		if (location == -1)
+		{
+			return false;
+		}
+		GLint dist_atten_type = (GLint)light.light_dist_atten_curve_type;
+		glUniform1i(location, dist_atten_type);
+
+		name = "allLights[" + std::to_string(i) + "].lightDistAttenCurveParams";
+		location = glGetUniformLocation(shader, name.c_str());
+		if (location == -1)
+		{
+			return false;
+		}
+		glUniform1fv(location, 5, light.light_dist_atten_curve_params);
+
+		name = "allLights[" + std::to_string(i) + "].lightAngleAttenCurveType";
+		location = glGetUniformLocation(shader, name.c_str());
+		if (location == -1)
+		{
+			return false;
+		}
+		GLint angle_atten_type = (GLint)light.light_angle_atten_curve_type;
+		glUniform1i(location, angle_atten_type);
+
+		name = "allLights[" + std::to_string(i) + "].lightAngleAttenCurveParams";
+		location = glGetUniformLocation(shader, name.c_str());
+		if (location == -1)
+		{
+			return false;
+		}
+		glUniform1fv(location, 5, light.light_angle_atten_curve_params);
+	}
 
     return true;
 }
