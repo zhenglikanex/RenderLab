@@ -144,21 +144,28 @@ void GraphicsManager::CalculateLights()
 		}
 
 		auto light_node = it.second;
-		Light light_param;
-		auto trans_ptr = light_node->GetCalculatedTransform();
-		light_param.light_position = { 0.0f,0.0f,0.0f,1.0f };
-		light_param.light_position = (*trans_ptr) * light_param.light_position;
-		light_param.light_direction = { 0.0f,0.0f,-1.0f };
-		light_param.light_direction = (*trans_ptr) * glm::vec4(light_param.light_direction, 1.0f);
 
 		auto light = scene.GetLight(light_node->GetSceneObjectRef());
 		if (light)
 		{
+			Light light_param;
+			auto trans_ptr = light_node->GetCalculatedTransform();
+			light_param.light_position = { 0.0f,0.0f,0.0f,1.0f };
+			light_param.light_position = (*trans_ptr) * light_param.light_position;
+			light_param.light_direction = { 0.0f,0.0f,-1.0f };
+			light_param.light_direction = (*trans_ptr) * glm::vec4(light_param.light_direction,0.0f);
+
 			light_param.light_color = light->GetColor().Value;
 			light_param.light_intensity = light->GetIntensity();
 			const AttenCurve& atten_curve = light->GetDistanceAttenuation();
 			light_param.light_dist_atten_curve_type = atten_curve.type;
 			memcpy(light_param.light_dist_atten_curve_params, &atten_curve.u, sizeof(atten_curve.u));
+
+			if (light->GetType() == SceneObjectType::kSceneObjectTypeLightInfi)
+			{
+				light_param.light_position[3] = 0.0f;
+			}
+
 			if (light->GetType() == SceneObjectType::kSceneObjectTypeLightSpot)
 			{
 				auto spot_light = std::dynamic_pointer_cast<SceneObjectSpotLight>(light);
@@ -166,9 +173,13 @@ void GraphicsManager::CalculateLights()
 				light_param.light_angle_atten_curve_type = angle_atten_curve.type;
 				memcpy(light_param.light_angle_atten_curve_params, &angle_atten_curve.u, sizeof(angle_atten_curve.u));
 			}
-		}
+			else
+			{
+				light_param.light_angle_atten_curve_type = AttenCurveType::kNone;
+			}
 
-		draw_frame_context_.lights.emplace_back(std::move(light_param));
+			draw_frame_context_.lights.emplace_back(std::move(light_param));
+		}
 	}
 }
 

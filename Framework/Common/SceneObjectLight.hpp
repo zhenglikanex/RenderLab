@@ -6,10 +6,11 @@ namespace Aurora
 {
 	enum class AttenCurveType
 	{
-		kLinear = 0,
-		kSmooth = 1,
-		kInverse = 2,
-		kInverseSquare = 3
+		kNone = 0,
+		kLinear = 1,
+		kSmooth = 2,
+		kInverse = 3,
+		kInverseSquare = 4
 	};
 
 	struct AttenCurve
@@ -23,7 +24,7 @@ namespace Aurora
 			struct InverseSquareParam { float scale; float offset; float kq; float k1; float kc; } inverse_squre_params;
 		}u;
 
-		AttenCurve() : type(AttenCurveType::kLinear), u({ {0.0f,1.0f} })
+		AttenCurve() : type(AttenCurveType::kNone)
 		{
 		}
 	};

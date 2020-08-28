@@ -396,7 +396,7 @@ namespace Aurora
 				
 				if (_type_str == "infinite")
 				{
-					return;
+					light = std::make_shared<SceneObjectInfiniteLight>();
 				}
 				else if (_type_str == "point")
 				{
