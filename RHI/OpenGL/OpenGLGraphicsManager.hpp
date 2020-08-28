@@ -39,6 +39,7 @@ namespace Aurora
 		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const glm::vec3& param);
 		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const float param);
 		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const int param);
+		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const bool param);
 		bool SetPerBatchShaderParameters(GLuint shader);
 
 		void RenderBuffers() override;

@@ -497,6 +497,21 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(GLuint shader, const std
 	return true;
 }
 
+bool OpenGLGraphicsManager::SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const bool param)
+{
+	unsigned int location;
+
+	location = glGetUniformLocation(shader, param_name.c_str());
+	if (location == -1)
+	{
+		return false;
+	}
+	glUniform1f(location, param);
+
+	return true;
+}
+
+
 void OpenGLGraphicsManager::InitializeBuffers(const Scene& scene)
 {
 	for (auto& obj : scene.GeometryNodes)
@@ -751,18 +766,22 @@ void OpenGLGraphicsManager::RenderBuffers()
 		}
 
 		SetPerBatchShaderParameters(shader_program_,"modelMatrix", trans);
-
+		
 		glBindVertexArray(dbc.vao);
+
+		SetPerBatchShaderParameters(shader_program_, "usingdiffuseMap", false);
+		SetPerBatchShaderParameters(shader_program_, "usingNormalMap", false);
+
 		//后面根据材质进行分组渲染
 		if (dbc.material)
 		{
 			Color color = dbc.material->GetBaseColor();
 			if (color.ValueMap)
 			{
-				SetPerBatchShaderParameters(shader_program_,"defaultSampler", texture_index_[color.ValueMap->GetName()]);
+				SetPerBatchShaderParameters(shader_program_,"diffuseMap", texture_index_[color.ValueMap->GetName()]);
 				
 				// 告诉shader使用texture
-				SetPerBatchShaderParameters(shader_program_,"diffuseColor", glm::vec3(-1.0f));
+				SetPerBatchShaderParameters(shader_program_,"usingdiffuseMap",true);
 			}
 			else
 			{
@@ -774,6 +793,13 @@ void OpenGLGraphicsManager::RenderBuffers()
 
 			Parameter param = dbc.material->GetSpecularPower();
 			SetPerBatchShaderParameters(shader_program_,"specularPower", param.Value);
+
+			Normal noraml = dbc.material->GetNormal();
+			if (noraml.ValueMap)
+			{
+				SetPerBatchShaderParameters(shader_program_, "normalMap", texture_index_[noraml.ValueMap->GetName()]);
+				SetPerBatchShaderParameters(shader_program_, "usingNormalMap", true);
+			}
 		}
 
 		glDrawElements(dbc.mode, dbc.count, dbc.type, 0);

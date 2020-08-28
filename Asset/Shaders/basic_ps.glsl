@@ -19,6 +19,7 @@ uniform struct Light {
 	float lightDistAttenCurveParams[5];
 	int lightAngleAttenCurveType;
 	float lightAngleAttenCurveParams[5];
+    vec2 lightSize;
 }allLights[MAX_LIGHTS];
 
 // update per frame
@@ -32,7 +33,11 @@ uniform vec3 diffuseColor;
 uniform vec3 specularColor;
 uniform float specularPower;
 
-uniform sampler2D defaultSampler;
+uniform bool usingDiffuseMap;
+uniform bool usingNormalMap;
+
+uniform sampler2D diffuseMap;
+uniform sampler2D normalMap;
 
 /////////////////////
 // INPUT VARIABLES //
@@ -119,7 +124,14 @@ float apply_atten_curve(float dist,int atten_type,float atten_params[5])
 
 vec3 apply_light(Light light)
 {
-	vec3 N = normalize(normal.xyz);
+    vec3 N = normalize(normal.xyz);
+    /*
+    if(usingNormalMap)
+        N = normalize(normal.xyz);
+    else
+        N = normalize()
+    */
+	
     vec3 light_dir = normalize((viewMatrix * worldMatrix * vec4(normalize(light.lightDirection),0.0f)).xyz);
     vec3 L;
     if(light.lightPosition.w == 0.0f)
@@ -146,11 +158,38 @@ vec3 apply_light(Light light)
     vec3 R = L - 2.0f * dot(L, N) *  N; // 等於reflect(L,N)
     //vec3 R = reflect(L,N);
     vec3 V = normalize(v.xyz);
-    if (diffuseColor.r < 0)
-        return ambientColor.rgb + light.lightIntensity * atten * light.lightColor.rgb * texture(defaultSampler, uv).rgb * clamp(dot(N, L), 0.0f, 1.0f) + specularColor.rgb * pow(clamp(dot(R, V), 0.0f, 1.0f), specularPower);
+    if (usingDiffuseMap)
+        return ambientColor.rgb + light.lightIntensity * atten * light.lightColor.rgb * texture(diffuseMap, uv).rgb * clamp(dot(N, L), 0.0f, 1.0f) + specularColor.rgb * pow(clamp(dot(R, V), 0.0f, 1.0f), specularPower);
     else
         return ambientColor.rgb + light.lightIntensity * atten * light.lightColor.rgb * diffuseColor.rgb * clamp(dot(N, L), 0.0f, 1.0f) + specularColor.rgb * pow(clamp(dot(R,V), 0.0f, 1.0f), specularPower);
         //outputColor = vec4(ambientColor,1.0f);
+}
+
+vec3 apply_areaLight(Light light)
+{
+    vec3 N = normalize(normal.xyz);
+    vec3 right = normalize((viewMatrix * worldMatrix * vec4(1.0f,0.0f,0.0f,0.0f)).xyz);
+    vec3 pnormal = normalize((viewMatrix * worldMatrix * light.lightDirection).xyz);
+    vec3 ppos = (viewMatrix * worldMatrix * light.lightPosition).xyz;
+    vec3 up = normalize(cross(pnormal,right));
+    right = normalize(cross(up,pnormal));
+
+    // width and height of the area light;
+    float width = light.lightSize.x;
+    float height = light.lightSize.y;
+
+    // project onto plane and calculate direction from center to the projection
+    vec3 projection = projectOnPlane(v.xyz,ppos,pnormal);
+    vec3 dir = projection - ppos;
+
+    // calculate distance from area;
+    vec2 diagonal = vec2(dot(dir,right),dot(dir,up));
+    vec2 nearest2D = vec2(clamp(diagonal.x,-width,width),clamp(diagonal.y,-height,height));
+    vec3 nearestPointInside = ppos + right * nearest2D.x + up * nearest2D.y;
+    
+    vec3 L = nearestPointInside - v.xyz;
+    float lightToSurfDist = 
+    
 }
 
 void main(void)

@@ -29,6 +29,7 @@ namespace Aurora
 		const Color& GetBaseColor() const { return base_color_; }
 		const Color& GetSpecularColor() const { return specular_; }
 		const Parameter& GetSpecularPower() const { return specular_power_; }
+		const Normal& GetNormal() const { return normal_; }
 		void SetName(const std::string& name) { name_ = name; }
 		void SetColor(const std::string& attrib, const glm::vec4& color)
 		{
