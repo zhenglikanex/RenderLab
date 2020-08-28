@@ -25,7 +25,8 @@ void InputManager::Tick()
 
 void InputManager::UpArrowKeyDown()
 {
-    g_app->GetEngine()->GetGraphicsManager()->WorldRotateX(PI / 60.0f);
+    //g_app->GetEngine()->GetGraphicsManager()->WorldRotateX(PI / 60.0f);
+    g_pGameLogic->OnUpKey();
 }
 
 void InputManager::UpArrowKeyUp()
@@ -35,12 +36,13 @@ void InputManager::UpArrowKeyUp()
 
 void InputManager::DownArrowKeyDown()
 {
-    g_app->GetEngine()->GetGraphicsManager()->WorldRotateX(-PI / 60.0f);
+    //g_app->GetEngine()->GetGraphicsManager()->WorldRotateX(-PI / 60.0f);
+    g_pGameLogic->OnDownKey();
 }
 
 void InputManager::DownArrowKeyUp()
 {
-
+    
 }
 
 void InputManager::LeftArrowKeyDown()
@@ -56,7 +58,8 @@ void InputManager::LeftArrowKeyUp()
 
 void InputManager::RightArrowKeyDown()
 {
-    g_app->GetEngine()->GetGraphicsManager()->WorldRotateY(-PI / 60.0f);
+    //g_app->GetEngine()->GetGraphicsManager()->WorldRotateY(-PI / 60.0f);
+    g_pGameLogic->OnRightKey();
 }
 
 void InputManager::RightArrowKeyUp()

@@ -43,12 +43,24 @@ namespace Aurora
 		{
 			glm::vec4 light_position;
 			glm::vec4 light_color;
-			glm::vec3 light_direction;
+			glm::vec4 light_direction;
+			glm::vec2 light_size;
 			float light_intensity;
 			AttenCurveType light_dist_atten_curve_type;
 			float light_dist_atten_curve_params[5];
 			AttenCurveType light_angle_atten_curve_type;
 			float light_angle_atten_curve_params[5];
+
+			Light()
+			{
+				light_position = { 0.0f,0.0f,0.0f,1.0f };
+				light_size = { 0.0f,0.0f };
+				light_color = { 1.0f,1.0f,1.0f,1.0f };
+				light_direction = { 0.0f,0.0f,-1.0f,0.0f };
+				light_intensity = 0.5f;
+				light_dist_atten_curve_type = AttenCurveType::kNone;
+				light_angle_atten_curve_type = AttenCurveType::kNone;
+			}
 		};
 
 		struct DrawFrameContext {

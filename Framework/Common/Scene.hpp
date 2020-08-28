@@ -29,6 +29,7 @@ namespace Aurora
 		std::unordered_map<std::string, std::shared_ptr<SceneObjectGeometry>> Geometries;
 
 		std::unordered_map<std::string,std::weak_ptr<SceneGeometryNode>> LUT_name_GeometryNodes;
+		std::unordered_map<std::string, std::weak_ptr<SceneLightNode>> LUT_name_LightNodes;
 
 		const std::shared_ptr<SceneObjectCamera> GetCamera(const std::string& key) const;
 		const std::shared_ptr<SceneCameraNode> GetFirstCameraNode() const;

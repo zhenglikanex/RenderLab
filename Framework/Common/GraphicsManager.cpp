@@ -150,10 +150,8 @@ void GraphicsManager::CalculateLights()
 		{
 			Light light_param;
 			auto trans_ptr = light_node->GetCalculatedTransform();
-			light_param.light_position = { 0.0f,0.0f,0.0f,1.0f };
 			light_param.light_position = (*trans_ptr) * light_param.light_position;
-			light_param.light_direction = { 0.0f,0.0f,-1.0f };
-			light_param.light_direction = (*trans_ptr) * glm::vec4(light_param.light_direction,0.0f);
+			light_param.light_direction = (*trans_ptr) * light_param.light_direction;
 
 			light_param.light_color = light->GetColor().Value;
 			light_param.light_intensity = light->GetIntensity();
@@ -165,17 +163,17 @@ void GraphicsManager::CalculateLights()
 			{
 				light_param.light_position[3] = 0.0f;
 			}
-
-			if (light->GetType() == SceneObjectType::kSceneObjectTypeLightSpot)
+			else if (light->GetType() == SceneObjectType::kSceneObjectTypeLightSpot)
 			{
 				auto spot_light = std::dynamic_pointer_cast<SceneObjectSpotLight>(light);
 				const AttenCurve& angle_atten_curve = spot_light->GetAngleAttenuation();
 				light_param.light_angle_atten_curve_type = angle_atten_curve.type;
 				memcpy(light_param.light_angle_atten_curve_params, &angle_atten_curve.u, sizeof(angle_atten_curve.u));
 			}
-			else
+			else if(light->GetType() == SceneObjectType::kSceneObjectTypeLightArea)
 			{
-				light_param.light_angle_atten_curve_type = AttenCurveType::kNone;
+				auto area_light = std::dynamic_pointer_cast<SceneObjectAreaLight>(light);
+				light_param.light_size = area_light->GetDimension();
 			}
 
 			draw_frame_context_.lights.emplace_back(std::move(light_param));

@@ -4,15 +4,6 @@
 
 namespace Aurora
 {
-	enum class AttenCurveType
-	{
-		kNone = 0,
-		kLinear = 1,
-		kSmooth = 2,
-		kInverse = 3,
-		kInverseSquare = 4
-	};
-
 	struct AttenCurve
 	{
 		AttenCurveType type;
@@ -116,5 +107,24 @@ namespace Aurora
 		}
 	protected:
 		AttenCurve light_angle_attenuation_;
+	};
+
+	class SceneObjectAreaLight : public SceneObjectLight 
+	{
+	public:
+		SceneObjectAreaLight() : SceneObjectLight(SceneObjectType::kSceneObjectTypeLightArea), light_dimension_({ 1.0f,1.0f })
+		{}
+
+		const glm::vec2& GetDimension() const
+		{
+			return light_dimension_;
+		}
+
+		void SetDimension(const glm::vec2& dimension)
+		{
+			light_dimension_ = dimension;
+		}
+	protected:
+		glm::vec2 light_dimension_;
 	};
 }

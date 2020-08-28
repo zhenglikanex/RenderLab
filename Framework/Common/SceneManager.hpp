@@ -26,6 +26,7 @@ namespace Aurora
 
 		std::weak_ptr<BaseSceneNode> GetRootNode();
 		std::weak_ptr<SceneGeometryNode> GetSceneGeometryNode(const std::string& name);
+		std::weak_ptr<SceneLightNode> GetSceneLightNode(const std::string& name);
 	protected:
 		void LoadOgexScene(const char* ogex_scene_file_name);
 	private:

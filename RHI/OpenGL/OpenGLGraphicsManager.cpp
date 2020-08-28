@@ -375,6 +375,14 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(GLuint shader)
 		}
 		glUniform4fv(location, 1, glm::value_ptr(light.light_position));
 
+		name = "allLights[" + std::to_string(i) + "].lightSize";
+		location = glGetUniformLocation(shader, name.c_str());
+		if (location == -1)
+		{
+			return false;
+		}
+		glUniform2fv(location, 1, glm::value_ptr(light.light_size));
+
 		name = "allLights[" + std::to_string(i) + "].lightColor";
 		location = glGetUniformLocation(shader, name.c_str());
 		if (location == -1)
@@ -393,7 +401,7 @@ bool OpenGLGraphicsManager::SetPerBatchShaderParameters(GLuint shader)
 		{
 			return false;
 		}
-		glUniform3fv(location, 1, glm::value_ptr(light.light_direction));
+		glUniform4fv(location, 1, glm::value_ptr(light.light_direction));
 
 		name = "allLights[" + std::to_string(i) + "].lightIntensity";
 		location = glGetUniformLocation(shader, name.c_str());

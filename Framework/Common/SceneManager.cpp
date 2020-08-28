@@ -102,3 +102,16 @@ std::weak_ptr<SceneGeometryNode> SceneManager::GetSceneGeometryNode(const std::s
 		return std::weak_ptr<SceneGeometryNode>();
 	}
 }
+
+std::weak_ptr<SceneLightNode> Aurora::SceneManager::GetSceneLightNode(const std::string& name)
+{
+	auto iter = scene_->LUT_name_LightNodes.find(name);
+	if (iter != scene_->LUT_name_LightNodes.end())
+	{
+		return iter->second;
+	}
+	else
+	{
+		return std::weak_ptr<SceneLightNode>();
+	}
+}

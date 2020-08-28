@@ -22,6 +22,7 @@ namespace Aurora
 		kSceneObjectTypeLightOmni,
 		kSceneObjectTypeLightInfi,
 		kSceneObjectTypeLightSpot,
+		kSceneObjectTypeLightArea,
 		kSceneObjectTypeCamera,
 		kSceneObjectTypeAnimator,
 		kSceneObjectTypeClip,
@@ -82,4 +83,12 @@ namespace Aurora
 	using Normal = ParameterValueMap<glm::vec3>;
 	using Parameter = ParameterValueMap<float>;
 
+	enum class AttenCurveType
+	{
+		kNone = 0,
+		kLinear = 1,
+		kSmooth = 2,
+		kInverse = 3,
+		kInverseSquare = 4
+	};
 }

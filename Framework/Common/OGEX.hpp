@@ -81,6 +81,8 @@ namespace Aurora
 				std::string _key = _structure.GetObjectStructure()->GetStructureName();
 				_node->AddSceneObjectRef(_key);
 
+				std::string name = _structure.GetNodeName();
+				scene.LUT_name_LightNodes.emplace(name, _node);
 				scene.LightNodes.emplace(_key, _node);
 				node = _node;
 			}
@@ -406,6 +408,11 @@ namespace Aurora
 				{
 					light = std::make_shared<SceneObjectSpotLight>();
 				}
+				else if (_type_str == "area")
+				{
+					light = std::make_shared<SceneObjectAreaLight>();
+				}
+
 				light->SetIfCastShadow(_structure.GetShadowFlag());
 
 				const ODDL::Structure* _sub_structure = _structure.GetFirstCoreSubnode();
@@ -494,6 +501,32 @@ namespace Aurora
 
 					_sub_structure = _sub_structure->Next();
 				}
+
+				ODDL::Structure* extension = _structure.GetFirstExtensionSubnode();
+				while (extension)
+				{
+					const OGEX::ExtensionStructure* _extension = dynamic_cast<const OGEX::ExtensionStructure*>(extension);
+					auto _appid = _extension->GetApplicationString();
+					if (_appid == "MyGameEngine")
+					{
+						auto _type = _extension->GetTypeString();
+						if (_type == "area_light")
+						{
+							const ODDL::Structure* sub_structure = _extension->GetFirstCoreSubnode();
+							const ODDL::DataStructure<ODDL::FloatDataType>* dataStructure1 = static_cast<const ODDL::DataStructure<ODDL::FloatDataType>*>(sub_structure);
+							auto elementCount = dataStructure1->GetDataElementCount();
+							assert(elementCount == 2);
+							auto width = dataStructure1->GetDataElement(0);
+							auto height = dataStructure1->GetDataElement(1);
+
+							auto _light = dynamic_pointer_cast<SceneObjectAreaLight>(light);
+							_light->SetDimension({ width, height });
+						}
+					}
+
+					extension = extension->Next();
+				}
+
 				scene.Lights[_key] = light;
 
 			}return;
