@@ -450,7 +450,7 @@ namespace Aurora
 						}
 						else if (atten->GetCurveType() == "smooth")
 						{
-							curve.type == AttenCurveType::kSmooth;
+							curve.type = AttenCurveType::kSmooth;
 							curve.u.smooth_params.begin_atten = atten->GetBeginParam();
 							curve.u.smooth_params.end_atten = atten->GetEndParam();
 						}
