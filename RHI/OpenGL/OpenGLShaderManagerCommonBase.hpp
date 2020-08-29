@@ -2,13 +2,13 @@
 
 #include <string>
 
-#include "Framework/Common/IShaderManager.hpp"
+#include "Framework/Common/ShaderManager.hpp"
 
 #include "glad/glad.h"
 
 namespace Aurora
 {
-	class OpenGLShaderManagerCommonBase : public IShaderManager
+	class OpenGLShaderManagerCommonBase : public ShaderManager
 	{
 	public:
 		OpenGLShaderManagerCommonBase() = default;
@@ -21,19 +21,5 @@ namespace Aurora
 
 		bool InitializeShaders() override;
 		void ClearShaders() override;
-
-		void* GetDefaultShaderProgram() override;
-#ifdef DEBUG
-		void* GetDebugShaderProgram() override;
-#endif
-	private:
-		GLuint vertex_shader_;
-		GLuint fragment_shader_;
-		GLuint shader_program_;
-#ifdef DEBUG
-		GLuint debug_vertex_shader_;
-		GLuint debug_fragment_shader_;
-		GLuint debug_shader_program_;
-#endif
 	};
 }

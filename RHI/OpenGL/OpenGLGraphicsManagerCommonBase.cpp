@@ -607,9 +607,9 @@ void OpenGLGraphicsManagerCommonBase::ClearBuffers()
 	textures_.clear();
 }
 
-void OpenGLGraphicsManagerCommonBase::UseShaderProgram(void* shader_program)
+void OpenGLGraphicsManagerCommonBase::UseShaderProgram(intptr_t shader_program)
 {
-	current_shader_ = *reinterpret_cast<GLuint*>(shader_program);
+	current_shader_ = static_cast<GLuint>(shader_program);
 	glUseProgram(current_shader_);
 }
 

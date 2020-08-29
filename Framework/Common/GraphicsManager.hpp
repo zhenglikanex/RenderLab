@@ -26,7 +26,7 @@ namespace Aurora
 		virtual void Clear();
 		virtual void Draw();
 
-		virtual void UseShaderProgram(void* shader_program);
+		virtual void UseShaderProgram(intptr_t shader_program);
 		virtual void SetPerFrameConstants(const DrawFrameContext& context);
 		virtual void DrawBatch(const DrawBatchContext& context);
 

@@ -8,7 +8,7 @@
 
 using namespace Aurora;
 
-Engine::Engine(std::unique_ptr<GraphicsManager>&& graphics_manager, std::unique_ptr<IShaderManager>&& shader_manager, std::unique_ptr<SceneManager>&& scene_manager, std::unique_ptr<InputManager>&& input_manager, std::unique_ptr<IPhysicsManager>&& physics_manager)
+Engine::Engine(std::unique_ptr<GraphicsManager>&& graphics_manager, std::unique_ptr<ShaderManager>&& shader_manager, std::unique_ptr<SceneManager>&& scene_manager, std::unique_ptr<InputManager>&& input_manager, std::unique_ptr<IPhysicsManager>&& physics_manager)
 	: graphics_manager_(std::move(graphics_manager))
 	, shader_manager_(std::move(shader_manager))
 	, scene_manager_(std::move(scene_manager))

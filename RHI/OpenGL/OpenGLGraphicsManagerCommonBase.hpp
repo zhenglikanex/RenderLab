@@ -27,7 +27,7 @@ namespace Aurora
 		void Clear() override;
 		void Draw() override;
 
-		void UseShaderProgram(void* shader_program) override;
+		void UseShaderProgram(intptr_t shader_program) override;
 		void SetPerFrameConstants(const DrawFrameContext& context) override;
 		void DrawBatch(const DrawBatchContext& context) override;
 

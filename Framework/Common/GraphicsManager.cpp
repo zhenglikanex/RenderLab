@@ -201,7 +201,7 @@ void GraphicsManager::UpdateConstants()
 	CalculateLights();
 }
 
-void GraphicsManager::UseShaderProgram(void* shader_program)
+void GraphicsManager::UseShaderProgram(intptr_t shader_program)
 {
 	
 }

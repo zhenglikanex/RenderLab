@@ -73,7 +73,8 @@ ShadowMapPass.cpp
 HUDPass.hpp
 HUDPass.cpp
 IShaderManager.hpp
-IShaderManager.cpp
+ShaderManager.hpp
+ShaderManager.cpp
 main.cpp
 )
 
