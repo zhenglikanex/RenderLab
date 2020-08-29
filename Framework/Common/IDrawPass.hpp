@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 
+#include "Framework/Common/GfxStructures.hpp"
+
 namespace Aurora
 {
 	class IDrawPass
@@ -9,6 +11,6 @@ namespace Aurora
 		IDrawPass() = default;
 		virtual ~IDrawPass() {};
 		
-		virtual void Draw() = 0;
+		virtual void Draw(const Frame& frame) = 0;
 	};
 }

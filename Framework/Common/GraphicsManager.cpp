@@ -5,14 +5,16 @@
 #include "Framework/Common/IApplication.hpp"
 #include "Framework/Common/Engine.hpp"
 #include "Framework/Common/SceneManager.hpp"
-
+#include "Framework/Common/ForwardRenderPass.hpp"
 using namespace Aurora;
 
 #define MAX_LIGHTS 100
 
 bool GraphicsManager::Initialize()
 {
+	frames_.resize(kFrameCount);
 	InitConstants();
+	base_pass_ = std::make_shared<ForwardRenderPass>();
 
 	return true;
 }
@@ -27,15 +29,11 @@ void GraphicsManager::Tick()
 	if (g_app->GetEngine()->GetSceneManager()->IsSceneChanged())
 	{
 		ClearBuffers();
-		ClearShaders();
-		InitializeShaders();
 		auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
 		InitializeBuffers(scene);
 
 		g_app->GetEngine()->GetSceneManager()->NotifySceneIsRenderingQueued();
 	}
-	CalculateCameraMatrix();
-	CalculateLights();
 
 	Clear();
 	Draw();
@@ -49,17 +47,11 @@ void GraphicsManager::Clear()
 
 void GraphicsManager::Draw()
 {
-
-}
-
-void GraphicsManager::WorldRotateX(float radians)
-{
-	draw_frame_context_.world_matrix *= glm::rotate(glm::identity<glm::mat4>(), radians, glm::vec3(1.0f, 0.0f, 0.0f));
-}
-
-void GraphicsManager::WorldRotateY(float radians)
-{
-	draw_frame_context_.world_matrix *= glm::rotate(glm::identity<glm::mat4>(), radians, glm::vec3(0.0f, 1.0f, 0.0f));
+	UpdateConstants();
+	if (base_pass_)
+	{
+		base_pass_->Draw(frames_[frame_index_]);
+	}
 }
 
 #ifdef DEBUG
@@ -77,18 +69,7 @@ void Aurora::GraphicsManager::ClearDebugBuffers()
 #endif
 void GraphicsManager::InitConstants()
 {
-	draw_frame_context_.world_matrix = glm::identity<glm::mat4>();
-}
-
-bool GraphicsManager::InitializeShaders()
-{
-	std::cout << "[RHI] bool GraphicsManager::InitializeShader(const char* vs_filename, const char* fs_filename)" << std::endl;
-	return true;
-}
-
-void GraphicsManager::ClearShaders()
-{
-	std::cout << "[RHI] void GraphicsManager::ClearShader()" << std::endl;
+	frames_[frame_index_].frame_context.world_matrix = glm::identity<glm::mat4>();
 }
 
 void GraphicsManager::InitializeBuffers(const Scene& scene)
@@ -105,14 +86,15 @@ void GraphicsManager::CalculateCameraMatrix()
 {
 	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
 	auto camera_node = scene.GetFirstCameraNode();
+	DrawFrameContext& frame_context = frames_[frame_index_].frame_context;
 	if (camera_node)
 	{
-		draw_frame_context_.view_matrix = glm::inverse(*camera_node->GetCalculatedTransform());
+		frame_context.view_matrix = glm::inverse(*camera_node->GetCalculatedTransform());
 	}
 	else
 	{
 		glm::vec3 position = { 0,-5,0 }, look_at = { 0,0,0 }, up = { 0,0,1 };
-		draw_frame_context_.view_matrix = glm::lookAtLH(position, look_at, up);
+		frame_context.view_matrix = glm::lookAtLH(position, look_at, up);
 	}
 
 	float fov = PI / 2.0f;
@@ -128,17 +110,18 @@ void GraphicsManager::CalculateCameraMatrix()
 	}
 
 	const GfxConfiguration& conf = g_app->GetConfiguration();
-	draw_frame_context_.projection_matrix = glm::perspectiveFovRH(fov, (float)conf.screen_width, (float)conf.screen_height, near_clip_distance, far_clip_distance);
+	frame_context.projection_matrix = glm::perspectiveFovRH(fov, (float)conf.screen_width, (float)conf.screen_height, near_clip_distance, far_clip_distance);
 }
 
 void GraphicsManager::CalculateLights()
 {
-	draw_frame_context_.ambient_color = { 0.01f,0.01f,0.01f };
+	DrawFrameContext& frame_context = frames_[frame_index_].frame_context;
+	frame_context.ambient_color = { 0.01f,0.01f,0.01f };
 	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
-	draw_frame_context_.lights.clear();
+	frame_context.lights.clear();
 	for (auto& it : scene.LightNodes)
 	{
-		if (draw_frame_context_.lights.size() >= MAX_LIGHTS)
+		if (frame_context.lights.size() >= MAX_LIGHTS)
 		{
 			break;
 		}
@@ -176,12 +159,32 @@ void GraphicsManager::CalculateLights()
 				light_param.light_size = area_light->GetDimension();
 			}
 
-			draw_frame_context_.lights.emplace_back(std::move(light_param));
+			frame_context.lights.emplace_back(std::move(light_param));
 		}
 	}
 }
-
-void GraphicsManager::RenderBuffers()
+void GraphicsManager::UpdateConstants()
 {
-	std::cout << "[RHI] void GraphicsManager::RenderBuffers()" << std::endl;
+	CalculateCameraMatrix();
+	CalculateLights();
+}
+
+void GraphicsManager::SetBasePass(std::shared_ptr<IDrawPass> base_pass)
+{
+	base_pass_ = base_pass;
+}
+
+void GraphicsManager::UseShaderProgram(void* shader_program)
+{
+	
+}
+
+void GraphicsManager::SetPerFrameConstants(const DrawFrameContext& context)
+{
+	
+}
+
+void GraphicsManager::DrawBatch(const DrawBatchContext& context)
+{
+
 }

@@ -23,10 +23,13 @@ namespace Aurora
 
 		void InitializeBuffers(const Scene& scene) override;
 		void ClearBuffers() override;
-		bool InitializeShaders() override;
 
 		void Clear() override;
 		void Draw() override;
+
+		void UseShaderProgram(void* shader_program) override;
+		void SetPerFrameConstants(const DrawFrameContext& context) override;
+		void DrawBatch(const DrawBatchContext& context) override;
 
 #ifdef DEBUG
 		void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) override;
@@ -35,32 +38,29 @@ namespace Aurora
 #endif
 
 	protected:
-		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const glm::mat4& param);
-		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const glm::vec3& param);
-		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const float param);
-		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const int param);
-		bool SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const bool param);
-		bool SetPerBatchShaderParameters(GLuint shader);
+		bool SetShaderParameters(const std::string& param_name, const glm::mat4& param);
+		bool SetShaderParameters(const std::string& param_name, const glm::vec3& param);
+		bool SetShaderParameters(const std::string& param_name, const float param);
+		bool SetShaderParameters(const std::string& param_name, const int param);
+		bool SetShaderParameters(const std::string& param_name, const bool param);
+		bool SetPerFrameShaderParameters(const DrawFrameContext& context);
 
-		void RenderBuffers() override;
 	protected:
-		GLuint vertex_shader_;
-		GLuint fragment_shader_;
-		GLuint shader_program_;
 		std::unordered_map<std::string, GLint> texture_index_;
 
-		struct DrawBathContext {
+		GLuint current_shader_;
+
+		struct OpenGLDrawBatchContext : public DrawBatchContext {
 			GLuint vao;
 			GLenum mode;
 			GLenum type;
 			GLsizei count;
-			std::shared_ptr<SceneGeometryNode> node;
-			std::shared_ptr<SceneObjectMaterial> material;
 		};
-		std::vector<DrawBathContext> draw_batch_context_;
+
 		std::vector<GLuint> buffers_;
 		std::vector<GLuint> textures_;
 
+#ifdef DEBUG
 		struct DebugDrawBathContext {
 			GLuint vao;
 			GLenum mode;
@@ -68,7 +68,6 @@ namespace Aurora
 			glm::vec3 color;
 		};
 
-#ifdef DEBUG
 		GLuint debug_vertex_shader_;
 		GLuint debug_fragment_shader_;
 		GLuint debug_shader_program_;

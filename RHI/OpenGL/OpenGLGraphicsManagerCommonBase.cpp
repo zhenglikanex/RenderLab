@@ -82,14 +82,6 @@ static void OutputLinkerErrorMessage(uint32_t program_id)
 void OpenGLGraphicsManagerCommonBase::Finalize()
 {
 	ClearBuffers();
-
-	glDetachShader(shader_program_, vertex_shader_);
-	glDetachShader(shader_program_, fragment_shader_);
-
-	glDeleteShader(vertex_shader_);
-	glDeleteShader(fragment_shader_);
-
-	glDeleteProgram(shader_program_);
 }
 
 void OpenGLGraphicsManagerCommonBase::Clear()
@@ -100,7 +92,7 @@ void OpenGLGraphicsManagerCommonBase::Clear()
 
 void OpenGLGraphicsManagerCommonBase::Draw()
 {
-	RenderBuffers();
+	GraphicsManager::Draw();
 	glFlush();
 }
 
@@ -273,51 +265,51 @@ void Aurora::OpenGLGraphicsManagerCommonBase::ClearDebugBuffers()
 
 #endif
 
-bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader)
+bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFrameContext& context)
 {
 	int location;
 
-	location = glGetUniformLocation(shader, "worldMatrix");
+	location = glGetUniformLocation(current_shader_, "worldMatrix");
 	if (location == -1)
 	{
 		return false;
 	}
-	glUniformMatrix4fv(location, 1, false, glm::value_ptr(draw_frame_context_.world_matrix));
+	glUniformMatrix4fv(location, 1, false, glm::value_ptr(context.world_matrix));
 
-	location = glGetUniformLocation(shader, "viewMatrix");
+	location = glGetUniformLocation(current_shader_, "viewMatrix");
 	if (location == -1)
 	{
 		return false;
 	}
-	glUniformMatrix4fv(location, 1, false, glm::value_ptr(draw_frame_context_.view_matrix));
+	glUniformMatrix4fv(location, 1, false, glm::value_ptr(context.view_matrix));
 
-	location = glGetUniformLocation(shader, "projectionMatrix");
+	location = glGetUniformLocation(current_shader_, "projectionMatrix");
 	if (location == -1)
 	{
 		return false;
 	}
-	glUniformMatrix4fv(location, 1, false, glm::value_ptr(draw_frame_context_.projection_matrix));
+	glUniformMatrix4fv(location, 1, false, glm::value_ptr(context.projection_matrix));
 
-	location = glGetUniformLocation(shader, "ambientColor");
+	location = glGetUniformLocation(current_shader_, "ambientColor");
 	if (location == -1)
 	{
 		return false;
 	}
-	glUniform3fv(location, 1, glm::value_ptr(draw_frame_context_.ambient_color));
+	glUniform3fv(location, 1, glm::value_ptr(context.ambient_color));
 
-	location = glGetUniformLocation(shader, "numLights");
+	location = glGetUniformLocation(current_shader_, "numLights");
 	if (location == -1)
 	{
 		return false;
 	}
-	glUniform1i(location, draw_frame_context_.lights.size());
+	glUniform1i(location, context.lights.size());
 
 	std::string name;
-	for (int i = 0; i < draw_frame_context_.lights.size(); ++i)
+	for (int i = 0; i < context.lights.size(); ++i)
 	{
-		auto& light = draw_frame_context_.lights[i];
+		auto& light = context.lights[i];
 		name = "allLights[" + std::to_string(i) + "].lightPosition";
-		location = glGetUniformLocation(shader, name.c_str());
+		location = glGetUniformLocation(current_shader_, name.c_str());
 		if (location == -1)
 		{
 			return false;
@@ -325,7 +317,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader)
 		glUniform4fv(location, 1, glm::value_ptr(light.light_position));
 
 		name = "allLights[" + std::to_string(i) + "].lightSize";
-		location = glGetUniformLocation(shader, name.c_str());
+		location = glGetUniformLocation(current_shader_, name.c_str());
 		if (location == -1)
 		{
 			return false;
@@ -333,7 +325,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader)
 		glUniform2fv(location, 1, glm::value_ptr(light.light_size));
 
 		name = "allLights[" + std::to_string(i) + "].lightColor";
-		location = glGetUniformLocation(shader, name.c_str());
+		location = glGetUniformLocation(current_shader_, name.c_str());
 		if (location == -1)
 		{
 			return false;
@@ -345,7 +337,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader)
 		}
 
 		name = "allLights[" + std::to_string(i) + "].lightDirection";
-		location = glGetUniformLocation(shader, name.c_str());
+		location = glGetUniformLocation(current_shader_, name.c_str());
 		if (location == -1)
 		{
 			return false;
@@ -353,7 +345,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader)
 		glUniform4fv(location, 1, glm::value_ptr(light.light_direction));
 
 		name = "allLights[" + std::to_string(i) + "].lightIntensity";
-		location = glGetUniformLocation(shader, name.c_str());
+		location = glGetUniformLocation(current_shader_, name.c_str());
 		if (location == -1)
 		{
 			return false;
@@ -361,7 +353,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader)
 		glUniform1f(location, light.light_intensity);
 
 		name = "allLights[" + std::to_string(i) + "].lightDistAttenCurveType";
-		location = glGetUniformLocation(shader, name.c_str());
+		location = glGetUniformLocation(current_shader_, name.c_str());
 		if (location == -1)
 		{
 			return false;
@@ -370,7 +362,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader)
 		glUniform1i(location, dist_atten_type);
 
 		name = "allLights[" + std::to_string(i) + "].lightDistAttenCurveParams";
-		location = glGetUniformLocation(shader, name.c_str());
+		location = glGetUniformLocation(current_shader_, name.c_str());
 		if (location == -1)
 		{
 			return false;
@@ -378,7 +370,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader)
 		glUniform1fv(location, 5, light.light_dist_atten_curve_params);
 
 		name = "allLights[" + std::to_string(i) + "].lightAngleAttenCurveType";
-		location = glGetUniformLocation(shader, name.c_str());
+		location = glGetUniformLocation(current_shader_, name.c_str());
 		if (location == -1)
 		{
 			return false;
@@ -387,7 +379,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader)
 		glUniform1i(location, angle_atten_type);
 
 		name = "allLights[" + std::to_string(i) + "].lightAngleAttenCurveParams";
-		location = glGetUniformLocation(shader, name.c_str());
+		location = glGetUniformLocation(current_shader_, name.c_str());
 		if (location == -1)
 		{
 			return false;
@@ -398,10 +390,10 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader)
 	return true;
 }
 
-bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const glm::mat4& param)
+bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& param_name, const glm::mat4& param)
 {
 	unsigned int location;
-	location = glGetUniformLocation(shader, param_name.c_str());
+	location = glGetUniformLocation(current_shader_, param_name.c_str());
 	if (location == -1)
 	{
 		return false;
@@ -411,11 +403,11 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader,
 	return true;
 }
 
-bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const glm::vec3& param)
+bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& param_name, const glm::vec3& param)
 {
 	unsigned int location;
 
-	location = glGetUniformLocation(shader, param_name.c_str());
+	location = glGetUniformLocation(current_shader_, param_name.c_str());
 	if (location == -1)
 	{
 		std::cout << "set param error param_name:" << param_name << std::endl;
@@ -426,11 +418,11 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader,
 	return true;
 }
 
-bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const float param)
+bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& param_name, const float param)
 {
 	unsigned int location;
 
-	location = glGetUniformLocation(shader, param_name.c_str());
+	location = glGetUniformLocation(current_shader_, param_name.c_str());
 	if (location == -1)
 	{
 		return false;
@@ -440,11 +432,11 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader,
 	return true;
 }
 
-bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const int param)
+bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& param_name, const int param)
 {
 	unsigned int location;
 
-	location = glGetUniformLocation(shader, param_name.c_str());
+	location = glGetUniformLocation(current_shader_, param_name.c_str());
 	if (location == -1)
 	{
 		return false;
@@ -454,11 +446,11 @@ bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader,
 	return true;
 }
 
-bool OpenGLGraphicsManagerCommonBase::SetPerBatchShaderParameters(GLuint shader, const std::string& param_name, const bool param)
+bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& param_name, const bool param)
 {
 	unsigned int location;
 
-	location = glGetUniformLocation(shader, param_name.c_str());
+	location = glGetUniformLocation(current_shader_, param_name.c_str());
 	if (location == -1)
 	{
 		return false;
@@ -636,28 +628,30 @@ void OpenGLGraphicsManagerCommonBase::InitializeBuffers(const Scene& scene)
 					}
 				}
 
-				DrawBathContext& dbc = *(new DrawBathContext);
-				dbc.vao = vao;
-				dbc.mode = mode;
-				dbc.type = type;
-				dbc.count = index_count;
-				dbc.node = geometry_node;
-				dbc.material = material;
+				auto dbc = std::make_shared<OpenGLDrawBatchContext>();
+				dbc->vao = vao;
+				dbc->mode = mode;
+				dbc->type = type;
+				dbc->count = index_count;
+				dbc->node = geometry_node;
+				dbc->material = material;
 
-				draw_batch_context_.push_back(std::move(dbc));
+				frames_[frame_index_].batch_contexts.push_back(dbc);
 			}
 		}
 	}
 }
 
-void Aurora::OpenGLGraphicsManagerCommonBase::ClearBuffers()
+void OpenGLGraphicsManagerCommonBase::ClearBuffers()
 {
-	for (auto& dbc : draw_batch_context_)
+	for (auto& frame : frames_)
 	{
-		glDeleteVertexArrays(1, &dbc.vao);
+		auto& batch_contexts = frame.batch_contexts;
+		for (auto& dbc : batch_contexts)
+		{
+			glDeleteVertexArrays(1, &std::dynamic_pointer_cast<OpenGLDrawBatchContext>(dbc)->vao);
+		}
 	}
-
-	draw_batch_context_.clear();
 
 	int size = buffers_.size();
 	//-1去除index buffer;
@@ -680,8 +674,18 @@ void Aurora::OpenGLGraphicsManagerCommonBase::ClearBuffers()
 	textures_.clear();
 }
 
+void OpenGLGraphicsManagerCommonBase::UseShaderProgram(void* shader_program)
+{
+	current_shader_ = *reinterpret_cast<GLuint*>(shader_program);
+	glUseProgram(current_shader_);
+}
 
-void OpenGLGraphicsManagerCommonBase::RenderBuffers()
+void OpenGLGraphicsManagerCommonBase::SetPerFrameConstants(const DrawFrameContext& context)
+{
+	SetPerFrameShaderParameters(context);
+}
+
+void OpenGLGraphicsManagerCommonBase::DrawBatch(const DrawBatchContext& context)
 {
 	//static float rotateAngle = 0.0f;
 
@@ -695,83 +699,77 @@ void OpenGLGraphicsManagerCommonBase::RenderBuffers()
 	////world_matrix_ = rotationMatrixY * rotationMatrixZ;
 	//draw_frame_context_.world_matrix = rotationMatrixZ;
 
-	glUseProgram(shader_program_);
-
-	SetPerBatchShaderParameters(shader_program_);
-
-	for (auto& dbc : draw_batch_context_)
+	const OpenGLDrawBatchContext& dbc = dynamic_cast<const OpenGLDrawBatchContext&>(context);
+	glm::mat4 trans;
+	if (void* rigidbody = dbc.node->RigidBody())
 	{
-		glm::mat4 trans;
-		if (void* rigidbody = dbc.node->RigidBody())
+		auto simulated_result = g_app->GetEngine()->GetPhysicsManager()->GetRigidBodyTransform(rigidbody);
+
+		// replace the translation part of the matrix with simlation result directly
+		//trans[3] = glm::vec4(0.0f,0.0f,0.0f,trans[3].w);
+
+		// apply the rotation part of the simlation result
+		trans = glm::identity<glm::mat4>();
+		trans[0] = simulated_result[0];
+		trans[1] = simulated_result[1];
+		trans[2] = simulated_result[2];
+
+		trans[3] = glm::vec4(simulated_result[3].x, simulated_result[3].y, simulated_result[3].z, trans[3].w);
+	}
+	else
+	{
+		trans = *dbc.node->GetCalculatedTransform();
+	}
+
+	SetShaderParameters("modelMatrix", trans);
+
+	glBindVertexArray(dbc.vao);
+
+	SetShaderParameters("usingdiffuseMap", false);
+	SetShaderParameters("usingNormalMap", false);
+
+	//后面根据材质进行分组渲染
+	if (dbc.material)
+	{
+		Color color = dbc.material->GetBaseColor();
+		if (color.ValueMap)
 		{
-			auto simulated_result = g_app->GetEngine()->GetPhysicsManager()->GetRigidBodyTransform(rigidbody);
+			SetShaderParameters("diffuseMap", texture_index_[color.ValueMap->GetName()]);
 
-			// replace the translation part of the matrix with simlation result directly
-			//trans[3] = glm::vec4(0.0f,0.0f,0.0f,trans[3].w);
-
-			// apply the rotation part of the simlation result
-			trans = glm::identity<glm::mat4>();
-			trans[0] = simulated_result[0];
-			trans[1] = simulated_result[1];
-			trans[2] = simulated_result[2];
-
-			trans[3] = glm::vec4(simulated_result[3].x, simulated_result[3].y, simulated_result[3].z, trans[3].w);
+			// 告诉shader使用texture
+			SetShaderParameters("usingdiffuseMap", true);
 		}
 		else
 		{
-			trans = *dbc.node->GetCalculatedTransform();
+			SetShaderParameters("diffuseColor", color.Value);
 		}
 
-		SetPerBatchShaderParameters(shader_program_, "modelMatrix", trans);
+		color = dbc.material->GetSpecularColor();
+		SetShaderParameters("specularColor", color.Value);
 
-		glBindVertexArray(dbc.vao);
+		Parameter param = dbc.material->GetSpecularPower();
+		SetShaderParameters("specularPower", param.Value);
 
-		SetPerBatchShaderParameters(shader_program_, "usingdiffuseMap", false);
-		SetPerBatchShaderParameters(shader_program_, "usingNormalMap", false);
-
-		//后面根据材质进行分组渲染
-		if (dbc.material)
+		Normal noraml = dbc.material->GetNormal();
+		if (noraml.ValueMap)
 		{
-			Color color = dbc.material->GetBaseColor();
-			if (color.ValueMap)
-			{
-				SetPerBatchShaderParameters(shader_program_, "diffuseMap", texture_index_[color.ValueMap->GetName()]);
-
-				// 告诉shader使用texture
-				SetPerBatchShaderParameters(shader_program_, "usingdiffuseMap", true);
-			}
-			else
-			{
-				SetPerBatchShaderParameters(shader_program_, "diffuseColor", color.Value);
-			}
-
-			color = dbc.material->GetSpecularColor();
-			SetPerBatchShaderParameters(shader_program_, "specularColor", color.Value);
-
-			Parameter param = dbc.material->GetSpecularPower();
-			SetPerBatchShaderParameters(shader_program_, "specularPower", param.Value);
-
-			Normal noraml = dbc.material->GetNormal();
-			if (noraml.ValueMap)
-			{
-				SetPerBatchShaderParameters(shader_program_, "normalMap", texture_index_[noraml.ValueMap->GetName()]);
-				SetPerBatchShaderParameters(shader_program_, "usingNormalMap", true);
-			}
+			SetShaderParameters("normalMap", texture_index_[noraml.ValueMap->GetName()]);
+			SetShaderParameters("usingNormalMap", true);
 		}
-
-		glDrawElements(dbc.mode, dbc.count, dbc.type, 0);
-
-		/*auto index_buffer_count = dbc.counts.size();
-		const GLvoid** indicies = new const GLvoid*[index_buffer_count];
-		memset(indicies, 0x00, sizeof(GLvoid*) * index_buffer_count);
-		glMultiDrawElements(dbc.mode, dbc.counts.data(), dbc.type, indicies, index_buffer_count);
-		delete[] indicies;*/
 	}
 
-#ifdef DEBUG
-	glUseProgram(debug_shader_program_);
+	glDrawElements(dbc.mode, dbc.count, dbc.type, 0);
 
-	SetPerBatchShaderParameters(debug_shader_program_);
+	/*auto index_buffer_count = dbc.counts.size();
+	const GLvoid** indicies = new const GLvoid*[index_buffer_count];
+	memset(indicies, 0x00, sizeof(GLvoid*) * index_buffer_count);
+	glMultiDrawElements(dbc.mode, dbc.counts.data(), dbc.type, indicies, index_buffer_count);
+	delete[] indicies;*/
+
+#ifdef DEBUG
+	/*glUseProgram(debug_shader_program_);
+
+	SetShaderParameters(debug_shader_program_);
 
 	for (auto& dbc : debug_draw_batch_contenxt_)
 	{
@@ -779,137 +777,7 @@ void OpenGLGraphicsManagerCommonBase::RenderBuffers()
 
 		glBindVertexArray(dbc.vao);
 		glDrawArrays(dbc.mode, 0, dbc.count);
-	}
+	}*/
 
 #endif
 }
-
-bool OpenGLGraphicsManagerCommonBase::InitializeShaders()
-{
-	const char* vs_filename = VS_SHADER_SOURCE_FILE;
-	const char* fs_filename = PS_SHADER_SOURCE_FILE;
-
-	std::string vertex_shader_buffer;
-	std::string fragment_shader_buffer;
-	int status;
-
-	vertex_shader_buffer = FileUtils::GetInstance()->OpenFileAndReadString(vs_filename);
-	if (vertex_shader_buffer.empty())
-	{
-		return false;
-	}
-
-	fragment_shader_buffer = FileUtils::GetInstance()->OpenFileAndReadString(fs_filename);
-	if (fragment_shader_buffer.empty())
-	{
-		return false;
-	}
-
-	vertex_shader_ = glCreateShader(GL_VERTEX_SHADER);
-	fragment_shader_ = glCreateShader(GL_FRAGMENT_SHADER);
-
-	auto _vs_c_str = vertex_shader_buffer.c_str();
-	glShaderSource(vertex_shader_, 1, &_vs_c_str, NULL);
-	auto _f_c_str = fragment_shader_buffer.c_str();
-	glShaderSource(fragment_shader_, 1, &_f_c_str, NULL);
-
-	glCompileShader(vertex_shader_);
-	glCompileShader(fragment_shader_);
-
-	glGetShaderiv(vertex_shader_, GL_COMPILE_STATUS, &status);
-	if (status != 1)
-	{
-		OutputShaderErrorMessage(vertex_shader_, vs_filename);
-		return false;
-	}
-
-	glGetShaderiv(fragment_shader_, GL_COMPILE_STATUS, &status);
-	if (status != 1)
-	{
-		OutputShaderErrorMessage(fragment_shader_, fs_filename);
-		return false;
-	}
-
-	shader_program_ = glCreateProgram();
-
-	glAttachShader(shader_program_, vertex_shader_);
-	glAttachShader(shader_program_, fragment_shader_);
-
-	glBindAttribLocation(shader_program_, 0, "inputPosition");
-	glBindAttribLocation(shader_program_, 1, "inputNormal");
-	glBindAttribLocation(shader_program_, 2, "inputUV");
-
-	glLinkProgram(shader_program_);
-
-	glGetProgramiv(shader_program_, GL_LINK_STATUS, &status);
-	if (status != 1)
-	{
-		OutputLinkerErrorMessage(shader_program_);
-		return false;
-	}
-
-#ifdef DEBUG
-	const char* debug_vs_filename = DEBUG_VS_SHADER_SOURCE_FILE;
-	const char* debug_fs_filename = DEBUG_PS_SHADER_SOURCE_FILE;
-
-	std::string debug_vs_vertex_shader_buffer;
-	std::string debgu_fragment_shader_buffer;
-
-	debug_vs_vertex_shader_buffer = FileUtils::GetInstance()->OpenFileAndReadString(debug_vs_filename);
-	if (debug_vs_vertex_shader_buffer.empty())
-	{
-		return false;
-	}
-
-	debgu_fragment_shader_buffer = FileUtils::GetInstance()->OpenFileAndReadString(debug_fs_filename);
-	if (debgu_fragment_shader_buffer.empty())
-	{
-		return false;
-	}
-
-	debug_vertex_shader_ = glCreateShader(GL_VERTEX_SHADER);
-	debug_fragment_shader_ = glCreateShader(GL_FRAGMENT_SHADER);
-
-	auto debug_vs_c_str = debug_vs_vertex_shader_buffer.c_str();
-	glShaderSource(debug_vertex_shader_, 1, &debug_vs_c_str, NULL);
-	auto debug_f_c_str = debgu_fragment_shader_buffer.c_str();
-	glShaderSource(debug_fragment_shader_, 1, &debug_f_c_str, NULL);
-
-	glCompileShader(debug_vertex_shader_);
-	glCompileShader(debug_fragment_shader_);
-
-	glGetShaderiv(debug_vertex_shader_, GL_COMPILE_STATUS, &status);
-	if (status != 1)
-	{
-		OutputShaderErrorMessage(debug_vertex_shader_, debug_vs_filename);
-		return false;
-	}
-
-	glGetShaderiv(debug_fragment_shader_, GL_COMPILE_STATUS, &status);
-	if (status != 1)
-	{
-		OutputShaderErrorMessage(debug_fragment_shader_, debug_fs_filename);
-		return false;
-	}
-
-	debug_shader_program_ = glCreateProgram();
-
-	glAttachShader(debug_shader_program_, debug_vertex_shader_);
-	glAttachShader(debug_shader_program_, debug_fragment_shader_);
-
-	glBindAttribLocation(debug_shader_program_, 0, "inputPosition");
-
-	glLinkProgram(debug_shader_program_);
-
-	glGetProgramiv(debug_shader_program_, GL_LINK_STATUS, &status);
-	if (status != 1)
-	{
-		OutputLinkerErrorMessage(debug_shader_program_);
-		return false;
-	}
-
-#endif
-
-	return true;
-}
-
