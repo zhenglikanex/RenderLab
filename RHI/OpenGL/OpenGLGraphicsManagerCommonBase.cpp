@@ -10,74 +10,7 @@
 #include "Framework/Utils/FileUtils.hpp"
 #include "Framework/Utils/FileHandle.hpp"
 
-#ifdef DEBUG
-const char DEBUG_VS_SHADER_SOURCE_FILE[] = "Shaders/debug_vs.glsl";
-const char DEBUG_PS_SHADER_SOURCE_FILE[] = "Shaders/debug_ps.glsl";
-#endif
-const char VS_SHADER_SOURCE_FILE[] = "Shaders/basic_vs.glsl";
-const char PS_SHADER_SOURCE_FILE[] = "Shaders/basic_ps.glsl";
-
 using namespace Aurora;
-
-static void OutputShaderErrorMessage(uint32_t shader_id, const char* shader_filename)
-{
-	int log_size, i;
-	char* info_log;
-	std::ofstream fout;
-
-	glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &log_size);
-
-	log_size++;
-
-	info_log = new char[log_size];
-	if (!info_log)
-	{
-		return;
-	}
-
-	glGetShaderInfoLog(shader_id, log_size, NULL, info_log);
-
-	fout.open("shader_error.txt");
-	for (i = 0; i < log_size; ++i)
-	{
-		fout << info_log[i];
-	}
-
-	fout.close();
-
-	std::cerr << "Error compiling shader. Check shader_error.txt for message." << shader_filename << std::endl;
-
-	return;
-}
-
-static void OutputLinkerErrorMessage(uint32_t program_id)
-{
-	int log_size, i;
-	char* info_log;
-	std::ofstream fout;
-
-	glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &log_size);
-
-	log_size++;
-
-	info_log = new char[log_size];
-	if (!info_log)
-	{
-		return;
-	}
-
-	glGetProgramInfoLog(program_id, log_size, NULL, info_log);
-	fout.open("linker-error.txt");
-
-	for (i = 0; i < log_size; ++i)
-	{
-		fout << info_log[i];
-	}
-
-	fout.close();
-
-	std::cerr << "Error compiling linker.  Check linker-error.txt for message." << std::endl;
-}
 
 void OpenGLGraphicsManagerCommonBase::Finalize()
 {
@@ -700,28 +633,7 @@ void OpenGLGraphicsManagerCommonBase::DrawBatch(const DrawBatchContext& context)
 	//draw_frame_context_.world_matrix = rotationMatrixZ;
 
 	const OpenGLDrawBatchContext& dbc = dynamic_cast<const OpenGLDrawBatchContext&>(context);
-	glm::mat4 trans;
-	if (void* rigidbody = dbc.node->RigidBody())
-	{
-		auto simulated_result = g_app->GetEngine()->GetPhysicsManager()->GetRigidBodyTransform(rigidbody);
-
-		// replace the translation part of the matrix with simlation result directly
-		//trans[3] = glm::vec4(0.0f,0.0f,0.0f,trans[3].w);
-
-		// apply the rotation part of the simlation result
-		trans = glm::identity<glm::mat4>();
-		trans[0] = simulated_result[0];
-		trans[1] = simulated_result[1];
-		trans[2] = simulated_result[2];
-
-		trans[3] = glm::vec4(simulated_result[3].x, simulated_result[3].y, simulated_result[3].z, trans[3].w);
-	}
-	else
-	{
-		trans = *dbc.node->GetCalculatedTransform();
-	}
-
-	SetShaderParameters("modelMatrix", trans);
+	SetShaderParameters("modelMatrix",dbc.trans);
 
 	glBindVertexArray(dbc.vao);
 

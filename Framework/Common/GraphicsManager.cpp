@@ -6,6 +6,8 @@
 #include "Framework/Common/Engine.hpp"
 #include "Framework/Common/SceneManager.hpp"
 #include "Framework/Common/ForwardRenderPass.hpp"
+#include "Framework/Common/ShadowMapPass.hpp"
+
 using namespace Aurora;
 
 #define MAX_LIGHTS 100
@@ -13,8 +15,11 @@ using namespace Aurora;
 bool GraphicsManager::Initialize()
 {
 	frames_.resize(kFrameCount);
+
 	InitConstants();
-	base_pass_ = std::make_shared<ForwardRenderPass>();
+
+	draw_passes_.push_back(std::make_shared<ShadowMapPass>());
+	draw_passes_.push_back(std::make_shared<ForwardRenderPass>());
 
 	return true;
 }
@@ -35,6 +40,8 @@ void GraphicsManager::Tick()
 		g_app->GetEngine()->GetSceneManager()->NotifySceneIsRenderingQueued();
 	}
 
+	UpdateConstants();
+
 	Clear();
 	Draw();
 	ClearDebugBuffers();
@@ -47,10 +54,11 @@ void GraphicsManager::Clear()
 
 void GraphicsManager::Draw()
 {
-	UpdateConstants();
-	if (base_pass_)
+	auto& frame = frames_[frame_index_];
+	
+	for (auto draw_pass : draw_passes_)
 	{
-		base_pass_->Draw(frames_[frame_index_]);
+		draw_pass->Draw(frame);
 	}
 }
 
@@ -165,13 +173,32 @@ void GraphicsManager::CalculateLights()
 }
 void GraphicsManager::UpdateConstants()
 {
+	auto& frame = frames_[frame_index_];
+	for (auto dbc : frame.batch_contexts)
+	{
+		if (void* rigidbody = dbc->node->RigidBody())
+		{
+			auto simulated_result = g_app->GetEngine()->GetPhysicsManager()->GetRigidBodyTransform(rigidbody);
+
+			// replace the translation part of the matrix with simlation result directly
+			//trans[3] = glm::vec4(0.0f,0.0f,0.0f,trans[3].w);
+
+			// apply the rotation part of the simlation result
+			dbc->trans = glm::identity<glm::mat4>();
+			dbc->trans[0] = simulated_result[0];
+			dbc->trans[1] = simulated_result[1];
+			dbc->trans[2] = simulated_result[2];
+
+			dbc->trans[3] = glm::vec4(simulated_result[3].x, simulated_result[3].y, simulated_result[3].z, dbc->trans[3].w);
+		}
+		else
+		{
+			dbc->trans = *dbc->node->GetCalculatedTransform();
+		}
+	}
+
 	CalculateCameraMatrix();
 	CalculateLights();
-}
-
-void GraphicsManager::SetBasePass(std::shared_ptr<IDrawPass> base_pass)
-{
-	base_pass_ = base_pass;
 }
 
 void GraphicsManager::UseShaderProgram(void* shader_program)

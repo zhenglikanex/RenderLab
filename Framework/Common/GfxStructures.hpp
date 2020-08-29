@@ -16,7 +16,7 @@ namespace Aurora
 		float light_dist_atten_curve_params[5];
 		AttenCurveType light_angle_atten_curve_type;
 		float light_angle_atten_curve_params[5];
-
+		bool cast_shadow;
 		Light()
 		{
 			light_position = { 0.0f,0.0f,0.0f,1.0f };
@@ -26,6 +26,7 @@ namespace Aurora
 			light_intensity = 0.5f;
 			light_dist_atten_curve_type = AttenCurveType::kNone;
 			light_angle_atten_curve_type = AttenCurveType::kNone;
+			cast_shadow = false;
 		}
 	};
 

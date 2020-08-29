@@ -26,7 +26,6 @@ namespace Aurora
 		virtual void Clear();
 		virtual void Draw();
 
-		virtual void SetBasePass(std::shared_ptr<IDrawPass> base_pass);
 		virtual void UseShaderProgram(void* shader_program);
 		virtual void SetPerFrameConstants(const DrawFrameContext& context);
 		virtual void DrawBatch(const DrawBatchContext& context);
@@ -47,6 +46,6 @@ namespace Aurora
 
 		uint32_t frame_index_ = 0;
 		std::vector<Frame> frames_;
-		std::shared_ptr<IDrawPass> base_pass_;
+		std::vector<std::shared_ptr<IDrawPass>> draw_passes_;
 	};
 }
