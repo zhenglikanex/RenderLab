@@ -4,12 +4,12 @@ using namespace Aurora;
 
 extern struct gladGLversionStruct GLVersion;
 
-OpenGLGraphicsManager::OpenGLGraphicsManager(GLADloadproc loader)
+OpenGLESGraphicsManager::OpenGLGraphicsManager(GLADloadproc loader)
     : loader_(loader)
 {
 
 }
-bool OpenGLGraphicsManager::Initialize()
+bool OpenGLESGraphicsManager::Initialize()
 {
 	if (!GraphicsManager::Initialize())
 	{

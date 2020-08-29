@@ -8,7 +8,7 @@
 // CONSTANTS       //
 /////////////////////
 // per frame
-#define MAX_LIGHTS 100
+#define MAX_LIGHTS 55
 uniform int numLights;
 uniform struct Light {
 	vec4 lightPosition;

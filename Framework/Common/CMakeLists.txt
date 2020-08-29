@@ -64,6 +64,16 @@ GameLogic.cpp
 DebugManager.hpp
 DebugManager.cpp
 ../Algorism/Tree.hpp
+GfxStructures.hpp
+IDrawPass.hpp
+ForwardRenderPass.hpp
+ForwardRenderPass.cpp
+ShadowMapPass.hpp
+ShadowMapPass.cpp
+HUDPass.hpp
+HUDPass.cpp
+IShaderManager.hpp
+IShaderManager.cpp
 main.cpp
 )
 

@@ -4,10 +4,10 @@
 
 namespace Aurora
 {
-	class OpenGLGraphicsManager : public OpenGLGraphicsManagerCommonBase
+	class OpenGLESGraphicsManager : public OpenGLGraphicsManagerCommonBase
 	{
 	public:
-		OpenGLGraphicsManager(GLADloadproc loader);
+		OpenGLESGraphicsManager(GLADloadproc loader);
 
 		bool Initialize() override;
 	private:

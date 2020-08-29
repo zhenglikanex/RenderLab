@@ -8,8 +8,9 @@
 
 using namespace Aurora;
 
-Engine::Engine(std::unique_ptr<GraphicsManager>&& graphics_manager,std::unique_ptr<SceneManager>&& scene_manager,std::unique_ptr<InputManager>&& input_manager,std::unique_ptr<IPhysicsManager>&& physics_manager)
+Engine::Engine(std::unique_ptr<GraphicsManager>&& graphics_manager, std::unique_ptr<IShaderManager>&& shader_manager, std::unique_ptr<SceneManager>&& scene_manager, std::unique_ptr<InputManager>&& input_manager, std::unique_ptr<IPhysicsManager>&& physics_manager)
 	: graphics_manager_(std::move(graphics_manager))
+	, shader_manager_(std::move(shader_manager))
 	, scene_manager_(std::move(scene_manager))
 	, input_manager_(std::move(input_manager))
 	, physics_manager_(std::move(physics_manager))
@@ -36,6 +37,13 @@ bool Engine::Initialize()
 	if (!graphics_manager_ || !graphics_manager_->Initialize())
 	{
 		std::cout << "GraphicsManager initialize failed!" << std::endl;
+
+		return false;
+	}
+
+	if (!shader_manager_ || !shader_manager_->Initialize())
+	{
+		std::cout << "ShaderManager initalize failed!" << std::endl;
 
 		return false;
 	}
@@ -73,6 +81,11 @@ void Engine::Finalize()
 	if (physics_manager_)
 	{
 		physics_manager_->Finalize();
+	}
+
+	if (shader_manager_)
+	{
+		shader_manager_->Finalize();
 	}
 
 	if (graphics_manager_)
@@ -113,13 +126,18 @@ void Engine::Tick()
 		physics_manager_->Tick();
 	}
 
-	if (graphics_manager_)
+	if (shader_manager_)
 	{
-		graphics_manager_->Tick();
+		shader_manager_->Tick();
 	}
 
 	if (g_pGameLogic)
 	{
 		g_pGameLogic->Tick();
+	}
+
+	if (graphics_manager_)
+	{
+		graphics_manager_->Tick();
 	}
 }

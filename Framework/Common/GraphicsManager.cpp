@@ -8,7 +8,7 @@
 
 using namespace Aurora;
 
-#define MAX_LIGHTS 10
+#define MAX_LIGHTS 100
 
 bool GraphicsManager::Initialize()
 {
