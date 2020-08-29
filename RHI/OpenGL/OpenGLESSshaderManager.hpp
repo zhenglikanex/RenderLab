@@ -6,7 +6,7 @@
 
 namespace Aurora
 {
-	class OpenGLShaderManager : public OpenGLShaderManagerCommonBase
+	class OpenGLESShaderManager : public OpenGLShaderManagerCommonBase
 	{
 	public:
 	};

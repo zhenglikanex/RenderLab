@@ -1,4 +1,4 @@
-#include "OpenGLShaderManager.hpp"
+#include "OpenGLESShaderManager.hpp"
 
 #define VS_SHADER_SOURCE_FILE "Shaders/basic_vs.glsl"
 #define PS_SHADER_SOURCE_FILE "Shaders/basic_ps.glsl"

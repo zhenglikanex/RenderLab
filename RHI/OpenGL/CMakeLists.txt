@@ -3,6 +3,8 @@ add_library(OpenGLRHI
         OpenGLGraphicsManagerCommonBase.cpp
         OpenGLGraphicsManager.hpp
 		OpenGLGraphicsManager.cpp
+        OpenGLShaderManagerCommonBase.hpp
+        OpenGLShaderManagerCommonBase.cpp
         OpenGLShaderManager.hpp
         OpenGLShaderManager.cpp
         ${PROJECT_SOURCE_DIR}/3rdparty/glad/src/glad.c
