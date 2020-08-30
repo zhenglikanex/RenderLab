@@ -73,7 +73,7 @@ void Aurora::GraphicsManager::DrawBox(const glm::vec3 & bbMin, const glm::vec3 b
 {
 }
 
-void GraphicsManager::DrawOverlay(const intptr_t shadowmap, float vp_left, float vp_top, float vp_width, float vp_height)
+void GraphicsManager::DrawOverlay(const intptr_t shadowmap,uint32_t layer,float vp_left, float vp_top, float vp_width, float vp_height)
 {
 
 }
@@ -156,7 +156,7 @@ void GraphicsManager::CalculateLights()
 			const AttenCurve& atten_curve = light->GetDistanceAttenuation();
 			light_param.light_dist_atten_curve_type = atten_curve.type;
 			memcpy(light_param.light_dist_atten_curve_params, &atten_curve.u, sizeof(atten_curve.u));
-			light_param.cast_shadow = light->GetIfCastShadow();
+			light_param.light_cast_shadow = light->GetIfCastShadow();
 
 			if (light->GetType() == SceneObjectType::kSceneObjectTypeLightInfi)
 			{
@@ -229,17 +229,27 @@ void GraphicsManager::DrawBatchDepthOnly(const DrawBatchContext& context)
 
 }
 
-intptr_t GraphicsManager::GenerateShadowMap(const Light& light)
+intptr_t GraphicsManager::GenerateShadowMapArray(uint32_t count)
 {
 	return 0;
 }
 
-void GraphicsManager::BeginShadowMap(const Light& light, const intptr_t shadowmap)
+void GraphicsManager::BeginShadowMap(const Light& light, const intptr_t shadowmap,uint32_t layer_index)
 {
 
 }
 
-void GraphicsManager::EndShadowMap(const intptr_t shadowmap)
+void GraphicsManager::EndShadowMap(const intptr_t shadowmap,uint32_t layer_index)
+{
+
+}
+
+void GraphicsManager::SetShadowMap(const intptr_t shadowmap)
+{
+	
+}
+
+void GraphicsManager::DestroyShadowMap(intptr_t& shadowmap)
 {
 
 }

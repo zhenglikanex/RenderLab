@@ -18,7 +18,8 @@ namespace Aurora
 		float light_dist_atten_curve_params[5];
 		AttenCurveType light_angle_atten_curve_type;
 		float light_angle_atten_curve_params[5];
-		bool cast_shadow;
+		bool light_cast_shadow;
+		int32_t light_shadowmap_index;
 		Light()
 		{
 			light_position = { 0.0f,0.0f,0.0f,1.0f };
@@ -28,7 +29,8 @@ namespace Aurora
 			light_intensity = 0.5f;
 			light_dist_atten_curve_type = AttenCurveType::kNone;
 			light_angle_atten_curve_type = AttenCurveType::kNone;
-			cast_shadow = false;
+			light_cast_shadow = false;
+			light_shadowmap_index = -1;
 		}
 	};
 
@@ -52,6 +54,13 @@ namespace Aurora
 	{
 		DrawFrameContext frame_context;
 		std::vector<std::shared_ptr<DrawBatchContext>> batch_contexts;
-		std::unordered_map<xg::Guid, intptr_t> shadow_maps;
+		intptr_t shadowmap;
+		uint32_t shadowmap_count;
+
+		Frame()
+		{
+			shadowmap = -1;
+			shadowmap_count = 0;
+		}
 	};
 }

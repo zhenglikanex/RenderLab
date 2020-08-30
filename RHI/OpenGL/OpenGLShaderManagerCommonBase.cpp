@@ -18,7 +18,7 @@ const char VS_SHADER_SOURCE_FILE[] = "Shaders/basic_vs.glsl";
 const char PS_SHADER_SOURCE_FILE[] = "Shaders/basic_ps.glsl";
 
 const char VS_PASSTHROUGH_SOURCE_FILE[] = "Shaders/passthrough_vs.glsl";
-const char PS_PASSTHROUGH_SOURCE_FILE[] = "Shaders/passthrough_ps.glsl";
+const char PS_PASSTHROUGH_SOURCE_FILE[] = "Shaders/depthtexture_ps.glsl";
 
 using namespace Aurora;
 

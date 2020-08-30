@@ -20,6 +20,7 @@ uniform struct Light {
 	int lightAngleAttenCurveType;
 	float lightAngleAttenCurveParams[5];
     vec2 lightSize;
+    int lighShadowMapIndex;
 }allLights[MAX_LIGHTS];
 
 // update per frame
@@ -38,7 +39,7 @@ uniform bool usingNormalMap;
 
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
-
+uniform sampler2D shadowMap;
 /////////////////////
 // INPUT VARIABLES //
 /////////////////////

@@ -17,9 +17,9 @@ void HUDPass::Draw(Frame& frame)
 	float top = 0.95f;
 	float left = 0.60f;
 
-	for (auto shadowmap : frame.shadow_maps)
+	for (uint32_t index = 0;index < frame.shadowmap_count;++index)
 	{
-		graphics_manager->DrawOverlay(shadowmap.second, left, top, 0.35f, 0.35f);
+		graphics_manager->DrawOverlay(frame.shadowmap,index,left, top, 0.35f, 0.35f);
 		top -= 0.45f;
 	}
 #endif

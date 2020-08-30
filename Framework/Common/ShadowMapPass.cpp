@@ -13,32 +13,47 @@ void ShadowMapPass::Draw(Frame& frame)
 	graphics_manager->UseShaderProgram(shader_program);
 	graphics_manager->SetPerFrameConstants(frame.frame_context);
 
-	for (auto light : frame.frame_context.lights)
+	if (frame.shadowmap != -1)
 	{
-		if (light.cast_shadow)
+		graphics_manager->DestroyShadowMap(frame.shadowmap);
+	}
+
+	frame.shadowmap_count = 0;
+
+	uint32_t cast_shadow_count = 0;
+	for (auto& light : frame.frame_context.lights)
+	{
+		if (light.light_cast_shadow)
 		{
-			//generate shadow map here
-			intptr_t shadow_map;
-			graphics_manager->GenerateShadowMap(light);
-			if (frame.shadow_maps.find(light.light_guid) == frame.shadow_maps.end())
+			++cast_shadow_count;
+		}
+	}
+
+	uint32_t index = 0;
+	if (cast_shadow_count > 0)
+	{
+		intptr_t shadow_map = graphics_manager->GenerateShadowMapArray(frame.frame_context.lights.size());
+
+		frame.shadowmap = shadow_map;
+		frame.shadowmap_count = cast_shadow_count;
+
+		for (auto& light : frame.frame_context.lights)
+		{
+			if (light.light_cast_shadow)
 			{
-				shadow_map = graphics_manager->GenerateShadowMap(light);
-				frame.shadow_maps[light.light_guid] = shadow_map;
-			}
-			else
-			{
-				shadow_map = frame.shadow_maps[light.light_guid];
-			}
-			
-			graphics_manager->BeginShadowMap(light, shadow_map);
+				//generate shadow map here
+				graphics_manager->BeginShadowMap(light, shadow_map,index);
 
 
-			for (auto dbc : frame.batch_contexts)
-			{
-				graphics_manager->DrawBatchDepthOnly(*dbc);
-			}
+				for (auto dbc : frame.batch_contexts)
+				{
+					graphics_manager->DrawBatchDepthOnly(*dbc);
+				}
 
-			graphics_manager->EndShadowMap(shadow_map);
+				graphics_manager->EndShadowMap(shadow_map,index);
+
+				++index;
+			}
 		}
 	}
 }
