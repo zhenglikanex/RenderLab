@@ -4,7 +4,7 @@
 
 namespace Aurora
 {
-	class SunLightGameLogic : public GameLogic
+	class ShadowMapGameLogic : public GameLogic
 	{
 	public:
 		bool Initialize() override;

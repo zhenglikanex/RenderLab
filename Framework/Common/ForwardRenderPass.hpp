@@ -7,6 +7,6 @@ namespace Aurora
 	{
 	public:
 		~ForwardRenderPass() = default;
-		void Draw(const Frame& frame) override;
+		void Draw(Frame& frame) override;
 	};
 }

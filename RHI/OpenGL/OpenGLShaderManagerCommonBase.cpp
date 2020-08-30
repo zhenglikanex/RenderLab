@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <map>
 
 #include "Framework/Utils/FileUtils.hpp"
 #include "Framework/Utils/FileHandle.hpp"
@@ -10,8 +11,14 @@
 const char DEBUG_VS_SHADER_SOURCE_FILE[] = "Shaders/debug_vs.glsl";
 const char DEBUG_PS_SHADER_SOURCE_FILE[] = "Shaders/debug_ps.glsl";
 #endif
+const char VS_SHADOWMAP_SOURCE_FILE[] = "Shaders/shadowmap_vs.glsl";
+const char PS_SHADOWMAP_SOURCE_FILE[] = "Shaders/shadowmap_ps.glsl";
+
 const char VS_SHADER_SOURCE_FILE[] = "Shaders/basic_vs.glsl";
 const char PS_SHADER_SOURCE_FILE[] = "Shaders/basic_ps.glsl";
+
+const char VS_PASSTHROUGH_SOURCE_FILE[] = "Shaders/passthrough_vs.glsl";
+const char PS_PASSTHROUGH_SOURCE_FILE[] = "Shaders/passthrough_ps.glsl";
 
 using namespace Aurora;
 
@@ -75,26 +82,8 @@ static void OutputLinkerErrorMessage(uint32_t program_id)
 	std::cerr << "Error compiling linker.  Check linker-error.txt for message." << std::endl;
 }
 
-bool OpenGLShaderManagerCommonBase::Initialize()
+static bool LoadShaderFromFile(const char* vs_filename, const char* fs_filename, std::map<int, const char*>& properties, GLuint& shader_program)
 {
-	return InitializeShaders();
-}
-
-void OpenGLShaderManagerCommonBase::Finalize()
-{
-	ClearShaders();
-}
-
-void OpenGLShaderManagerCommonBase::Tick()
-{
-
-}
-
-bool OpenGLShaderManagerCommonBase::InitializeShaders()
-{
-	const char* vs_filename = VS_SHADER_SOURCE_FILE;
-	const char* fs_filename = PS_SHADER_SOURCE_FILE;
-
 	std::string vertex_shader_buffer;
 	std::string fragment_shader_buffer;
 	int status;
@@ -136,14 +125,15 @@ bool OpenGLShaderManagerCommonBase::InitializeShaders()
 		return false;
 	}
 
-	auto shader_program = glCreateProgram();
+	shader_program = glCreateProgram();
 
 	glAttachShader(shader_program, vertex_shader);
 	glAttachShader(shader_program, fragment_shader);
 
-	glBindAttribLocation(shader_program, 0, "inputPosition");
-	glBindAttribLocation(shader_program, 1, "inputNormal");
-	glBindAttribLocation(shader_program, 2, "inputUV");
+	for (auto& attr : properties)
+	{
+		glBindAttribLocation(shader_program, attr.first,attr.second);
+	}
 
 	glLinkProgram(shader_program);
 
@@ -154,77 +144,72 @@ bool OpenGLShaderManagerCommonBase::InitializeShaders()
 		return false;
 	}
 
-	default_shaders_[DefaultShaderIndex::Forward] = shader_program;
-
-#ifdef DEBUG
-	const char* debug_vs_filename = DEBUG_VS_SHADER_SOURCE_FILE;
-	const char* debug_fs_filename = DEBUG_PS_SHADER_SOURCE_FILE;
-
-	std::string debug_vs_vertex_shader_buffer;
-	std::string debgu_fragment_shader_buffer;
-
-	debug_vs_vertex_shader_buffer = FileUtils::GetInstance()->OpenFileAndReadString(debug_vs_filename);
-	if (debug_vs_vertex_shader_buffer.empty())
-	{
-		return false;
-	}
-
-	debgu_fragment_shader_buffer = FileUtils::GetInstance()->OpenFileAndReadString(debug_fs_filename);
-	if (debgu_fragment_shader_buffer.empty())
-	{
-		return false;
-	}
-
-	auto debug_vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-	auto debug_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-
-	auto debug_vs_c_str = debug_vs_vertex_shader_buffer.c_str();
-	glShaderSource(debug_vertex_shader, 1, &debug_vs_c_str, NULL);
-	auto debug_f_c_str = debgu_fragment_shader_buffer.c_str();
-	glShaderSource(debug_fragment_shader, 1, &debug_f_c_str, NULL);
-
-	glCompileShader(debug_vertex_shader);
-	glCompileShader(debug_fragment_shader);
-
-	glGetShaderiv(debug_vertex_shader, GL_COMPILE_STATUS, &status);
-	if (status != 1)
-	{
-		OutputShaderErrorMessage(debug_vertex_shader, debug_vs_filename);
-		return false;
-	}
-
-	glGetShaderiv(debug_fragment_shader, GL_COMPILE_STATUS, &status);
-	if (status != 1)
-	{
-		OutputShaderErrorMessage(debug_fragment_shader, debug_fs_filename);
-		return false;
-	}
-
-	auto debug_shader_program = glCreateProgram();
-
-	glAttachShader(debug_shader_program, debug_vertex_shader);
-	glAttachShader(debug_shader_program, debug_fragment_shader);
-
-	glBindAttribLocation(debug_shader_program, 0, "inputPosition");
-
-	glLinkProgram(debug_shader_program);
-
-	glGetProgramiv(debug_shader_program, GL_LINK_STATUS, &status);
-	if (status != 1)
-	{
-		OutputLinkerErrorMessage(debug_shader_program);
-		return false;
-	}
-#endif
-
-	default_shaders_[DefaultShaderIndex::Debug] = debug_shader_program;
-
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);
-	glDeleteShader(debug_vertex_shader);
-	glDeleteShader(debug_fragment_shader);
 
 	return true;
+}
+
+bool OpenGLShaderManagerCommonBase::Initialize()
+{
+	return InitializeShaders();
+}
+
+void OpenGLShaderManagerCommonBase::Finalize()
+{
+	ClearShaders();
+}
+
+void OpenGLShaderManagerCommonBase::Tick()
+{
+
+}
+
+bool OpenGLShaderManagerCommonBase::InitializeShaders()
+{
+	bool result = false;
+
+	std::map<int, const char*> properties =
+	{
+		{0,"inputPosition"},
+		{1,"inputNoraml"},
+		{2,"inputUV"},
+	};
+	GLuint shader_program;
+	result = LoadShaderFromFile(VS_SHADER_SOURCE_FILE, PS_SHADER_SOURCE_FILE, properties,shader_program);
+	if (result == false)
+	{
+		return result;
+	}
+	default_shaders_[DefaultShaderIndex::Forward] = shader_program;
+
+	properties = { {0,"inputPosition"} };
+	result = LoadShaderFromFile(VS_SHADOWMAP_SOURCE_FILE,PS_SHADOWMAP_SOURCE_FILE, properties, shader_program);
+	if (result == false)
+	{
+		return result;
+	}
+	default_shaders_[DefaultShaderIndex::ShadowMap] = shader_program;
+
+	properties = { {0,"inputPosition"},{1,"inputUV"} };
+	result = LoadShaderFromFile(VS_PASSTHROUGH_SOURCE_FILE, PS_PASSTHROUGH_SOURCE_FILE, properties, shader_program);
+	if (result == false)
+	{
+		return result;
+	}
+	default_shaders_[DefaultShaderIndex::Copy] = shader_program;
+
+#ifdef DEBUG
+	properties = { {0,"inputPosition"} };
+	result = LoadShaderFromFile(DEBUG_VS_SHADER_SOURCE_FILE, DEBUG_PS_SHADER_SOURCE_FILE, properties, shader_program);
+	if (result == false)
+	{
+		return result;
+	}
+	default_shaders_[DefaultShaderIndex::Debug] = shader_program;
+#endif
+
+	return result;
 }
 
 void OpenGLShaderManagerCommonBase::ClearShaders()

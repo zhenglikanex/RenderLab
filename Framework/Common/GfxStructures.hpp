@@ -1,12 +1,14 @@
 #pragma once
 #include <vector>
 #include "Framework/Common/GeomMath.hpp"
-#include "Scene.hpp"
+#include "Framework/Common/Scene.hpp"
+#include "Framework/Common/Guid.hpp"
 
 namespace Aurora
 {
 	struct Light
 	{
+		xg::Guid light_guid;
 		glm::vec4 light_position;
 		glm::vec4 light_color;
 		glm::vec4 light_direction;
@@ -50,5 +52,6 @@ namespace Aurora
 	{
 		DrawFrameContext frame_context;
 		std::vector<std::shared_ptr<DrawBatchContext>> batch_contexts;
+		std::unordered_map<xg::Guid, intptr_t> shadow_maps;
 	};
 }

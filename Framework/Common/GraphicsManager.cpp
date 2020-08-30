@@ -7,10 +7,11 @@
 #include "Framework/Common/SceneManager.hpp"
 #include "Framework/Common/ForwardRenderPass.hpp"
 #include "Framework/Common/ShadowMapPass.hpp"
+#include "Framework/Common/HUDPass.hpp"
 
 using namespace Aurora;
 
-#define MAX_LIGHTS 100
+#define MAX_LIGHTS 55
 
 bool GraphicsManager::Initialize()
 {
@@ -20,6 +21,7 @@ bool GraphicsManager::Initialize()
 
 	draw_passes_.push_back(std::make_shared<ShadowMapPass>());
 	draw_passes_.push_back(std::make_shared<ForwardRenderPass>());
+	draw_passes_.push_back(std::make_shared<HUDPass>());
 
 	return true;
 }
@@ -69,6 +71,11 @@ void Aurora::GraphicsManager::DrawLine(const glm::vec3 & from, const glm::vec3 &
 
 void Aurora::GraphicsManager::DrawBox(const glm::vec3 & bbMin, const glm::vec3 bbMax, const glm::vec3 & color)
 {
+}
+
+void GraphicsManager::DrawOverlay(const intptr_t shadowmap, float vp_left, float vp_top, float vp_width, float vp_height)
+{
+
 }
 
 void Aurora::GraphicsManager::ClearDebugBuffers()
@@ -140,15 +147,16 @@ void GraphicsManager::CalculateLights()
 		if (light)
 		{
 			Light light_param;
+			light_param.light_guid = light->guid();
 			auto trans_ptr = light_node->GetCalculatedTransform();
 			light_param.light_position = (*trans_ptr) * light_param.light_position;
 			light_param.light_direction = (*trans_ptr) * light_param.light_direction;
-
 			light_param.light_color = light->GetColor().Value;
 			light_param.light_intensity = light->GetIntensity();
 			const AttenCurve& atten_curve = light->GetDistanceAttenuation();
 			light_param.light_dist_atten_curve_type = atten_curve.type;
 			memcpy(light_param.light_dist_atten_curve_params, &atten_curve.u, sizeof(atten_curve.u));
+			light_param.cast_shadow = light->GetIfCastShadow();
 
 			if (light->GetType() == SceneObjectType::kSceneObjectTypeLightInfi)
 			{
@@ -212,6 +220,26 @@ void GraphicsManager::SetPerFrameConstants(const DrawFrameContext& context)
 }
 
 void GraphicsManager::DrawBatch(const DrawBatchContext& context)
+{
+
+}
+
+void GraphicsManager::DrawBatchDepthOnly(const DrawBatchContext& context)
+{
+
+}
+
+intptr_t GraphicsManager::GenerateShadowMap(const Light& light)
+{
+	return 0;
+}
+
+void GraphicsManager::BeginShadowMap(const Light& light, const intptr_t shadowmap)
+{
+
+}
+
+void GraphicsManager::EndShadowMap(const intptr_t shadowmap)
 {
 
 }

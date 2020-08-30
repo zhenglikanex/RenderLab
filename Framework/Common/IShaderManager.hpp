@@ -9,7 +9,8 @@ namespace Aurora
 		ShadowMap = 0,
 		Forward,
 		Differed,
-		Debug
+		Debug,
+		Copy
 	};
 
 	class IShaderManager : public IRuntimeModule

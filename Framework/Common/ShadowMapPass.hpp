@@ -8,6 +8,6 @@ namespace Aurora
 	{
 	public:
 		~ShadowMapPass() = default;
-		void Draw(const Frame& frame) override;
+		void Draw(Frame& frame) override;
 	};
 }

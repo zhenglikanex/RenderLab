@@ -33,6 +33,7 @@ namespace Aurora
 		}
 	public:
 		void SetIfCastShadow(bool shadow) { cast_shadows_ = shadow; }
+		bool GetIfCastShadow() const { return cast_shadows_; }
 
 		void SetColor(const std::string& attrib, const glm::vec4& color)
 		{

@@ -6,7 +6,7 @@
 
 using namespace Aurora;
 
-void ForwardRenderPass::Draw(const Frame& frame)
+void ForwardRenderPass::Draw(Frame& frame)
 {
 	auto shader_program = g_app->GetEngine()->GetShaderManager()->GetDefaultShaderProgram(DefaultShaderIndex::Forward);
 	auto& graphics_manager = g_app->GetEngine()->GetGraphicsManager();

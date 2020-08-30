@@ -31,9 +31,16 @@ namespace Aurora
 		void SetPerFrameConstants(const DrawFrameContext& context) override;
 		void DrawBatch(const DrawBatchContext& context) override;
 
+		void DrawBatchDepthOnly(const DrawBatchContext& context) override;
+
+		intptr_t GenerateShadowMap(const Light& light) override;
+		void BeginShadowMap(const Light& light, const intptr_t shadowmap) override;
+		void EndShadowMap(const intptr_t shadowmap) override;
+
 #ifdef DEBUG
 		void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) override;
 		void DrawBox(const glm::vec3& bbMin, const glm::vec3 bbMax, const glm::vec3& color) override;
+		void DrawOverlay(const intptr_t shadowmap, float vp_left, float vp_top, float vp_width, float vp_height) override;
 		void ClearDebugBuffers() override;
 #endif
 
@@ -47,7 +54,7 @@ namespace Aurora
 
 	protected:
 		std::unordered_map<std::string, GLint> texture_index_;
-
+		GLuint shadowmap_framebuffer_name_;
 		GLuint current_shader_;
 
 		struct OpenGLDrawBatchContext : public DrawBatchContext {

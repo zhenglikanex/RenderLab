@@ -181,6 +181,56 @@ void Aurora::OpenGLGraphicsManagerCommonBase::DrawBox(const glm::vec3& bbMin, co
 	debug_draw_batch_contenxt_.push_back(std::move(dbc));
 }
 
+void OpenGLGraphicsManagerCommonBase::DrawOverlay(const intptr_t shadowmap, float vp_left, float vp_top, float vp_width, float vp_height)
+{
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	GLint texture_id = (GLuint)shadowmap;
+
+	glActiveTexture(GL_TEXTURE0 + texture_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+
+	SetShaderParameters("depthSampler", texture_id);
+	GLfloat vertices[] = {
+		vp_left, vp_top, 0.0f,
+		vp_left, vp_top - vp_height, 0.0f,
+		vp_left + vp_width, vp_top, 0.0f,
+		vp_left + vp_width, vp_top - vp_height, 0.0f
+	};
+
+	GLfloat uv[] = {
+		0.0f,1.0f,
+		0.0f,0.0f,
+		1.0f,1.0f,
+		1.0f,0.0f
+	};
+
+	GLuint buffer_id[2];
+	
+	glGenBuffers(2, buffer_id);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer_id[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+	// Bind the vertex buffer and load the vertex (uv) data into the vertex buffer.
+	glBindBuffer(GL_ARRAY_BUFFER, buffer_id[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uv), uv, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0x00, 4);
+
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(2, buffer_id);
+}
+
 void Aurora::OpenGLGraphicsManagerCommonBase::ClearDebugBuffers()
 {
 	for (auto& dbc : debug_draw_batch_contenxt_)
@@ -692,4 +742,83 @@ void OpenGLGraphicsManagerCommonBase::DrawBatch(const DrawBatchContext& context)
 	}*/
 
 #endif
+}
+
+void OpenGLGraphicsManagerCommonBase::DrawBatchDepthOnly(const DrawBatchContext& context)
+{
+	const OpenGLDrawBatchContext& dbc = dynamic_cast<const OpenGLDrawBatchContext&>(context);
+	SetShaderParameters("modelMatrix", dbc.trans);
+	glBindVertexArray(dbc.vao);
+	glDrawElements(dbc.mode, dbc.count, dbc.type, 0);
+}
+
+intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMap(const Light& light)
+{
+	GLuint depthTexture;
+	glGenTextures(1, &depthTexture);
+	
+	return static_cast<intptr_t>(depthTexture);
+}
+
+void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const intptr_t shadowmap)
+{
+	const int32_t kShadowMapWidth = 1024;
+	const int32_t kShadowMapHeight = 1024;
+
+	glGenFramebuffers(1, &shadowmap_framebuffer_name_);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowmap_framebuffer_name_);
+
+	GLuint depthTexture = (GLuint)shadowmap;
+	glActiveTexture(GL_TEXTURE0 + depthTexture);
+	glBindTexture(GL_TEXTURE_2D, depthTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, kShadowMapWidth, kShadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+#ifdef OPENGL_ES
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+#else
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,depthTexture, 0);
+#endif
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		assert(0);
+	}
+	
+	//glDrawBuffer(GL_NONE);
+	glDrawBuffers(0, nullptr);
+	glDepthMask(TRUE);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, kShadowMapWidth, kShadowMapHeight);
+
+	glm::mat4 depthVP;
+	glm::mat4 view;
+	glm::mat4 projection;
+	glm::vec3 position = light.light_position;
+	glm::vec3 lookAt = light.light_position + light.light_direction;
+	glm::vec3 up = { 0.0f,0.0f,1.0f };
+	view = glm::lookAt(position, lookAt,up);
+
+	float fov = PI / 3.0f;
+	float near_clip_distance = 1.0f;
+	float far_clip_distance = 100.0f;
+	float scene_aspect = 1.0f;
+
+	//projection = glm::perspectiveFovRH(fov,(float)kShadowMapWidth,(float)kShadowMapHeight,near_clip_distance,far_clip_distance);
+	/*GLfloat near_plane = 1.0f, far_plane = 100.0f;*/
+	projection  = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_clip_distance, far_clip_distance);
+	depthVP = projection * view;
+	SetShaderParameters("depthVP", depthVP);
+}
+
+void OpenGLGraphicsManagerCommonBase::EndShadowMap(const intptr_t shadowmap)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	glDeleteFramebuffers(1, &shadowmap_framebuffer_name_);
+
+	const GfxConfiguration& conf = g_app->GetConfiguration();
+	glViewport(0, 0, conf.screen_width, conf.screen_height);
 }
