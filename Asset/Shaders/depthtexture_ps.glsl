@@ -8,5 +8,5 @@ uniform float layer_index;
 
 void main()
 {
-    color = pow(texture(depthSampler,vec3(UV,0)).rrr, vec3(1.0f));
+    color = pow(texture(depthSampler,vec3(UV,layer_index)).rrr, vec3(20.0f));
 }

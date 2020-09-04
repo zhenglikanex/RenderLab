@@ -803,16 +803,15 @@ void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const i
 	glm::vec3 position = light.light_position;
 	glm::vec3 lookAt = light.light_position + light.light_direction;
 	glm::vec3 up = { 0.0f,0.0f,1.0f };
-	view = glm::lookAt(position, lookAt,up);
+	view = glm::lookAtRH(position, lookAt,up);
 
 	float fov = PI / 3.0f;
 	float near_clip_distance = 1.0f;
 	float far_clip_distance = 100.0f;
-	float scene_aspect = 1.0f;
 
-	//projection = glm::perspectiveFovRH(fov,(float)kShadowMapWidth,(float)kShadowMapHeight,near_clip_distance,far_clip_distance);
+	projection = glm::perspectiveFovRH(fov,(float)kShadowMapWidth,(float)kShadowMapHeight,near_clip_distance,far_clip_distance);
 	/*GLfloat near_plane = 1.0f, far_plane = 100.0f;*/
-	projection  = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_clip_distance, far_clip_distance);
+	//projection  = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_clip_distance, far_clip_distance);
 	depthVP = projection * view;
 	SetShaderParameters("depthVP", depthVP);
 }
