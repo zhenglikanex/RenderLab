@@ -30,8 +30,9 @@ void MyPhysicsManager::Tick()
 		CreateRigidBodies();
 		g_app->GetEngine()->GetSceneManager()->NotifySceneIsPhysicsSimulationQueued();
 	}
-
+#ifdef DEBUG
 	DrawDebugInfo();
+#endif // DEBUG
 }
 
 void MyPhysicsManager::CreateRigidBody(SceneGeometryNode& node, const SceneObjectGeometry& geometry)

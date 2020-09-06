@@ -21,7 +21,7 @@ int main()
 	while (!g_app->IsQuit())
 	{
 		g_app->Tick();
-		std::this_thread::sleep_for(std::chrono::microseconds(10000));
+		//std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
 	g_app->Finalize();

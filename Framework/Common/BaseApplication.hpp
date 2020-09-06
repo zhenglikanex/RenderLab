@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "Framework/Common/IApplication.hpp"
 #include "Framework/Common/GfxConfiguration.hpp"
 
@@ -23,6 +25,8 @@ namespace Aurora
 
 		const GfxConfiguration& GetConfiguration() const override { return config_; }
 		const std::unique_ptr<Engine>& GetEngine() const override { return engine_; }
+		float GetDt() override { return dt_; }
+		float GetElapse() override { return elapse_; };
 	protected:
 		virtual void OnDraw() {}
 
@@ -30,6 +34,9 @@ namespace Aurora
 		std::unique_ptr<Engine> engine_;
 	private:
 		bool quit_;
+		std::chrono::steady_clock::time_point last_time_;
+		float dt_;
+		float elapse_;
 	};
 }
 

@@ -45,9 +45,9 @@ bool OpenGLGraphicsManager::Initialize()
 		glFrontFace(GL_CCW);
 
 		// Enable back face culling.
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 	}
-
+	
 	return true;
 }

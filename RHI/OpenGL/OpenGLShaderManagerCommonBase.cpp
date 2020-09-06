@@ -20,6 +20,12 @@ const char PS_SHADER_SOURCE_FILE[] = "Shaders/basic_ps.glsl";
 const char VS_PASSTHROUGH_SOURCE_FILE[] = "Shaders/passthrough_vs.glsl";
 const char PS_PASSTHROUGH_SOURCE_FILE[] = "Shaders/depthtexture_ps.glsl";
 
+const char VS_WATER_SOURCE_FILE[] = "Shaders/water_vs.glsl";
+const char PS_WATER_SOURCE_FILE[] = "Shaders/water_ps.glsl";
+
+const char VS_SKYBOX_SOURCE_FILE[] = "Shaders/sky_box_vs.glsl";
+const char PS_SKYBOX_SOURCE_FILE[] = "Shaders/sky_box_ps.glsl";
+
 using namespace Aurora;
 
 static void OutputShaderErrorMessage(uint32_t shader_id, const char* shader_filename)
@@ -199,6 +205,21 @@ bool OpenGLShaderManagerCommonBase::InitializeShaders()
 	}
 	default_shaders_[DefaultShaderIndex::Copy] = shader_program;
 
+	properties = { {0,"inputPosition"} };
+	result = LoadShaderFromFile(VS_WATER_SOURCE_FILE, PS_WATER_SOURCE_FILE, properties, shader_program);
+	if (result == false)
+	{
+		return result;
+	}
+	default_shaders_[DefaultShaderIndex::Water] = shader_program;
+
+	properties = { {0,"inputPosition"} };
+	result = LoadShaderFromFile(VS_SKYBOX_SOURCE_FILE, PS_SKYBOX_SOURCE_FILE, properties, shader_program);
+	if (result == false)
+	{
+		return result;
+	}
+	default_shaders_[DefaultShaderIndex::SkyBox] = shader_program;
 #ifdef DEBUG
 	properties = { {0,"inputPosition"} };
 	result = LoadShaderFromFile(DEBUG_VS_SHADER_SOURCE_FILE, DEBUG_PS_SHADER_SOURCE_FILE, properties, shader_program);

@@ -110,7 +110,6 @@ void GLFWApplication::Tick()
     BaseApplication::Tick();
 
     glfwSwapBuffers(window_);
-
     if (!glfwWindowShouldClose(window_))
     {
         glfwPollEvents();

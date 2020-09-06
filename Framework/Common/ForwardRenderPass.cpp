@@ -8,7 +8,7 @@ using namespace Aurora;
 
 void ForwardRenderPass::Draw(Frame& frame)
 {
-	auto shader_program = g_app->GetEngine()->GetShaderManager()->GetDefaultShaderProgram(DefaultShaderIndex::Forward);
+	auto shader_program = g_app->GetEngine()->GetShaderManager()->GetDefaultShaderProgram(DefaultShaderIndex::Water);
 	auto& graphics_manager = g_app->GetEngine()->GetGraphicsManager();
 	graphics_manager->UseShaderProgram(shader_program);
 	graphics_manager->SetPerFrameConstants(frame.frame_context);

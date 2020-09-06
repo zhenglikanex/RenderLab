@@ -15,7 +15,8 @@ namespace Aurora
 		virtual bool Initialize() = 0;
 		virtual void Finalize() = 0;
 		virtual void Tick() = 0;
-
+		virtual float GetDt() = 0;
+		virtual float GetElapse() = 0;
 		virtual void Quit() = 0;
 		virtual bool IsQuit() const = 0;
 

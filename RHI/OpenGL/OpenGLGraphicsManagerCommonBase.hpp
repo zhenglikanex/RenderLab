@@ -32,12 +32,15 @@ namespace Aurora
 		void DrawBatch(const DrawBatchContext& context) override;
 
 		void DrawBatchDepthOnly(const DrawBatchContext& context) override;
+		void DrawSkyBox() override;
 
 		intptr_t GenerateShadowMapArray(uint32_t count) override;
 		void BeginShadowMap(const Light& light, const intptr_t shadowmap,uint32_t layer_index) override;
 		void EndShadowMap(const intptr_t shadowmap,uint32_t layer_index) override;
 		void SetShadowMap(const intptr_t shadowmap) override;
 		void DestroyShadowMap(intptr_t& shadowmap) override;
+
+		void SetPolygonMode(PolygonMode mode) override;
 
 #ifdef DEBUG
 		void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) override;
@@ -84,5 +87,6 @@ namespace Aurora
 		std::vector<GLuint> debug_buffers_;
 #endif
 		GLADloadproc loader_;
+		GLuint sky_box_vao_;
 	};
 }

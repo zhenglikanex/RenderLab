@@ -34,6 +34,9 @@ namespace Aurora
 				*result = *result * static_cast<glm::mat4>(*trans);
 			}
 
+			// 将blender中的旋转抵消
+			//*result *= glm::rotate(glm::identity<glm::mat4>(), -90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+
 			*result *= runtime_transform_;
 
 			return result;
@@ -46,6 +49,7 @@ namespace Aurora
 			glm::mat4 rotate_y = glm::rotate(rotate, rotation_angle_y, glm::vec3(0.0f, 1.0f, 0.0f));
 			glm::mat4 rotate_z = glm::rotate(rotate, rotaion_angle_z, glm::vec3(0.0f, 0.0f, 1.0f));
 
+			
 			runtime_transform_ = runtime_transform_ * rotate_x * rotate_y * rotate_z;
 		}
 

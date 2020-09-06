@@ -274,6 +274,8 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 	}
 	glUniformMatrix4fv(location, 1, false, glm::value_ptr(context.projection_matrix));
 
+	SetShaderParameters("viewPosition", context.view_pos);
+
 	location = glGetUniformLocation(current_shader_, "ambientColor");
 	if (location == -1)
 	{
@@ -624,6 +626,115 @@ void OpenGLGraphicsManagerCommonBase::InitializeBuffers(const Scene& scene)
 			}
 		}
 	}
+
+	// init sky box
+
+	ImageParser parser;
+	std::string faces[6] = { "right.jpg","left.jpg","top.jpg","bottom.jpg","front.jpg","back.jpg" };
+	//std::string faces[6] = { "Epic_BlueSunset_Cam_3_Right-X.png","Epic_BlueSunset_Cam_2_Left+X.png","Epic_BlueSunset_Cam_4_Up+Y.png","Epic_BlueSunset_Cam_5_Down-Y.png","Epic_BlueSunset_Cam_0_Front+Z.png","Epic_BlueSunset_Cam_1_Back-Z.png" };
+
+	GLuint texture_id;
+	glGenTextures(1, &texture_id);
+	glActiveTexture(GL_TEXTURE0 + texture_id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
+	
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		auto img = parser.Parser("Textures/" + faces[i]);
+		if (img)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, img->Width, img->Height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->data
+			);
+			//stbi_image_free(data);
+		}
+		else
+		{
+			//std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			//stbi_image_free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	texture_index_["sky_box"] = texture_id;
+	textures_.push_back(texture_id);
+
+	glGenTextures(1, &texture_id);
+	glActiveTexture(GL_TEXTURE0 + texture_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	auto img = parser.Parser("Textures/" + faces[0]);
+	glTexImage2D(GL_TEXTURE_2D,0, GL_RGB, img->Width, img->Height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	texture_index_["test"] = texture_id;
+	textures_.push_back(texture_id);
+
+	float skyboxVertices[] = {
+		// positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f
+	};
+
+	glGenVertexArrays(1, &sky_box_vao_);
+	glBindVertexArray(sky_box_vao_);
+
+	GLuint buffer_id;
+	glGenBuffers(1, &buffer_id);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer_id);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+	
+
+	buffers_.push_back(buffer_id);
 }
 
 void OpenGLGraphicsManagerCommonBase::ClearBuffers()
@@ -691,6 +802,8 @@ void OpenGLGraphicsManagerCommonBase::DrawBatch(const DrawBatchContext& context)
 	SetShaderParameters("usingdiffuseMap", false);
 	SetShaderParameters("usingNormalMap", false);
 
+	SetShaderParameters("dt", g_app->GetElapse());
+	SetShaderParameters("skybox", texture_index_["sky_box"]);
 	//后面根据材质进行分组渲染
 	if (dbc.material)
 	{
@@ -751,6 +864,25 @@ void OpenGLGraphicsManagerCommonBase::DrawBatchDepthOnly(const DrawBatchContext&
 	SetShaderParameters("modelMatrix", dbc.trans);
 	glBindVertexArray(dbc.vao);
 	glDrawElements(dbc.mode, dbc.count, dbc.type, 0);
+}
+
+void OpenGLGraphicsManagerCommonBase::DrawSkyBox()
+{
+	auto shader_program = g_app->GetEngine()->GetShaderManager()->GetDefaultShaderProgram(DefaultShaderIndex::SkyBox);
+	UseShaderProgram(shader_program);
+
+	auto view = glm::mat3(frames_[0].frame_context.view_matrix);
+	SetShaderParameters("worldMatrix", frames_[0].frame_context.world_matrix);
+	SetShaderParameters("viewMatrix", view);
+	glm::mat4 model = glm::identity<glm::mat4>();
+	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	SetShaderParameters("modelMatrix", model);
+	SetShaderParameters("projectionMatrix", frames_[0].frame_context.projection_matrix);
+	SetShaderParameters("skybox", texture_index_["sky_box"]);
+	glDepthFunc(GL_LEQUAL);
+	glBindVertexArray(sky_box_vao_);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDepthFunc(GL_LESS);
 }
 
 intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMapArray(uint32_t count)
@@ -835,4 +967,19 @@ void OpenGLGraphicsManagerCommonBase::DestroyShadowMap(intptr_t& shadowmap)
 	GLuint id = (GLuint)shadowmap;
 	glDeleteTextures(1, &id);
 	shadowmap = -1;
+}
+
+void OpenGLGraphicsManagerCommonBase::SetPolygonMode(PolygonMode mode)
+{
+	switch (mode)
+	{
+	case PolygonMode::kLine:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		break;
+	case PolygonMode::kFill:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		break;
+	default:
+		break;
+	}
 }

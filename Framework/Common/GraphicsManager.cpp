@@ -46,7 +46,11 @@ void GraphicsManager::Tick()
 
 	Clear();
 	Draw();
+#ifdef DEBUG
 	ClearDebugBuffers();
+#endif // DEBUG
+
+	
 }
 
 void GraphicsManager::Clear()
@@ -62,6 +66,8 @@ void GraphicsManager::Draw()
 	{
 		draw_pass->Draw(frame);
 	}
+
+	DrawSkyBox();
 }
 
 #ifdef DEBUG
@@ -112,6 +118,9 @@ void GraphicsManager::CalculateCameraMatrix()
 		frame_context.view_matrix = glm::lookAtLH(position, look_at, up);
 	}
 
+	//glm::vec3 position = { 0,-5,0 }, look_at = { 0.0f,0.0f,0.0f }, up = { 0.0f,1.0f,0.0f };
+	//frame_context.view_matrix = glm::lookAt(look_at, glm::vec3(0.0f, 0.0f, -1.0f), up);
+
 	float fov = PI / 2.0f;
 	float near_clip_distance = 1.0f;
 	float far_clip_distance = 100.0f;
@@ -120,12 +129,14 @@ void GraphicsManager::CalculateCameraMatrix()
 	{
 		auto camera = scene.GetCamera(camera_node->GetSceneObjectRef());
 		fov = std::dynamic_pointer_cast<SceneObjectPerspectiveCamera>(camera)->GetFov();
-		near_clip_distance = 1.0f;
+		near_clip_distance = 0.1f;
 		far_clip_distance = 100.0f;
 	}
 
 	const GfxConfiguration& conf = g_app->GetConfiguration();
 	frame_context.projection_matrix = glm::perspectiveFovRH(fov, (float)conf.screen_width, (float)conf.screen_height, near_clip_distance, far_clip_distance);
+
+	frame_context.view_pos = *camera_node->GetCalculatedTransform() * glm::vec4(0.0f, 0.0f, 0.0f,1.0f);
 }
 
 void GraphicsManager::CalculateLights()
@@ -229,6 +240,11 @@ void GraphicsManager::DrawBatchDepthOnly(const DrawBatchContext& context)
 
 }
 
+void GraphicsManager::DrawSkyBox()
+{
+
+}
+
 intptr_t GraphicsManager::GenerateShadowMapArray(uint32_t count)
 {
 	return 0;
@@ -250,6 +266,11 @@ void GraphicsManager::SetShadowMap(const intptr_t shadowmap)
 }
 
 void GraphicsManager::DestroyShadowMap(intptr_t& shadowmap)
+{
+
+}
+
+void GraphicsManager::SetPolygonMode(PolygonMode mode)
 {
 
 }

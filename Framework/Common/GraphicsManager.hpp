@@ -9,6 +9,12 @@
 
 namespace Aurora
 {
+	enum class PolygonMode
+	{
+		kLine,
+		kFill
+	};
+
 	class GraphicsManager : public IRuntimeModule
 	{
 	public:
@@ -30,6 +36,7 @@ namespace Aurora
 		virtual void SetPerFrameConstants(const DrawFrameContext& context);
 		virtual void DrawBatch(const DrawBatchContext& context);
 		virtual void DrawBatchDepthOnly(const DrawBatchContext& context);
+		virtual void DrawSkyBox();
 		
 		virtual intptr_t GenerateShadowMapArray(uint32_t count);
 		virtual void BeginShadowMap(const Light& light, const intptr_t shadowmap,uint32_t layer_index);
@@ -37,6 +44,7 @@ namespace Aurora
 		virtual void SetShadowMap(const intptr_t shadowmap);
 		virtual void DestroyShadowMap(intptr_t& shadowmap);
 
+		virtual void SetPolygonMode(PolygonMode mode);
 #ifdef DEBUG
 		virtual void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color);
 		virtual void DrawBox(const glm::vec3& bbMin, const glm::vec3 bbMax, const glm::vec3& color);

@@ -38,6 +38,7 @@ namespace Aurora
 		glm::mat4 world_matrix;
 		glm::mat4 view_matrix;
 		glm::mat4 projection_matrix;
+		glm::vec3 view_pos;
 		glm::vec3 ambient_color;
 		std::vector<Light> lights;
 	};
