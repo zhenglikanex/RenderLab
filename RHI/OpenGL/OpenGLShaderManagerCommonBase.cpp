@@ -205,7 +205,11 @@ bool OpenGLShaderManagerCommonBase::InitializeShaders()
 	}
 	default_shaders_[DefaultShaderIndex::Copy] = shader_program;
 
-	properties = { {0,"inputPosition"} };
+	properties = {
+		{0,"inputPosition"},
+		{1,"inputNoraml"},
+		{2,"inputUV"},
+	};
 	result = LoadShaderFromFile(VS_WATER_SOURCE_FILE, PS_WATER_SOURCE_FILE, properties, shader_program);
 	if (result == false)
 	{

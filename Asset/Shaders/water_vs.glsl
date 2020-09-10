@@ -1,9 +1,11 @@
 #version 450
 
 layout(location = 0) in vec3 inputPosition;
-
+layout(location = 1) in vec3 inputNoraml;
+layout(location = 2) in vec2 inputUV;
 out vec3 fragPos;
 out vec3 fragNormal;
+out vec2 UV;
 
 ///////////////////////
 // UNIFORM VARIABLES //
@@ -60,6 +62,7 @@ void main()
 
 	fragNormal = mat3(transpose(inverse(modelMatrix))) * normalize(normal);
 	fragPos = vec3(worldPos);
+	UV = inputUV;
 	//float filterAmp = 3.0f * 3.1415926f / 3.1415926f / 2.0f - 1.0f;
 	//filterAmp = clamp(filterAmp,0.0f,1.0f);
 	//worldPos.z = sin(0.1f * dot(dir[0],worldPos.xy) + dt * 2.0f);

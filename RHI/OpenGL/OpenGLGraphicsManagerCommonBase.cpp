@@ -663,6 +663,47 @@ void OpenGLGraphicsManagerCommonBase::InitializeBuffers(const Scene& scene)
 	texture_index_["sky_box"] = texture_id;
 	textures_.push_back(texture_id);
 
+	auto texture = *parser.Parser("Textures/H1_water7b.jpg");
+	GLuint texture_id1;
+	glGenTextures(1, &texture_id1);
+	glActiveTexture(GL_TEXTURE0 + texture_id1);
+	glBindTexture(GL_TEXTURE_2D, texture_id1);
+	if (texture.bitcount == 3)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.Width, texture.Height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
+	}
+	else if (texture.bitcount == 4)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.Width, texture.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
+	}
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	texture_index_["normal"] = texture_id1;
+	textures_.push_back(texture_id1);
+
+	auto texture1 = *parser.Parser("Textures/H1_Water_Gradient_19.jpg");
+	GLuint texture_id2;
+	glGenTextures(1, &texture_id2);
+	glActiveTexture(GL_TEXTURE0 + texture_id2);
+	glBindTexture(GL_TEXTURE_2D, texture_id2);
+	if (texture1.bitcount == 3)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture1.Width, texture1.Height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture1.data);
+	}
+	else if (texture1.bitcount == 4)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture1.Width, texture1.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture1.data);
+	}
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	texture_index_["diffuse"] = texture_id2;
+	textures_.push_back(texture_id2);
 
 	float skyboxVertices[] = {
 		// positions          
@@ -792,6 +833,8 @@ void OpenGLGraphicsManagerCommonBase::DrawBatch(const DrawBatchContext& context)
 
 	SetShaderParameters("dt", g_app->GetElapse());
 	SetShaderParameters("skybox", texture_index_["sky_box"]);
+	SetShaderParameters("normalMap", texture_index_["normal"]);
+	SetShaderParameters("diffuseMap", texture_index_["diffuse"]);
 	//后面根据材质进行分组渲染
 	if (dbc.material)
 	{
