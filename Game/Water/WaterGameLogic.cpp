@@ -33,11 +33,11 @@ void WaterGameLogic::Tick()
 void WaterGameLogic::OnLeftKey()
 {
 
-	//g_app->GetEngine()->GetGraphicsManager()->SetPolygonMode(PolygonMode::kLine);
-	auto ptr = g_app->GetEngine()->GetSceneManager()->GetSceneGeometryNode("Grid");
+	g_app->GetEngine()->GetGraphicsManager()->SetPolygonMode(PolygonMode::kLine);
+	/*auto ptr = g_app->GetEngine()->GetSceneManager()->GetSceneGeometryNode("Grid");
 	if (auto node = ptr.lock())
 	{
 		node->MoveBy(glm::vec3(0.0f, 10.0f, 10.0f));
-	}
+	}*/
 
 }

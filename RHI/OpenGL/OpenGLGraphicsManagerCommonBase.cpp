@@ -630,7 +630,7 @@ void OpenGLGraphicsManagerCommonBase::InitializeBuffers(const Scene& scene)
 	// init sky box
 
 	ImageParser parser;
-	std::string faces[6] = { "right.jpg","left.jpg","top.jpg","bottom.jpg","front.jpg","back.jpg" };
+	std::string faces[6] = { "right","left","top","bottom","front","back" };
 	//std::string faces[6] = { "Epic_BlueSunset_Cam_3_Right-X.png","Epic_BlueSunset_Cam_2_Left+X.png","Epic_BlueSunset_Cam_4_Up+Y.png","Epic_BlueSunset_Cam_5_Down-Y.png","Epic_BlueSunset_Cam_0_Front+Z.png","Epic_BlueSunset_Cam_1_Back-Z.png" };
 
 	GLuint texture_id;
@@ -640,7 +640,7 @@ void OpenGLGraphicsManagerCommonBase::InitializeBuffers(const Scene& scene)
 	
 	for (unsigned int i = 0; i < 6; i++)
 	{
-		auto img = parser.Parser("Textures/" + faces[i]);
+		auto img = parser.Parser("Textures/sky_box2/" + faces[i] + ".png");
 		if (img)
 		{
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
@@ -663,18 +663,6 @@ void OpenGLGraphicsManagerCommonBase::InitializeBuffers(const Scene& scene)
 	texture_index_["sky_box"] = texture_id;
 	textures_.push_back(texture_id);
 
-	glGenTextures(1, &texture_id);
-	glActiveTexture(GL_TEXTURE0 + texture_id);
-	glBindTexture(GL_TEXTURE_2D, texture_id);
-	auto img = parser.Parser("Textures/" + faces[0]);
-	glTexImage2D(GL_TEXTURE_2D,0, GL_RGB, img->Width, img->Height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	texture_index_["test"] = texture_id;
-	textures_.push_back(texture_id);
 
 	float skyboxVertices[] = {
 		// positions          
@@ -875,7 +863,7 @@ void OpenGLGraphicsManagerCommonBase::DrawSkyBox()
 	SetShaderParameters("worldMatrix", frames_[0].frame_context.world_matrix);
 	SetShaderParameters("viewMatrix", view);
 	glm::mat4 model = glm::identity<glm::mat4>();
-	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	SetShaderParameters("modelMatrix", model);
 	SetShaderParameters("projectionMatrix", frames_[0].frame_context.projection_matrix);
 	SetShaderParameters("skybox", texture_index_["sky_box"]);

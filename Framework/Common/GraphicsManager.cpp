@@ -135,8 +135,14 @@ void GraphicsManager::CalculateCameraMatrix()
 
 	const GfxConfiguration& conf = g_app->GetConfiguration();
 	frame_context.projection_matrix = glm::perspectiveFovRH(fov, (float)conf.screen_width, (float)conf.screen_height, near_clip_distance, far_clip_distance);
-
+	
+	//ÊÀ½ç¿Õ¼ä
 	frame_context.view_pos = *camera_node->GetCalculatedTransform() * glm::vec4(0.0f, 0.0f, 0.0f,1.0f);
+	auto mat = glm::rotate(glm::identity<glm::mat4>(), glm::radians(-90.f), glm::vec3(1.0f, 0.0f, 0.0f));
+	auto pos = mat * glm::vec4(0.0f,0.0f,1.0f,0.0f);
+	auto si = glm::sin(glm::radians(-90.f));
+	pos = glm::normalize(pos);
+	pos = pos + pos;
 }
 
 void GraphicsManager::CalculateLights()

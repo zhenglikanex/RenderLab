@@ -42,23 +42,23 @@ vec3 CaculNoraml(vec4 vertex,float steepness,float amplitude,vec2 dir,float freq
 
 void main()
 {
-	vec4 worldPos =  worldMatrix * modelMatrix * vec4(inputPosition,1.0f);
+	// 世界空间
+	vec4 worldPos = worldMatrix * modelMatrix * vec4(inputPosition,1.0f);
 
-	/*
 	vec3 pos = vec3(worldPos);
-	pos += CaculGerstnerWave(worldPos,1.5f,1.0f,vec2(1.0f,0.0f),0.2f,1.0f);
-	pos += CaculGerstnerWave(worldPos,1.0f,1.0f,vec2(1.0f,1.0f),0.1f,1.0f);
-	pos += CaculGerstnerWave(worldPos,0.2f,1.0f,vec2(0.5f,1.0f),1.0f,1.5f);
+	//pos += CaculGerstnerWave(worldPos,1.5f,1.0f,vec2(1.0f,0.0f),0.2f,1.0f);
+	//pos += CaculGerstnerWave(worldPos,1.0f,1.0f,vec2(1.0f,1.0f),0.1f,1.0f);
+	pos += CaculGerstnerWave(worldPos,0.1f,1.0f,vec2(0.0f,1.0f),0.25f,0.5f);
 	//worldPos.xz += pos.xz;
 	//worldPos.y = pos.y;
-	*/
+	
 	vec3 normal = vec3(0.0f,0.0f,0.0f);
-	normal += CaculNoraml(worldPos,1.5f,1.0f,vec2(1.0f,0.0f),0.2f,1.0f);
-	normal += CaculNoraml(worldPos,1.0f,1.0f,vec2(1.0f,1.0f),0.1f,1.0f);
-	normal += CaculNoraml(worldPos,0.2f,1.0f,vec2(0.5f,1.0f),1.0f,1.5f);
-	normal = vec3(0.0f,1.0f,0.0f) - normal;
+	//normal += CaculNoraml(worldPos,1.5f,1.0f,vec2(1.0f,0.0f),0.2f,1.0f);
+	//normal += CaculNoraml(worldPos,1.0f,1.0f,vec2(1.0f,1.0f),0.1f,1.0f);
+	//normal += CaculNoraml(worldPos,0.1f,1.0f,vec2(0.0f,1.0f),0.25f,0.5f);
+	normal = vec3(0.0f,0.0f,1.0f) - normal;
 
-	fragNormal = vec3(0.0f,0.0f,1.0f);
+	fragNormal = mat3(transpose(inverse(modelMatrix))) * normalize(normal);
 	fragPos = vec3(worldPos);
 	//float filterAmp = 3.0f * 3.1415926f / 3.1415926f / 2.0f - 1.0f;
 	//filterAmp = clamp(filterAmp,0.0f,1.0f);

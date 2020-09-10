@@ -1,5 +1,6 @@
 #version 450
 
+in vec3 V;
 in vec2 UV;
 out vec3 color;
 
@@ -8,5 +9,5 @@ uniform float layer_index;
 
 void main()
 {
-    color = pow(texture(depthSampler,vec3(UV,layer_index)).rrr, vec3(20.0f));
+    color = V;
 }
