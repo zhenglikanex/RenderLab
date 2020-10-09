@@ -251,6 +251,13 @@ void Aurora::OpenGLGraphicsManagerCommonBase::ClearDebugBuffers()
 
 bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFrameContext& context)
 {
+	unsigned int location;
+	
+	GLuint block_index = glGetUniformBlockIndex(current_shader_, "DrawFramConstants");
+	
+	GLint blockSize;
+
+
 	int location;
 
 	location = glGetUniformLocation(current_shader_, "worldMatrix");

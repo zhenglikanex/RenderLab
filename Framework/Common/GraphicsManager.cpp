@@ -5,9 +5,9 @@
 #include "Framework/Common/IApplication.hpp"
 #include "Framework/Common/Engine.hpp"
 #include "Framework/Common/SceneManager.hpp"
-#include "Framework/Common/ForwardRenderPass.hpp"
-#include "Framework/Common/ShadowMapPass.hpp"
-#include "Framework/Common/HUDPass.hpp"
+#include "Framework/DrawPass/ForwardRenderPass.hpp"
+#include "Framework/DrawPass/ShadowMapPass.hpp"
+#include "Framework/DrawPass/HUDPass.hpp"
 
 using namespace Aurora;
 
@@ -174,6 +174,19 @@ void GraphicsManager::CalculateLights()
 				auto area_light = std::dynamic_pointer_cast<SceneObjectAreaLight>(light);
 				light_param.light_size = area_light->GetDimension();
 			}
+
+			glm::vec3 position = light_param.light_position;
+			glm::vec3 look_at = position + glm::vec3(light_param.light_direction);
+			glm::vec3 up = { 0.0f,0.0f,1.0f };
+
+			glm::mat4 view = glm::lookAt(position, look_at, up);
+			float fov = PI / 3.0f;
+			float near_clip_dist = 1.0f;
+			float far_clip_dist = 100.0f;
+			float screen_aspect = 1.0f;
+			glm::mat4 projection = glm::perspectiveFov(fov, 100.0f, 100.0f, near_clip_dist, far_clip_dist);
+
+			light_param.light_vp = view * projection;
 
 			frame_context.lights.emplace_back(std::move(light_param));
 		}

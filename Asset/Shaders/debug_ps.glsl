@@ -1,5 +1,3 @@
-#version 150
-
 uniform vec3 lineColor;
 
 out vec4 outputColor;

@@ -1,5 +1,3 @@
-#version 450
-
 in vec2 UV;
 
 out vec3 color;

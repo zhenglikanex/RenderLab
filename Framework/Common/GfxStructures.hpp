@@ -20,6 +20,7 @@ namespace Aurora
 		float light_angle_atten_curve_params[5];
 		bool light_cast_shadow;
 		int32_t light_shadowmap_index;
+		glm::mat4 light_vp;
 		Light()
 		{
 			light_position = { 0.0f,0.0f,0.0f,1.0f };

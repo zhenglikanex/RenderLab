@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IDrawPass.hpp"
+#include "Framework/Common/IDrawPass.hpp"
 
 namespace Aurora
 {

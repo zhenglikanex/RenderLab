@@ -1,45 +1,6 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: basic.ps 
-////////////////////////////////////////////////////////////////////////////////
-#version 450
-
-
-/////////////////////
-// CONSTANTS       //
-/////////////////////
-// per frame
-#define MAX_LIGHTS 55
-uniform int numLights;
-uniform struct Light {
-	vec4 lightPosition;
-	vec4 lightColor;
-	vec4 lightDirection;
-	float lightIntensity;
-	int lightDistAttenCurveType;
-	float lightDistAttenCurveParams[5];
-	int lightAngleAttenCurveType;
-	float lightAngleAttenCurveParams[5];
-    vec2 lightSize;
-    int lighShadowMapIndex;
-}allLights[MAX_LIGHTS];
-
-// update per frame
-uniform mat4 worldMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-
-// per drawcall
-uniform vec3 ambientColor;
-uniform vec3 diffuseColor;
-uniform vec3 specularColor;
-uniform float specularPower;
-
-uniform bool usingDiffuseMap;
 uniform bool usingNormalMap;
 
-uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
-uniform sampler2D shadowMap;
 /////////////////////
 // INPUT VARIABLES //
 /////////////////////

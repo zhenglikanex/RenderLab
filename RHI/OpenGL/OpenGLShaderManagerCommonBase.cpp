@@ -7,6 +7,8 @@
 #include "Framework/Utils/FileUtils.hpp"
 #include "Framework/Utils/FileHandle.hpp"
 
+const char COMMON_SHADER_SOURCE_FILE[] = "Shaders/cbuffer.glsl";
+
 #ifdef DEBUG
 const char DEBUG_VS_SHADER_SOURCE_FILE[] = "Shaders/debug_vs.glsl";
 const char DEBUG_PS_SHADER_SOURCE_FILE[] = "Shaders/debug_ps.glsl";
@@ -84,9 +86,16 @@ static void OutputLinkerErrorMessage(uint32_t program_id)
 
 static bool LoadShaderFromFile(const char* vs_filename, const char* fs_filename, std::map<int, const char*>& properties, GLuint& shader_program)
 {
+	std::string common_shader_buffer;
 	std::string vertex_shader_buffer;
 	std::string fragment_shader_buffer;
 	int status;
+
+	common_shader_buffer = FileUtils::GetInstance()->OpenFileAndReadString(COMMON_SHADER_SOURCE_FILE);
+	if (common_shader_buffer.empty())
+	{
+		return false;
+	}
 
 	vertex_shader_buffer = FileUtils::GetInstance()->OpenFileAndReadString(vs_filename);
 	if (vertex_shader_buffer.empty())
@@ -94,11 +103,15 @@ static bool LoadShaderFromFile(const char* vs_filename, const char* fs_filename,
 		return false;
 	}
 
+	vertex_shader_buffer = common_shader_buffer + vertex_shader_buffer;
+
 	fragment_shader_buffer = FileUtils::GetInstance()->OpenFileAndReadString(fs_filename);
 	if (fragment_shader_buffer.empty())
 	{
 		return false;
 	}
+
+	fragment_shader_buffer = common_shader_buffer + fragment_shader_buffer;
 
 	auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 	auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);

@@ -66,12 +66,6 @@ DebugManager.cpp
 ../Algorism/Tree.hpp
 GfxStructures.hpp
 IDrawPass.hpp
-ForwardRenderPass.hpp
-ForwardRenderPass.cpp
-ShadowMapPass.hpp
-ShadowMapPass.cpp
-HUDPass.hpp
-HUDPass.cpp
 IShaderManager.hpp
 ShaderManager.hpp
 ShaderManager.cpp
@@ -80,4 +74,4 @@ main.cpp
 
 target_include_directories(Common PUBLIC "${PROJECT_SOURCE_DIR}/3rdparty/glm/include")
 
-target_link_libraries(Common ${OPENGEX_LIBRARY} ${OPENDDL_LIBRARY} ${BULLET_COLLISION_LIBRARY} ${BULLET_DYNAMICS_LIBRARY} ${BULLET_LINEARMATH_LIBRARY})
+target_link_libraries(Common DrawPass ${OPENGEX_LIBRARY} ${OPENDDL_LIBRARY} ${BULLET_COLLISION_LIBRARY} ${BULLET_DYNAMICS_LIBRARY} ${BULLET_LINEARMATH_LIBRARY})
