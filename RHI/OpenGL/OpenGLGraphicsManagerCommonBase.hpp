@@ -58,6 +58,7 @@ namespace Aurora
 		std::unordered_map<std::string, GLint> texture_index_;
 		GLuint shadowmap_framebuffer_name_;
 		GLuint current_shader_;
+		GLuint ubo_buffer_ = 0;
 
 		struct OpenGLDrawBatchContext : public DrawBatchContext {
 			GLuint vao;

@@ -51,6 +51,8 @@ namespace Aurora
 		static const uint32_t kFrameCount = 2;
 		static const uint32_t kMaxSceneObjectCount = 65535;
 		static const uint32_t kMaxTextureCount = 2048;
+		const int32_t kShadowMapWidth = 512;
+		const int32_t kShadowMapHeight = 512;
 
 		uint32_t frame_index_ = 0;
 		std::vector<Frame> frames_;

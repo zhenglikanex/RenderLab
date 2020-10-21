@@ -251,16 +251,19 @@ void Aurora::OpenGLGraphicsManagerCommonBase::ClearDebugBuffers()
 
 bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFrameContext& context)
 {	
-	
-
 	GLuint block_index = glGetUniformBlockIndex(current_shader_, "DrawFrameConstants");
-	GLint block_size;
-	GLuint ubo;
-	glGenBuffers(1, &ubo);
-	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-	glGetActiveUniformBlockiv(current_shader_, block_index, GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
 
-	GLubyte* block_buffer = new GLubyte[block_size];
+	if (!ubo_buffer_)
+	{
+		glGenBuffers(1, &ubo_buffer_);
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo_buffer_);
+		GLint block_size;
+		glGetActiveUniformBlockiv(current_shader_, block_index, GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
+
+		glBufferData(GL_UNIFORM_BUFFER, block_size, nullptr, GL_DYNAMIC_DRAW);
+	}
+
+	GLubyte* block_buffer = static_cast<GLubyte*>(glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY));
 	
 	{
 		// 查询每个变量的偏移位置
@@ -322,13 +325,9 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 		memcpy(block_buffer + offset[0xA], &context.lights[i].light_vp, sizeof(glm::mat4));
 	}
 
-	glBufferData(GL_UNIFORM_BUFFER, block_size, block_buffer, GL_DYNAMIC_DRAW);
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
 
-	glBindBufferBase(GL_UNIFORM_BUFFER, block_index, ubo);
-
-	buffers_.push_back(ubo);
-
-	delete[] block_buffer;
+	glBindBufferBase(GL_UNIFORM_BUFFER, block_index, ubo_buffer_);
 
 	return true;
 }
@@ -714,9 +713,6 @@ void OpenGLGraphicsManagerCommonBase::DrawBatchDepthOnly(const DrawBatchContext&
 
 intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMapArray(uint32_t count)
 {
-	const int32_t kShadowMapWidth = 1024;
-	const int32_t kShadowMapHeight = 1024;
-
 	GLuint shadowmap;
 	glGenTextures(1, &shadowmap);
 	glActiveTexture(GL_TEXTURE0 + shadowmap);
@@ -733,9 +729,6 @@ intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMapArray(uint32_t count)
 
 void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const intptr_t shadowmap,uint32_t layer_index)
 {
-	const int32_t kShadowMapWidth = 1024;
-	const int32_t kShadowMapHeight = 1024;
-
 	glGenFramebuffers(1, &shadowmap_framebuffer_name_);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowmap_framebuffer_name_);
 	
@@ -773,6 +766,10 @@ void OpenGLGraphicsManagerCommonBase::SetShadowMap(const intptr_t shadowmap)
 	GLint texture_id = (GLint)shadowmap;
 	glActiveTexture(GL_TEXTURE0 + texture_id);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	bool result = SetShaderParameters("shadowMap", texture_id);
 	assert(result);
 
