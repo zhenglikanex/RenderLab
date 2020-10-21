@@ -250,133 +250,85 @@ void Aurora::OpenGLGraphicsManagerCommonBase::ClearDebugBuffers()
 #endif
 
 bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFrameContext& context)
-{
-	unsigned int location;
+{	
 	
-	GLuint block_index = glGetUniformBlockIndex(current_shader_, "DrawFramConstants");
+
+	GLuint block_index = glGetUniformBlockIndex(current_shader_, "DrawFrameConstants");
+	GLint block_size;
+	GLuint ubo;
+	glGenBuffers(1, &ubo);
+	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+	glGetActiveUniformBlockiv(current_shader_, block_index, GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
+
+	GLubyte* block_buffer = new GLubyte[block_size];
 	
-	GLint blockSize;
-
-
-	int location;
-
-	location = glGetUniformLocation(current_shader_, "worldMatrix");
-	if (location == -1)
 	{
-		return false;
-	}
-	glUniformMatrix4fv(location, 1, false, glm::value_ptr(context.world_matrix));
+		// 查询每个变量的偏移位置
+		const GLchar *names[] = { "worldMatrix","viewMatrix","projectionMatrix","ambientColor","numLights" };
+		GLuint indices[5];
+		glGetUniformIndices(current_shader_, 5, names, indices);
 
-	location = glGetUniformLocation(current_shader_, "viewMatrix");
-	if (location == -1)
-	{
-		return false;
-	}
-	glUniformMatrix4fv(location, 1, false, glm::value_ptr(context.view_matrix));
+		GLint offset[5];
+		glGetActiveUniformsiv(current_shader_, 5, indices, GL_UNIFORM_OFFSET, offset);
 
-	location = glGetUniformLocation(current_shader_, "projectionMatrix");
-	if (location == -1)
-	{
-		return false;
-	}
-	glUniformMatrix4fv(location, 1, false, glm::value_ptr(context.projection_matrix));
+		memcpy(block_buffer + offset[0], &context.world_matrix, sizeof(glm::mat4));
+		memcpy(block_buffer + offset[1], &context.view_matrix, sizeof(glm::mat4));
+		memcpy(block_buffer + offset[2], &context.projection_matrix, sizeof(glm::mat4));
+		memcpy(block_buffer + offset[3], &context.ambient_color, sizeof(glm::vec3));
 
-	location = glGetUniformLocation(current_shader_, "ambientColor");
-	if (location == -1)
-	{
-		return false;
+		GLint num_lights = (GLint)context.lights.size();
+		memcpy(block_buffer + offset[4], &context.lights, sizeof(GLint));
 	}
-	glUniform3fv(location, 1, glm::value_ptr(context.ambient_color));
 
-	location = glGetUniformLocation(current_shader_, "numLights");
-	if (location == -1)
-	{
-		return false;
-	}
-	glUniform1i(location, context.lights.size());
-
-	std::string name;
 	for (int i = 0; i < context.lights.size(); ++i)
 	{
-		auto& light = context.lights[i];
-		name = "allLights[" + std::to_string(i) + "].lightPosition";
-		location = glGetUniformLocation(current_shader_, name.c_str());
-		if (location == -1)
-		{
-			return false;
-		}
-		glUniform4fv(location, 1, glm::value_ptr(light.light_position));
+		char uniformNames[16][256];
 
-		name = "allLights[" + std::to_string(i) + "].lightSize";
-		location = glGetUniformLocation(current_shader_, name.c_str());
-		if (location == -1)
-		{
-			return false;
-		}
-		glUniform2fv(location, 1, glm::value_ptr(light.light_size));
+		sprintf(uniformNames[0x0], "allLights[%zd].lightPosition", i);
+		sprintf(uniformNames[0x1], "allLights[%zd].lightColor", i);
+		sprintf(uniformNames[0x2], "allLights[%zd].lightIntensity", i);
+		sprintf(uniformNames[0x3], "allLights[%zd].lightDirection", i);
+		sprintf(uniformNames[0x4], "allLights[%zd].lightSize", i);
+		sprintf(uniformNames[0x5], "allLights[%zd].lightDistAttenCurveType", i);
+		sprintf(uniformNames[0x6], "allLights[%zd].lightDistAttenCurveParams", i);
+		sprintf(uniformNames[0x7], "allLights[%zd].lightAngleAttenCurveType", i);
+		sprintf(uniformNames[0x8], "allLights[%zd].lightAngleAttenCurveParams", i);
+		sprintf(uniformNames[0x9], "allLights[%zd].lightShadowMapIndex", i);
+		sprintf(uniformNames[0xA], "allLights[%zd].lightVP", i);
 
-		name = "allLights[" + std::to_string(i) + "].lightColor";
-		location = glGetUniformLocation(current_shader_, name.c_str());
-		if (location == -1)
-		{
-			return false;
-		}
-		glUniform4fv(location, 1, glm::value_ptr(light.light_color));
-		if (location == -1)
-		{
-			return false;
-		}
+		const char* names[16] = {
+			uniformNames[0x0], uniformNames[0x1], uniformNames[0x2], uniformNames[0x3],
+			uniformNames[0x4], uniformNames[0x5], uniformNames[0x6], uniformNames[0x7],
+			uniformNames[0x8], uniformNames[0x9], uniformNames[0xA], uniformNames[0xB],
+			uniformNames[0xC], uniformNames[0xD], uniformNames[0xE], uniformNames[0xF]
+		};
 
-		name = "allLights[" + std::to_string(i) + "].lightDirection";
-		location = glGetUniformLocation(current_shader_, name.c_str());
-		if (location == -1)
-		{
-			return false;
-		}
-		glUniform4fv(location, 1, glm::value_ptr(light.light_direction));
+		GLuint indices[0xB];
+		glGetUniformIndices(current_shader_, 0xB, names, indices);
+		GLint offset[0xB];
+		glGetActiveUniformsiv(current_shader_, 0xB, indices, GL_UNIFORM_OFFSET, offset);
 
-		name = "allLights[" + std::to_string(i) + "].lightIntensity";
-		location = glGetUniformLocation(current_shader_, name.c_str());
-		if (location == -1)
-		{
-			return false;
-		}
-		glUniform1f(location, light.light_intensity);
 
-		name = "allLights[" + std::to_string(i) + "].lightDistAttenCurveType";
-		location = glGetUniformLocation(current_shader_, name.c_str());
-		if (location == -1)
-		{
-			return false;
-		}
-		GLint dist_atten_type = (GLint)light.light_dist_atten_curve_type;
-		glUniform1i(location, dist_atten_type);
-
-		name = "allLights[" + std::to_string(i) + "].lightDistAttenCurveParams";
-		location = glGetUniformLocation(current_shader_, name.c_str());
-		if (location == -1)
-		{
-			return false;
-		}
-		glUniform1fv(location, 5, light.light_dist_atten_curve_params);
-
-		name = "allLights[" + std::to_string(i) + "].lightAngleAttenCurveType";
-		location = glGetUniformLocation(current_shader_, name.c_str());
-		if (location == -1)
-		{
-			return false;
-		}
-		GLint angle_atten_type = (GLint)light.light_angle_atten_curve_type;
-		glUniform1i(location, angle_atten_type);
-
-		name = "allLights[" + std::to_string(i) + "].lightAngleAttenCurveParams";
-		location = glGetUniformLocation(current_shader_, name.c_str());
-		if (location == -1)
-		{
-			return false;
-		}
-		glUniform1fv(location, 5, light.light_angle_atten_curve_params);
+		memcpy(block_buffer + offset[0x0], &context.lights[i].light_position, sizeof(glm::vec4));
+		memcpy(block_buffer + offset[0x1], &context.lights[i].light_color, sizeof(glm::vec4));
+		memcpy(block_buffer + offset[0x2], &context.lights[i].light_intensity, sizeof(float));
+		memcpy(block_buffer + offset[0x3], &context.lights[i].light_direction, sizeof(glm::vec4));
+		memcpy(block_buffer + offset[0x4], &context.lights[i].light_size, sizeof(glm::vec2));
+		memcpy(block_buffer + offset[0x5], &context.lights[i].light_dist_atten_curve_type, sizeof(int32_t));
+		memcpy(block_buffer + offset[0x6], &context.lights[i].light_dist_atten_curve_params[0], sizeof(float) * 5);
+		memcpy(block_buffer + offset[0x7], &context.lights[i].light_angle_atten_curve_type, sizeof(int32_t));
+		memcpy(block_buffer + offset[0x8], &context.lights[i].light_angle_atten_curve_params[0], sizeof(float) * 5);
+		memcpy(block_buffer + offset[0x9], &context.lights[i].light_shadowmap_index, sizeof(int32_t));
+		memcpy(block_buffer + offset[0xA], &context.lights[i].light_vp, sizeof(glm::mat4));
 	}
+
+	glBufferData(GL_UNIFORM_BUFFER, block_size, block_buffer, GL_DYNAMIC_DRAW);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, block_index, ubo);
+
+	buffers_.push_back(ubo);
+
+	delete[] block_buffer;
 
 	return true;
 }
@@ -804,23 +756,7 @@ void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const i
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, kShadowMapWidth, kShadowMapHeight);
 
-	glm::mat4 depthVP;
-	glm::mat4 view;
-	glm::mat4 projection;
-	glm::vec3 position = light.light_position;
-	glm::vec3 lookAt = light.light_position + light.light_direction;
-	glm::vec3 up = { 0.0f,0.0f,1.0f };
-	view = glm::lookAtRH(position, lookAt,up);
-
-	float fov = PI / 3.0f;
-	float near_clip_distance = 1.0f;
-	float far_clip_distance = 100.0f;
-
-	projection = glm::perspectiveFovRH(fov,(float)kShadowMapWidth,(float)kShadowMapHeight,near_clip_distance,far_clip_distance);
-	/*GLfloat near_plane = 1.0f, far_plane = 100.0f;*/
-	//projection  = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_clip_distance, far_clip_distance);
-	depthVP = projection * view;
-	SetShaderParameters("depthVP", depthVP);
+	SetShaderParameters("depthVP", light.light_vp);
 }
 
 void OpenGLGraphicsManagerCommonBase::EndShadowMap(const intptr_t shadowmap,uint32_t layer_index)
@@ -834,7 +770,12 @@ void OpenGLGraphicsManagerCommonBase::EndShadowMap(const intptr_t shadowmap,uint
 
 void OpenGLGraphicsManagerCommonBase::SetShadowMap(const intptr_t shadowmap)
 {
-	
+	GLint texture_id = (GLint)shadowmap;
+	glActiveTexture(GL_TEXTURE0 + texture_id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
+	bool result = SetShaderParameters("shadowMap", texture_id);
+	assert(result);
+
 }
 
 void OpenGLGraphicsManagerCommonBase::DestroyShadowMap(intptr_t& shadowmap)

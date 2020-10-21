@@ -14,11 +14,11 @@ struct Light {
 	int lightAngleAttenCurveType;
 	float lightAngleAttenCurveParams[5];
     vec2 lightSize;
-    int lighShadowMapIndex;
+    int lightShadowMapIndex;
     mat4 lightVP;
 };
 
-uniform DrawFrameConstants {
+layout(std140) uniform DrawFrameConstants {
     mat4 worldMatrix;
     mat4 viewMatrix;
     mat4 projectionMatrix;
