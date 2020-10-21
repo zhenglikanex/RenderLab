@@ -64,12 +64,12 @@ float shadow_test(const Light light,const float cosTheta)
 
     // 裴松分布
     const vec2 possonDisk[4] = vec2[]
-    {
+    (
         vec2( -0.94201624, -0.39906216 ),
         vec2( 0.94558609, -0.76890725 ),
         vec2( -0.094184101, -0.92938870 ),
         vec2( 0.34495938, 0.29387760 )
-    }
+    );
 
     // (-1.0,1.0) -> (0.0,1.0)
     v_light_space = depth_bias * v_light_space;
@@ -83,7 +83,7 @@ float shadow_test(const Light light,const float cosTheta)
         for(int i = 0;i<4;i++)
         {
             float near_occ = texture(shadowMap,vec3(v_light_space.xy + possonDisk[i] / 700.0f,light.lightShadowMapIndex)).r;
-            if(v_light_space.z - nearest2D > bias)
+            if(v_light_space.z - near_occ > bias)
             {
                 visibility -= 0.2f;
             }
@@ -172,11 +172,22 @@ vec3 apply_light(Light light)
     
     float lightToSurfAngle = acos(dot(L,-light_dir));
 
+    float atten_params[5];
+    atten_params[0] = light.lightAngleAttenCurveParams_0;
+    atten_params[1] = light.lightAngleAttenCurveParams_1;
+    atten_params[2] = light.lightAngleAttenCurveParams_2;
+    atten_params[3] = light.lightAngleAttenCurveParams_3;
+    atten_params[4] = light.lightAngleAttenCurveParams_4;
     // angle attenuation
-    float atten = apply_atten_curve(lightToSurfAngle,light.lightAngleAttenCurveType,light.lightAngleAttenCurveParams);
+    float atten = apply_atten_curve(lightToSurfAngle,light.lightAngleAttenCurveType,atten_params);
     
+    atten_params[0] = light.lightDistAttenCurveParams_0;
+    atten_params[1] = light.lightDistAttenCurveParams_1;
+    atten_params[2] = light.lightDistAttenCurveParams_2;
+    atten_params[3] = light.lightDistAttenCurveParams_3;
+    atten_params[4] = light.lightDistAttenCurveParams_4;
     // distance attenuation
-    atten *= apply_atten_curve(lightToSurfDist,light.lightDistAttenCurveType,light.lightDistAttenCurveParams);
+    atten *= apply_atten_curve(lightToSurfDist,light.lightDistAttenCurveType,atten_params);
 
     vec3 R = L - 2.0f * dot(L, N) *  N; // 等於reflect(L,N)
     //vec3 R = reflect(L,N);
@@ -218,8 +229,15 @@ vec3 apply_areaLight(Light light)
     float lightToSurfDist = length(L);
     L = normalize(L);
 
+    
+    float atten_params[5];
+    atten_params[0] = light.lightDistAttenCurveParams_0;
+    atten_params[1] = light.lightDistAttenCurveParams_1;
+    atten_params[2] = light.lightDistAttenCurveParams_2;
+    atten_params[3] = light.lightDistAttenCurveParams_3;
+    atten_params[4] = light.lightDistAttenCurveParams_4;
     // distance attenuation
-    float atten = apply_atten_curve(lightToSurfDist, light.lightDistAttenCurveType, light.lightDistAttenCurveParams);
+    float atten = apply_atten_curve(lightToSurfDist, light.lightDistAttenCurveType, atten_params);
 
     vec3 linearColor = vec3(0.0f);
 

@@ -252,18 +252,28 @@ void Aurora::OpenGLGraphicsManagerCommonBase::ClearDebugBuffers()
 bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFrameContext& context)
 {	
 	GLuint block_index = glGetUniformBlockIndex(current_shader_, "DrawFrameConstants");
+	if (block_index == GL_INVALID_INDEX)
+	{
+		return true;
+	}
 
+	GLint block_size;
 	if (!ubo_buffer_)
 	{
 		glGenBuffers(1, &ubo_buffer_);
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_buffer_);
-		GLint block_size;
+		
 		glGetActiveUniformBlockiv(current_shader_, block_index, GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
 
 		glBufferData(GL_UNIFORM_BUFFER, block_size, nullptr, GL_DYNAMIC_DRAW);
 	}
+	else
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo_buffer_);
+		glGetActiveUniformBlockiv(current_shader_, block_index, GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
+	}
 
-	GLubyte* block_buffer = static_cast<GLubyte*>(glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY));
+	GLubyte* block_buffer = static_cast<GLubyte*>(glMapBufferRange(GL_UNIFORM_BUFFER,0,block_size,GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT));
 	
 	{
 		// 查询每个变量的偏移位置
@@ -285,7 +295,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 
 	for (int i = 0; i < context.lights.size(); ++i)
 	{
-		char uniformNames[16][256];
+		char uniformNames[11][256];
 
 		sprintf(uniformNames[0x0], "allLights[%zd].lightPosition", i);
 		sprintf(uniformNames[0x1], "allLights[%zd].lightColor", i);
@@ -293,23 +303,22 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 		sprintf(uniformNames[0x3], "allLights[%zd].lightDirection", i);
 		sprintf(uniformNames[0x4], "allLights[%zd].lightSize", i);
 		sprintf(uniformNames[0x5], "allLights[%zd].lightDistAttenCurveType", i);
-		sprintf(uniformNames[0x6], "allLights[%zd].lightDistAttenCurveParams", i);
+		sprintf(uniformNames[0x6], "allLights[%zd].lightDistAttenCurveParams_0", i);
 		sprintf(uniformNames[0x7], "allLights[%zd].lightAngleAttenCurveType", i);
-		sprintf(uniformNames[0x8], "allLights[%zd].lightAngleAttenCurveParams", i);
+		sprintf(uniformNames[0x8], "allLights[%zd].lightAngleAttenCurveParams_0", i);
 		sprintf(uniformNames[0x9], "allLights[%zd].lightShadowMapIndex", i);
 		sprintf(uniformNames[0xA], "allLights[%zd].lightVP", i);
 
-		const char* names[16] = {
+		const char* names[11] = {
 			uniformNames[0x0], uniformNames[0x1], uniformNames[0x2], uniformNames[0x3],
 			uniformNames[0x4], uniformNames[0x5], uniformNames[0x6], uniformNames[0x7],
-			uniformNames[0x8], uniformNames[0x9], uniformNames[0xA], uniformNames[0xB],
-			uniformNames[0xC], uniformNames[0xD], uniformNames[0xE], uniformNames[0xF]
+			uniformNames[0x8], uniformNames[0x9], uniformNames[0xA]
 		};
 
-		GLuint indices[0xB];
-		glGetUniformIndices(current_shader_, 0xB, names, indices);
-		GLint offset[0xB];
-		glGetActiveUniformsiv(current_shader_, 0xB, indices, GL_UNIFORM_OFFSET, offset);
+		GLuint indices[11];
+		glGetUniformIndices(current_shader_, 11, names, indices);
+		GLint offset[11];
+		glGetActiveUniformsiv(current_shader_, 11, indices, GL_UNIFORM_OFFSET, offset);
 
 
 		memcpy(block_buffer + offset[0x0], &context.lights[i].light_position, sizeof(glm::vec4));
@@ -327,6 +336,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 
+	glUniformBlockBinding(current_shader_, block_index, 0);
 	glBindBufferBase(GL_UNIFORM_BUFFER, block_index, ubo_buffer_);
 
 	return true;

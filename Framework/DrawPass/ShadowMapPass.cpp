@@ -11,7 +11,7 @@ void ShadowMapPass::Draw(Frame& frame)
 	auto shader_program = g_app->GetEngine()->GetShaderManager()->GetDefaultShaderProgram(DefaultShaderIndex::ShadowMap);
 	auto& graphics_manager = g_app->GetEngine()->GetGraphicsManager();
 	graphics_manager->UseShaderProgram(shader_program);
-	graphics_manager->SetPerFrameConstants(frame.frame_context);
+	//graphics_manager->SetPerFrameConstants(frame.frame_context);
 
 	if (frame.shadowmap != -1)
 	{
@@ -52,7 +52,7 @@ void ShadowMapPass::Draw(Frame& frame)
 
 				graphics_manager->EndShadowMap(shadow_map,index);
 
-				++index;
+				light.light_shadowmap_index = index++;
 			}
 		}
 	}
