@@ -1,6 +1,7 @@
-uniform bool usingNormalMap;
+////////////////////////////////////////////////////////////////////////////////
+// Filename: basic.ps 
+////////////////////////////////////////////////////////////////////////////////
 
-uniform sampler2D normalMap;
 /////////////////////
 // INPUT VARIABLES //
 /////////////////////
@@ -13,7 +14,6 @@ in vec2 uv;
 // OUTPUT VARIABLES //
 //////////////////////
 out vec4 outputColor;
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
@@ -34,9 +34,9 @@ vec3 linePlaneIntersect(vec3 line_start, vec3 line_dir, vec3 center_of_plane, ve
     return line_start + line_dir * (dot(center_of_plane - line_start, normal_of_plane) / dot(line_dir, normal_of_plane));
 }
 
-float linear_interpolate(float t,float begin,float end)
-{    
-     if (t < begin)
+float linear_interpolate(float t, float begin, float end)
+{
+    if (t < begin)
     {
         return 1.0f;
     }
@@ -50,59 +50,17 @@ float linear_interpolate(float t,float begin,float end)
     }
 }
 
-float shadow_test(const Light light,const float cosTheta)
-{
-    vec4 v_light_space = light.lightVP * v_world;
-    v_light_space /= v_light_space.w;
-
-    const mat4 depth_bias = mat4(
-        vec4(0.5f,0.0f,0.0f,0.0f),
-        vec4(0.0f,0.5f,0.0f,0.0f),
-        vec4(0.0f,0.0f,0.5f,0.0f),
-        vec4(0.5f,0.5f,0.5f,1.0f)
-    );
-
-    // 裴松分布
-    const vec2 possonDisk[4] = vec2[]
-    (
-        vec2( -0.94201624, -0.39906216 ),
-        vec2( 0.94558609, -0.76890725 ),
-        vec2( -0.094184101, -0.92938870 ),
-        vec2( 0.34495938, 0.29387760 )
-    );
-
-    // (-1.0,1.0) -> (0.0,1.0)
-    v_light_space = depth_bias * v_light_space;
-    // shadow test
-    float visibility = 1.0f;
-    if(light.lightShadowMapIndex != -1)
-    {
-        // 根据斜率修改偏差，光用0.005在曲面上还是会有暗疮
-        float bias =  0.005 * tan(acos(cosTheta)); // cosTheta is dot( n,l ), clamped between 0 and 1;
-        bias = clamp(bias,0,0.01);
-        for(int i = 0;i<4;i++)
-        {
-            float near_occ = texture(shadowMap,vec3(v_light_space.xy + possonDisk[i] / 700.0f,light.lightShadowMapIndex)).r;
-            if(v_light_space.z - near_occ > bias)
-            {
-                visibility -= 0.2f;
-            }
-        }
-    }
-
-    return visibility;
-}
-
-float apply_atten_curve(float dist,int atten_type,float atten_params[5])
+float apply_atten_curve(float dist, int atten_type, float atten_params[5])
 {
     float atten = 1.0f;
+
     switch(atten_type)
     {
         case 1: // linear
         {
             float begin_atten = atten_params[0];
             float end_atten = atten_params[1];
-            atten = linear_interpolate(dist,begin_atten,end_atten);
+            atten = linear_interpolate(dist, begin_atten, end_atten);
             break;
         }
         case 2: // smooth
@@ -138,71 +96,112 @@ float apply_atten_curve(float dist,int atten_type,float atten_params[5])
         }
         case 0:
         default:
-            break;
+            break; // no attenuation
     }
+
     return atten;
 }
 
-vec3 apply_light(Light light)
-{
-    vec3 N = normalize(normal.xyz);
-    /*
-    if(usingNormalMap)
-        N = normalize(normal.xyz);
-    else
-        N = normalize()
-    */
-	
-    vec3 light_dir = normalize((viewMatrix * worldMatrix * normalize(light.lightDirection)).xyz);
-    vec3 L;
-    if(light.lightPosition.w == 0.0f)
+float shadow_test(const Light light, const float cosTheta) {
+    vec4 v_light_space = light.lightVP * v_world;
+    v_light_space /= v_light_space.w;
+
+    const mat4 depth_bias = mat4 (
+        vec4(0.5f, 0.0f, 0.0f, 0.0f),
+        vec4(0.0f, 0.5f, 0.0f, 0.0f),
+        vec4(0.0f, 0.0f, 0.5f, 0.0f),
+        vec4(0.5f, 0.5f, 0.5f, 1.0f)
+    );
+
+    const vec2 poissonDisk[4] = vec2[](
+        vec2( -0.94201624, -0.39906216 ),
+        vec2( 0.94558609, -0.76890725 ),
+        vec2( -0.094184101, -0.92938870 ),
+        vec2( 0.34495938, 0.29387760 )
+    );
+
+    v_light_space = depth_bias * v_light_space;
+
+    // shadow test
+    float visibility = 1.0f;
+    if (light.lightShadowMapIndex != -1) // the light cast shadow
     {
-        L = -light_dir; // 平行光所有像素的光照方向都一樣
-    } 
-    else 
+        float bias = 5e-4 * tan(acos(cosTheta)); // cosTheta is dot( n,l ), clamped between 0 and 1
+        bias = clamp(bias, 0, 0.01);
+        for (int i = 0; i < 4; i++)
+        {
+            float near_occ = texture(shadowMap, vec3(v_light_space.xy + poissonDisk[i] / 700.0f, light.lightShadowMapIndex)).r;
+            if (v_light_space.z - near_occ > bias)
+            {
+                // we are in the shadow
+                visibility -= 0.2f;
+            }
+        }
+    }
+
+    return visibility;
+}
+
+vec3 apply_light(const Light light) {
+    vec3 N = normalize(normal.xyz);
+    vec3 L;
+    vec3 light_dir = normalize((viewMatrix * worldMatrix * light.lightDirection).xyz);
+
+    if (light.lightPosition.w == 0.0f)
+    {
+        L = -light_dir;
+    }
+    else
     {
         L = (viewMatrix * worldMatrix * light.lightPosition).xyz - v.xyz;
     }
-    
+
     float lightToSurfDist = length(L);
+
     L = normalize(L);
 
-    float costTheta = clamp(dot(N,L),0.0f,1.0f);
-    float visibility = shadow_test(light,costTheta);
-    
-    float lightToSurfAngle = acos(dot(L,-light_dir));
+    float cosTheta = clamp(dot(N, L), 0.0f, 1.0f);
 
+    // shadow test
+    float visibility = shadow_test(light, cosTheta);
+
+    float lightToSurfAngle = acos(dot(L, -light_dir));
+
+    // angle attenuation
     float atten_params[5];
     atten_params[0] = light.lightAngleAttenCurveParams_0;
     atten_params[1] = light.lightAngleAttenCurveParams_1;
     atten_params[2] = light.lightAngleAttenCurveParams_2;
     atten_params[3] = light.lightAngleAttenCurveParams_3;
     atten_params[4] = light.lightAngleAttenCurveParams_4;
-    // angle attenuation
-    float atten = apply_atten_curve(lightToSurfAngle,light.lightAngleAttenCurveType,atten_params);
-    
+    float atten = apply_atten_curve(lightToSurfAngle, light.lightAngleAttenCurveType, atten_params);
+
+    // distance attenuation
     atten_params[0] = light.lightDistAttenCurveParams_0;
     atten_params[1] = light.lightDistAttenCurveParams_1;
     atten_params[2] = light.lightDistAttenCurveParams_2;
     atten_params[3] = light.lightDistAttenCurveParams_3;
     atten_params[4] = light.lightDistAttenCurveParams_4;
-    // distance attenuation
-    atten *= apply_atten_curve(lightToSurfDist,light.lightDistAttenCurveType,atten_params);
+    atten *= apply_atten_curve(lightToSurfDist, light.lightDistAttenCurveType, atten_params);
 
-    vec3 R = L - 2.0f * dot(L, N) *  N; // 等於reflect(L,N)
-    //vec3 R = reflect(L,N);
-    vec3 V = normalize(v.xyz);
+    vec3 R = normalize(2.0f * dot(L, N) *  N - L);
+    vec3 V = normalize(-v.xyz);
+
     vec3 linearColor;
+
     if (usingDiffuseMap)
-        linearColor = ambientColor.rgb + light.lightIntensity * atten * light.lightColor.rgb * texture(diffuseMap, uv).rgb * costTheta + specularColor.rgb * pow(clamp(dot(R, V), 0.0f, 1.0f), specularPower);
+    {
+        linearColor = light.lightIntensity * atten * light.lightColor.rgb * (texture(diffuseMap, uv).rgb * cosTheta + specularColor.rgb * pow(clamp(dot(R, V), 0.0f, 1.0f), specularPower)); 
+    }
     else
-        linearColor = ambientColor.rgb + light.lightIntensity * atten * light.lightColor.rgb * diffuseColor.rgb * clamp(dot(N, L), 0.0f, 1.0f) + specularColor.rgb * pow(clamp(dot(R,V), 0.0f, 1.0f), specularPower);
-        //outputColor = vec4(ambientColor,1.0f);
-    
+    {
+        linearColor = light.lightIntensity * atten * light.lightColor.rgb * (diffuseColor.rgb * cosTheta + specularColor.rgb * pow(clamp(dot(R, V), 0.0f, 1.0f), specularPower)); 
+    }
+
     return linearColor * visibility;
 }
 
-vec3 apply_areaLight(Light light)
+vec3 apply_areaLight(const Light light)
 {
     vec3 N = normalize(normal.xyz);
     vec3 right = normalize((viewMatrix * worldMatrix * vec4(1.0f, 0.0f, 0.0f, 0.0f)).xyz);
@@ -229,20 +228,19 @@ vec3 apply_areaLight(Light light)
     float lightToSurfDist = length(L);
     L = normalize(L);
 
-    
+    // distance attenuation
     float atten_params[5];
     atten_params[0] = light.lightDistAttenCurveParams_0;
     atten_params[1] = light.lightDistAttenCurveParams_1;
     atten_params[2] = light.lightDistAttenCurveParams_2;
     atten_params[3] = light.lightDistAttenCurveParams_3;
     atten_params[4] = light.lightDistAttenCurveParams_4;
-    // distance attenuation
     float atten = apply_atten_curve(lightToSurfDist, light.lightDistAttenCurveType, atten_params);
 
     vec3 linearColor = vec3(0.0f);
 
     float pnDotL = dot(pnormal, -L);
-    float nDotL = dot(N,L);
+    float nDotL = dot(N, L);
 
     if (nDotL > 0.0f && isAbovePlane(v.xyz, ppos, pnormal)) //looking at the plane
     {
@@ -273,9 +271,9 @@ vec3 apply_areaLight(Light light)
 
 void main(void)
 {
-	vec3 linearColor = vec3(0);
-	for(int i = 0;i<numLights;i++)
-	{
+    vec3 linearColor = vec3(0.0f);
+    for (int i = 0; i < numLights; i++)
+    {
         if (allLights[i].lightSize.x > 0.0f || allLights[i].lightSize.y > 0.0f)
         {
             linearColor += apply_areaLight(allLights[i]); 
@@ -284,9 +282,11 @@ void main(void)
         {
             linearColor += apply_light(allLights[i]); 
         }
-	}
-	
-    // gamma correction
-	outputColor = vec4(ambientColor.rgb + clamp(pow(linearColor, vec3(1.0f/2.2f)), 0.0f, 1.0f), 1.0f);
-}
+    }
 
+    // no-gamma correction
+    // outputColor = vec4(clamp(linearColor, 0.0f, 1.0f), 1.0f);
+
+    // gamma correction
+    outputColor = vec4(ambientColor.rgb + clamp(pow(linearColor, vec3(1.0f/2.2f)), 0.0f, 1.0f), 1.0f);
+}
