@@ -290,7 +290,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 		memcpy(block_buffer + offset[3], &context.ambient_color, sizeof(glm::vec3));
 
 		GLint num_lights = (GLint)context.lights.size();
-		memcpy(block_buffer + offset[4], &context.lights, sizeof(GLint));
+		memcpy(block_buffer + offset[4], &num_lights, sizeof(GLint));
 	}
 
 	for (int i = 0; i < context.lights.size(); ++i)
@@ -758,6 +758,24 @@ void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const i
 	glDepthMask(TRUE);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, kShadowMapWidth, kShadowMapHeight);
+
+	glm::mat4 depthVP;
+	glm::mat4 view;
+	glm::mat4 projection;
+	glm::vec3 position = light.light_position;
+	glm::vec3 lookAt = light.light_position + light.light_direction;
+	glm::vec3 up = { 0.0f,0.0f,1.0f };
+	view = glm::lookAtRH(position, lookAt, up);
+
+	float fov = PI / 3.0f;
+	float near_clip_distance = 1.0f;
+	float far_clip_distance = 100.0f;
+
+	projection = glm::perspectiveFovRH(fov, (float)kShadowMapWidth, (float)kShadowMapHeight, near_clip_distance, far_clip_distance);
+	/*GLfloat near_plane = 1.0f, far_plane = 100.0f;*/
+	//projection  = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_clip_distance, far_clip_distance);
+	depthVP = projection * view;
+	//SetShaderParameters("depthVP", depthVP);
 
 	SetShaderParameters("depthVP", light.light_vp);
 }

@@ -162,7 +162,7 @@ void GraphicsManager::CalculateLights()
 			glm::vec3 look_at = position + glm::vec3(light_param.light_direction);
 			glm::vec3 up = { 0.0f,0.0f,1.0f };
 
-			glm::mat4 view = glm::lookAt(position, look_at, up);
+			glm::mat4 view = glm::lookAtRH(position, look_at, up);
 			glm::mat4 projection = glm::identity<glm::mat4>();
 
 			if (light->GetType() == SceneObjectType::kSceneObjectTypeLightInfi)
@@ -180,7 +180,7 @@ void GraphicsManager::CalculateLights()
 				float near_clip_dist = 1.0f;
 				float far_clip_dist = 100.0f;
 				float screen_aspect = 1.0f;
-				glm::mat4 projection = glm::perspectiveFov(fov, 100.0f, 100.0f, near_clip_dist, far_clip_dist);
+				projection = glm::perspectiveFovRH(fov, 100.0f, 100.0f, near_clip_dist, far_clip_dist);
 			}
 			else if (light->GetType() == SceneObjectType::kSceneObjectTypeLightArea)
 			{
@@ -188,7 +188,7 @@ void GraphicsManager::CalculateLights()
 				light_param.light_size = area_light->GetDimension();
 			}
 
-			light_param.light_vp = view * projection;
+			light_param.light_vp = projection * view;
 
 			frame_context.lights.emplace_back(std::move(light_param));
 		}
