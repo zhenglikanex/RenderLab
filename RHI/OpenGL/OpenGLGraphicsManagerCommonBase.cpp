@@ -617,6 +617,11 @@ void OpenGLGraphicsManagerCommonBase::ClearBuffers()
 		glDeleteBuffers(1, &buf);
 	}
 
+	if (ubo_buffer_)
+	{
+		glDeleteBuffers(1, &ubo_buffer_);
+	}
+
 	for (auto& texture : textures_)
 	{
 		glDeleteTextures(1, &texture);
