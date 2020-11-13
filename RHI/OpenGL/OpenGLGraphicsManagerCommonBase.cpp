@@ -656,7 +656,7 @@ void OpenGLGraphicsManagerCommonBase::DrawBatch(const DrawBatchContext& context)
 
 	glBindVertexArray(dbc.vao);
 
-	SetShaderParameters("usingdiffuseMap", false);
+	SetShaderParameters("usingDiffuseMap", false);
 	SetShaderParameters("usingNormalMap", false);
 
 	//后面根据材质进行分组渲染
@@ -668,7 +668,7 @@ void OpenGLGraphicsManagerCommonBase::DrawBatch(const DrawBatchContext& context)
 			SetShaderParameters("diffuseMap", texture_index_[color.ValueMap->GetName()]);
 
 			// 告诉shader使用texture
-			SetShaderParameters("usingdiffuseMap", true);
+			SetShaderParameters("usingDiffuseMap", true);
 		}
 		else
 		{

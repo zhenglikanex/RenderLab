@@ -136,7 +136,7 @@ GeometryObject $geometry2		// Cube
 	}
 }
 
-LightObject $light1 (type = "infinite", shadow = false)		// Sun
+LightObject $light1 (type = "infinite", shadow = true)		// Sun
 {
 	Color (attrib = "light") {float[3] {{1.0, 0.27297642827033997, 0.30094948410987854}}}
 }
