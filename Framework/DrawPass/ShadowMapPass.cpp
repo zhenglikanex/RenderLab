@@ -28,8 +28,8 @@ void ShadowMapPass::Draw(Frame& frame)
 			++cast_shadow_count;
 		}
 	}
-	const uint32_t kShadowMapWidth = 512;
-	const uint32_t kShadowMapHeight = 512;
+	const uint32_t kShadowMapWidth = 2048;
+	const uint32_t kShadowMapHeight = 2048;
 	uint32_t index = 0;
 	if (cast_shadow_count > 0)
 	{

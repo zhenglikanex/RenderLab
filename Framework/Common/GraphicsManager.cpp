@@ -169,6 +169,8 @@ void GraphicsManager::CalculateLights()
 
 			if (light->GetType() == SceneObjectType::kSceneObjectTypeLightInfi)
 			{
+				light_param.light_type = LightType::Infinity;
+
 				glm::vec4 target = { 0.0f,0.0f,0.0f,1.0f };
 				auto camera_node = scene.GetFirstCameraNode();
 				if (camera_node)
@@ -187,12 +189,12 @@ void GraphicsManager::CalculateLights()
 				glm::vec3 position = light_param.light_position;
 				glm::vec3 look_at = target;
 				glm::vec3 up = { 0.0f,0.0f,1.0f };
-				if (std::abs(light_param.light_direction.x) <= 0.1f && std::abs(light_param.light_direction.y) <= 0.1f)
+				if (std::abs(light_param.light_direction.x) <= 0.2f && std::abs(light_param.light_direction.y) <= 0.2f)
 				{
 					up = { 0.1f,0.1f,1.0f };
 				}
 				view = glm::lookAtRH(position, look_at, up);
-				float sm_half_dist = std::min(far_clip_dist / 4.0f, 500.0f);
+				float sm_half_dist = std::min(far_clip_dist * 0.25f, 800.0f);
 				projection = glm::orthoRH(-sm_half_dist, sm_half_dist, -sm_half_dist, sm_half_dist, near_clip_dist, far_clip_dist + sm_half_dist);
 
 				// ¸æËßshaderÊÇinfinity light
@@ -212,6 +214,8 @@ void GraphicsManager::CalculateLights()
 
 				if (light->GetType() == SceneObjectType::kSceneObjectTypeLightSpot)
 				{
+					light_param.light_type = LightType::Spot;
+
 					auto spot_light = std::dynamic_pointer_cast<SceneObjectSpotLight>(light);
 					const AttenCurve& angle_atten_curve = spot_light->GetAngleAttenuation();
 					light_param.light_angle_atten_curve_type = angle_atten_curve.type;
@@ -223,6 +227,8 @@ void GraphicsManager::CalculateLights()
 				}
 				else if (light->GetType() == SceneObjectType::kSceneObjectTypeLightArea)
 				{
+					light_param.light_type = LightType::Area;
+
 					auto area_light = std::dynamic_pointer_cast<SceneObjectAreaLight>(light);
 					light_param.light_size = area_light->GetDimension();
 				}
@@ -289,6 +295,8 @@ intptr_t GraphicsManager::GenerateShadowMap(const uint32_t width, const uint32_t
 	return 0;
 }
 
+intptr_t GraphicsManager::
+
 intptr_t GraphicsManager::GenerateShadowMapArray(const uint32_t width, const uint32_t height, const uint32_t count)
 {
 	return 0;
@@ -311,6 +319,11 @@ void GraphicsManager::SetShadowMap(const intptr_t shadowmap)
 void GraphicsManager::SetGlobalShadowMap(const intptr_t shadowmap)
 {
 
+}
+
+void GraphicsManager::SetShadowMaps(const Frame& frame)
+{
+	
 }
 
 void GraphicsManager::DestroyShadowMap(intptr_t& shadowmap)
