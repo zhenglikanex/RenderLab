@@ -131,7 +131,7 @@ void GraphicsManager::CalculateCameraMatrix()
 void GraphicsManager::CalculateLights()
 {
 	DrawFrameContext& frame_context = frames_[frame_index_].frame_context;
-	frame_context.ambient_color = { 0.01f,0.01f,0.01f };
+	frame_context.ambient_color = { 0.05f,0.05f,0.05f };
 	auto& scene = g_app->GetEngine()->GetSceneManager()->GetSceneForRendering();
 	frame_context.lights.clear();
 	for (auto& it : scene.LightNodes)
@@ -163,29 +163,69 @@ void GraphicsManager::CalculateLights()
 			glm::vec3 up = { 0.0f,0.0f,1.0f };
 
 			glm::mat4 view = glm::lookAtRH(position, look_at, up);
+			float near_clip_dist = 1.0f;
+			float far_clip_dist = 100.0f;
 			glm::mat4 projection = glm::identity<glm::mat4>();
 
 			if (light->GetType() == SceneObjectType::kSceneObjectTypeLightInfi)
 			{
+				glm::vec4 target = { 0.0f,0.0f,0.0f,1.0f };
+				auto camera_node = scene.GetFirstCameraNode();
+				if (camera_node)
+				{
+					auto camera = scene.GetCamera(camera_node->GetSceneObjectRef());
+					near_clip_dist = camera->GetNearClipDistance();
+					far_clip_dist = camera->GetFarClipDistance();
+
+					target[2] = -(0.75f * near_clip_dist + 0.25f * far_clip_dist);
+
+					auto tran = *camera_node->GetCalculatedTransform();
+					target = tran * target;
+				}
+
+				light_param.light_position = target - light_param.light_direction * far_clip_dist;
+				glm::vec3 position = light_param.light_position;
+				glm::vec3 look_at = target;
+				glm::vec3 up = { 0.0f,0.0f,1.0f };
+				if (std::abs(light_param.light_direction.x) <= 0.1f && std::abs(light_param.light_direction.y) <= 0.1f)
+				{
+					up = { 0.1f,0.1f,1.0f };
+				}
+				view = glm::lookAtRH(position, look_at, up);
+				float sm_half_dist = std::min(far_clip_dist / 4.0f, 500.0f);
+				projection = glm::orthoRH(-sm_half_dist, sm_half_dist, -sm_half_dist, sm_half_dist, near_clip_dist, far_clip_dist + sm_half_dist);
+
+				// ¸æËßshaderÊÇinfinity light
 				light_param.light_position[3] = 0.0f;
 			}
-			else if (light->GetType() == SceneObjectType::kSceneObjectTypeLightSpot)
-			{
-				auto spot_light = std::dynamic_pointer_cast<SceneObjectSpotLight>(light);
-				const AttenCurve& angle_atten_curve = spot_light->GetAngleAttenuation();
-				light_param.light_angle_atten_curve_type = angle_atten_curve.type;
-				memcpy(light_param.light_angle_atten_curve_params, &angle_atten_curve.u, sizeof(angle_atten_curve.u));
+			else {
+				glm::vec3 position = light_param.light_position;
+				glm::vec3 look_at = light_param.light_position + light_param.light_direction;
+				glm::vec3 up = { 0.0f,0.0f,1.0f };
+				if (std::abs(light_param.light_direction.x) <= 0.1f
+					&& std::abs(light_param.light_direction.y) <= 0.1f)
+				{
+					up = { 0.0f,0.707f,0.707f };
+				}
+				view = glm::lookAt(position, look_at, up);
 
-				float fov = light_param.light_angle_atten_curve_params[1] * 2.0f;
-				float near_clip_dist = 1.0f;
-				float far_clip_dist = 100.0f;
-				float screen_aspect = 1.0f;
-				projection = glm::perspectiveFovRH(fov, 100.0f, 100.0f, near_clip_dist, far_clip_dist);
-			}
-			else if (light->GetType() == SceneObjectType::kSceneObjectTypeLightArea)
-			{
-				auto area_light = std::dynamic_pointer_cast<SceneObjectAreaLight>(light);
-				light_param.light_size = area_light->GetDimension();
+
+				if (light->GetType() == SceneObjectType::kSceneObjectTypeLightSpot)
+				{
+					auto spot_light = std::dynamic_pointer_cast<SceneObjectSpotLight>(light);
+					const AttenCurve& angle_atten_curve = spot_light->GetAngleAttenuation();
+					light_param.light_angle_atten_curve_type = angle_atten_curve.type;
+					memcpy(light_param.light_angle_atten_curve_params, &angle_atten_curve.u, sizeof(angle_atten_curve.u));
+
+					float fov = light_param.light_angle_atten_curve_params[1] * 2.0f;
+					float screen_aspect = 1.0f;
+					projection = glm::perspectiveFovRH(fov, 100.0f, 100.0f, near_clip_dist, far_clip_dist);
+				}
+				else if (light->GetType() == SceneObjectType::kSceneObjectTypeLightArea)
+				{
+					auto area_light = std::dynamic_pointer_cast<SceneObjectAreaLight>(light);
+					light_param.light_size = area_light->GetDimension();
+				}
 			}
 
 			light_param.light_vp = projection * view;
@@ -244,24 +284,33 @@ void GraphicsManager::DrawBatchDepthOnly(const DrawBatchContext& context)
 
 }
 
-intptr_t GraphicsManager::GenerateShadowMapArray(uint32_t count)
+intptr_t GraphicsManager::GenerateShadowMap(const uint32_t width, const uint32_t height)
 {
 	return 0;
 }
 
-void GraphicsManager::BeginShadowMap(const Light& light, const intptr_t shadowmap,uint32_t layer_index)
+intptr_t GraphicsManager::GenerateShadowMapArray(const uint32_t width, const uint32_t height, const uint32_t count)
+{
+	return 0;
+}
+void GraphicsManager::BeginShadowMap(const Light& light, const intptr_t shadowmap, const uint32_t width, const uint32_t height, const uint32_t layer_index)
 {
 
 }
 
-void GraphicsManager::EndShadowMap(const intptr_t shadowmap,uint32_t layer_index)
+void GraphicsManager::EndShadowMap(const intptr_t shadowmap, const uint32_t layer_index)
 {
 
 }
 
 void GraphicsManager::SetShadowMap(const intptr_t shadowmap)
 {
-	
+
+}
+
+void GraphicsManager::SetGlobalShadowMap(const intptr_t shadowmap)
+{
+
 }
 
 void GraphicsManager::DestroyShadowMap(intptr_t& shadowmap)

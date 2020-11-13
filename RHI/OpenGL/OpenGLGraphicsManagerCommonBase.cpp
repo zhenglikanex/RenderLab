@@ -721,23 +721,39 @@ void OpenGLGraphicsManagerCommonBase::DrawBatchDepthOnly(const DrawBatchContext&
 	glDrawElements(dbc.mode, dbc.count, dbc.type, 0);
 }
 
-intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMapArray(uint32_t count)
+intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMap(const uint32_t width, const uint32_t height)
+{
+	GLuint shadowmap;
+
+	glGenTextures(1, &shadowmap);
+	glActiveTexture(GL_TEXTURE0 + shadowmap);
+	glBindTexture(GL_TEXTURE_2D, shadowmap);
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+	return static_cast<intptr_t>(shadowmap);
+}
+
+intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMapArray(const uint32_t width,const uint32_t height,uint32_t count)
 {
 	GLuint shadowmap;
 	glGenTextures(1, &shadowmap);
 	glActiveTexture(GL_TEXTURE0 + shadowmap);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowmap);
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT24, kShadowMapWidth, kShadowMapHeight, count);
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT24, width, height, count);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT24, kShadowMapWidth, kShadowMapHeight, count, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT24, width, height,count, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
 	return static_cast<intptr_t>(shadowmap);
 }
 
-void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const intptr_t shadowmap,uint32_t layer_index)
+void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const intptr_t shadowmap, const uint32_t width, const uint32_t height, const uint32_t layer_index)
 {
 	glGenFramebuffers(1, &shadowmap_framebuffer_name_);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowmap_framebuffer_name_);
@@ -757,25 +773,7 @@ void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const i
 	glDrawBuffers(0, nullptr);
 	glDepthMask(TRUE);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, kShadowMapWidth, kShadowMapHeight);
-
-	glm::mat4 depthVP;
-	glm::mat4 view;
-	glm::mat4 projection;
-	glm::vec3 position = light.light_position;
-	glm::vec3 lookAt = light.light_position + light.light_direction;
-	glm::vec3 up = { 0.0f,0.0f,1.0f };
-	view = glm::lookAtRH(position, lookAt, up);
-
-	float fov = PI / 3.0f;
-	float near_clip_distance = 1.0f;
-	float far_clip_distance = 100.0f;
-
-	projection = glm::perspectiveFovRH(fov, (float)kShadowMapWidth, (float)kShadowMapHeight, near_clip_distance, far_clip_distance);
-	/*GLfloat near_plane = 1.0f, far_plane = 100.0f;*/
-	//projection  = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_clip_distance, far_clip_distance);
-	depthVP = projection * view;
-	//SetShaderParameters("depthVP", depthVP);
+	glViewport(0, 0, width, height);
 
 	SetShaderParameters("depthVP", light.light_vp);
 }
@@ -798,9 +796,26 @@ void OpenGLGraphicsManagerCommonBase::SetShadowMap(const intptr_t shadowmap)
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	float color[] = { 1.0f,1.0f,1.0f,1.0f };
+	glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, color);
 	bool result = SetShaderParameters("shadowMap", texture_id);
 	assert(result);
 
+}
+
+void OpenGLGraphicsManagerCommonBase::SetGlobalShadowMap(const intptr_t shadowmap)
+{
+	GLint texture_id = (GLint)shadowmap;
+	glActiveTexture(GL_TEXTURE0 + texture_id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	float color[] = { 1.0f,1.0f,1.0f,1.0f };
+	glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, color);
+	bool result = SetShaderParameters("globalShadowMap", texture_id);
+	assert(result);
 }
 
 void OpenGLGraphicsManagerCommonBase::DestroyShadowMap(intptr_t& shadowmap)

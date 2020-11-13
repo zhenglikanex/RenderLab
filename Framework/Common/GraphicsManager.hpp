@@ -31,12 +31,13 @@ namespace Aurora
 		virtual void DrawBatch(const DrawBatchContext& context);
 		virtual void DrawBatchDepthOnly(const DrawBatchContext& context);
 		
-		virtual intptr_t GenerateShadowMapArray(uint32_t count);
-		virtual void BeginShadowMap(const Light& light, const intptr_t shadowmap,uint32_t layer_index);
-		virtual void EndShadowMap(const intptr_t shadowmap,uint32_t layer_index);
+		virtual intptr_t GenerateShadowMap(const uint32_t width, const uint32_t height);
+		virtual intptr_t GenerateShadowMapArray(const uint32_t width, const uint32_t height, const uint32_t count);
+		virtual void BeginShadowMap(const Light& light, const intptr_t shadowmap, const uint32_t width, const uint32_t height, const uint32_t layer_index);
+		virtual void EndShadowMap(const intptr_t shadowmap, const uint32_t layer_index);
 		virtual void SetShadowMap(const intptr_t shadowmap);
+		virtual void SetGlobalShadowMap(const intptr_t shadowmap);
 		virtual void DestroyShadowMap(intptr_t& shadowmap);
-
 #ifdef DEBUG
 		virtual void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color);
 		virtual void DrawBox(const glm::vec3& bbMin, const glm::vec3 bbMax, const glm::vec3& color);
@@ -51,8 +52,6 @@ namespace Aurora
 		static const uint32_t kFrameCount = 2;
 		static const uint32_t kMaxSceneObjectCount = 65535;
 		static const uint32_t kMaxTextureCount = 2048;
-		const int32_t kShadowMapWidth = 512;
-		const int32_t kShadowMapHeight = 512;
 
 		uint32_t frame_index_ = 0;
 		std::vector<Frame> frames_;

@@ -28,11 +28,12 @@ void ShadowMapPass::Draw(Frame& frame)
 			++cast_shadow_count;
 		}
 	}
-
+	const uint32_t kShadowMapWidth = 512;
+	const uint32_t kShadowMapHeight = 512;
 	uint32_t index = 0;
 	if (cast_shadow_count > 0)
 	{
-		intptr_t shadow_map = graphics_manager->GenerateShadowMapArray(frame.frame_context.lights.size());
+		intptr_t shadow_map = graphics_manager->GenerateShadowMapArray(kShadowMapWidth, kShadowMapHeight, frame.frame_context.lights.size());
 
 		frame.shadowmap = shadow_map;
 		frame.shadowmap_count = cast_shadow_count;
@@ -42,7 +43,7 @@ void ShadowMapPass::Draw(Frame& frame)
 			if (light.light_cast_shadow)
 			{
 				//generate shadow map here
-				graphics_manager->BeginShadowMap(light, shadow_map,index);
+				graphics_manager->BeginShadowMap(light, shadow_map,kShadowMapWidth,kShadowMapHeight,index);
 
 
 				for (auto dbc : frame.batch_contexts)

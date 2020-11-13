@@ -134,7 +134,7 @@ float shadow_test(const Light light, const float cosTheta) {
             if (v_light_space.z - near_occ > bias)
             {
                 // we are in the shadow
-                visibility -= 0.2f;
+                visibility -= 0.20f;
             }
         }
     }
@@ -189,13 +189,22 @@ vec3 apply_light(const Light light) {
 
     vec3 linearColor;
 
+    vec3 admit_light = light.lightIntensity * atten * light.lightColor.rgb;
     if (usingDiffuseMap)
     {
-        linearColor = light.lightIntensity * atten * light.lightColor.rgb * (texture(diffuseMap, uv).rgb * cosTheta + specularColor.rgb * pow(clamp(dot(R, V), 0.0f, 1.0f), specularPower)); 
+        //linearColor = light.lightIntensity * atten * light.lightColor.rgb * (texture(diffuseMap, uv).rgb * cosTheta + specularColor.rgb * pow(clamp(dot(R, V), 0.0f, 1.0f), specularPower)); 
+        linearColor = texture(diffuseMap,uv).rgb * cosTheta;
+        if(visibility > 0.2f)
+            linearColor += specularColor.rgb * pow(clamp(dot(R,V),0.0f,1.0f),specularPower);
+        linearColor *= admit_light;
     }
     else
     {
-        linearColor = light.lightIntensity * atten * light.lightColor.rgb * (diffuseColor.rgb * cosTheta + specularColor.rgb * pow(clamp(dot(R, V), 0.0f, 1.0f), specularPower)); 
+        //linearColor = light.lightIntensity * atten * light.lightColor.rgb * (diffuseColor.rgb * cosTheta + specularColor.rgb * pow(clamp(dot(R, V), 0.0f, 1.0f), specularPower)); 
+        linearColor = diffuseColor.rgb * cosTheta;
+        if(visibility > 0.2f)
+            linearColor += specularColor.rgb * pow(clamp(dot(R,V),0.0f,1.0f),specularPower);
+        linearColor *= admit_light;
     }
 
     return linearColor * visibility;

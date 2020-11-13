@@ -36,6 +36,7 @@ layout(std140) uniform DrawFrameConstants {
 };
 
 uniform sampler2DArray shadowMap;
+uniform sampler2D globalShadowMap;
 
 // per drawcall
 uniform mat4 modelMatrix;

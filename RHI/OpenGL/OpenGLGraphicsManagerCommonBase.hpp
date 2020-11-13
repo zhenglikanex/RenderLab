@@ -33,12 +33,13 @@ namespace Aurora
 
 		void DrawBatchDepthOnly(const DrawBatchContext& context) override;
 
-		intptr_t GenerateShadowMapArray(uint32_t count) override;
-		void BeginShadowMap(const Light& light, const intptr_t shadowmap,uint32_t layer_index) override;
-		void EndShadowMap(const intptr_t shadowmap,uint32_t layer_index) override;
+		intptr_t GenerateShadowMap(const uint32_t width, const uint32_t height) override;
+		intptr_t GenerateShadowMapArray(const uint32_t width, const uint32_t height, const uint32_t count) override;
+		void BeginShadowMap(const Light& light, const intptr_t shadowmap, const uint32_t width, const uint32_t height, const uint32_t layer_index) override;
+		void EndShadowMap(const intptr_t shadowmap, const uint32_t layer_index) override;
 		void SetShadowMap(const intptr_t shadowmap) override;
+		void SetGlobalShadowMap(const intptr_t shadowmap) override;
 		void DestroyShadowMap(intptr_t& shadowmap) override;
-
 #ifdef DEBUG
 		void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) override;
 		void DrawBox(const glm::vec3& bbMin, const glm::vec3 bbMax, const glm::vec3& color) override;
