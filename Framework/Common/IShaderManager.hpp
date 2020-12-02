@@ -10,7 +10,8 @@ namespace Aurora
 		Forward,
 		Differed,
 		Debug,
-		Copy
+		Copy,
+		CopyCube
 	};
 
 	class IShaderManager : public IRuntimeModule

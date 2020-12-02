@@ -45,7 +45,8 @@ namespace Aurora
 #ifdef DEBUG
 		void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) override;
 		void DrawBox(const glm::vec3& bbMin, const glm::vec3 bbMax, const glm::vec3& color) override;
-		void DrawOverlay(const intptr_t shadowmap,uint32_t layer_index,float vp_left, float vp_top, float vp_width, float vp_height) override;
+		void DrawTextureOverlay(const intptr_t shadowmap, uint32_t layer_index, float vp_left, float vp_top, float vp_width, float vp_height) override;
+		void DrawCubeMapOverlay(const intptr_t cuebemap, uint32_t layer_index, float vp_left, float vp_top, float vp_width, float vp_height) override;
 		void ClearDebugBuffers() override;
 #endif
 

@@ -73,7 +73,12 @@ void Aurora::GraphicsManager::DrawBox(const glm::vec3 & bbMin, const glm::vec3 b
 {
 }
 
-void GraphicsManager::DrawOverlay(const intptr_t shadowmap,uint32_t layer,float vp_left, float vp_top, float vp_width, float vp_height)
+void GraphicsManager::DrawTextureOverlay(const intptr_t shadowmap, uint32_t layer_index, float vp_left, float vp_top, float vp_width, float vp_height)
+{
+
+}
+
+void GraphicsManager::DrawCubeMapOverlay(const intptr_t cubemap, uint32_t layer_index, float vp_left, float vp_top, float vp_width, float vp_height)
 {
 
 }
@@ -231,6 +236,17 @@ void GraphicsManager::CalculateLights()
 
 					auto area_light = std::dynamic_pointer_cast<SceneObjectAreaLight>(light);
 					light_param.light_size = area_light->GetDimension();
+				}
+				else
+				{
+					light_param.light_type = LightType::Omni;
+					auto point_light = std::dynamic_pointer_cast<SceneObjectOmniLight>(light);
+					
+					float fov = PI / 2.0f;
+					float screen_aspect = 1.0f;
+
+					
+					projection = glm::perspectiveFovRH(fov, 100.0f, 100.0f, near_clip_dist, far_clip_dist);
 				}
 			}
 

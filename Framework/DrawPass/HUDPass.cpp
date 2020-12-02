@@ -19,16 +19,22 @@ void HUDPass::Draw(Frame& frame)
 
 	for (uint32_t index = 0;index < frame.shadowmap_count;++index)
 	{
-		graphics_manager->DrawOverlay(frame.shadowmap,index,left, top, 0.25f, 0.25f);
+		graphics_manager->DrawTextureOverlay(frame.shadowmap,index,left, top, 0.25f, 0.25f);
 		top -= 0.30f;
 	}
 
-	top = 0.95f;
-	left = 0.40f;
-
 	for (uint32_t i = 0; i < frame.global_shadowmap_count; i++)
 	{
-		graphics_manager->DrawOverlay(frame.global_shadowmap, i, left, top, 0.25f, 0.25f);
+		graphics_manager->DrawTextureOverlay(frame.global_shadowmap, i, left, top, 0.25f, 0.25f);
+		top -= 0.30f;
+	}
+
+	shader_program = g_app->GetEngine()->GetShaderManager()->GetDefaultShaderProgram(DefaultShaderIndex::CopyCube);
+	graphics_manager->UseShaderProgram(shader_program);
+
+	for (uint32_t i = 0; i < frame.cube_shadowmap_count; i++)
+	{
+		graphics_manager->DrawCubeMapOverlay(frame.cube_shadowmap, i, left, top, 0.25f, 0.25f);
 		top -= 0.30f;
 	}
 #endif

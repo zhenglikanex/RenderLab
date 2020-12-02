@@ -40,7 +40,7 @@ void ShadowMapPass::Draw(Frame& frame)
 		{
 			switch (light.light_type)
 			{
-			case LightType::Point:
+			case LightType::Omni:
 				frame.cube_shadowmap_count++;
 				break;
 			case LightType::Spot:
@@ -80,7 +80,7 @@ void ShadowMapPass::Draw(Frame& frame)
 			intptr_t shadowmap;
 			switch (light.light_type)
 			{
-			case LightType::Point:
+			case LightType::Omni:
 				shadowmap = frame.cube_shadowmap;
 				graphics_manager->BeginShadowMap(light, shadowmap, kCubeShadowMapWidth, kCubeShadowMapHeight,cube_shadowmap_index);
 				light.light_shadowmap_index = cube_shadowmap_index++;

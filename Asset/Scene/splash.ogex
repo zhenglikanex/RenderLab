@@ -3043,7 +3043,7 @@ LightObject $light1 (type = "point", shadow = false)		// Point
 	}
 }
 
-LightObject $light2 (type = "spot", shadow = true)		// Lamp.001
+LightObject $light2 (type = "spot", shadow = false)		// Lamp.001
 {
 	Color (attrib = "light") {float[3] {{0.01141956727951765, 1.0, 0.026550518348813057}}}
 	Param (attrib = "intensity") {float {5.0}}
@@ -3060,7 +3060,7 @@ LightObject $light2 (type = "spot", shadow = true)		// Lamp.001
 	}
 }
 
-LightObject $light3 (type = "spot", shadow = true)		// Lamp
+LightObject $light3 (type = "spot", shadow = false)		// Lamp
 {
 	Color (attrib = "light") {float[3] {{1.0, 0.0010070281568914652, 0.00051426503341645}}}
 	Param (attrib = "intensity") {float {5.0}}

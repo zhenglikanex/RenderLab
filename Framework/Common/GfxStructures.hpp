@@ -8,7 +8,7 @@ namespace Aurora
 {
 	enum class LightType : int32_t
 	{
-		Point = 0,
+		Omni = 0,
 		Spot = 1,
 		Infinity = 2,
 		Area = 3,
@@ -32,7 +32,7 @@ namespace Aurora
 		glm::mat4 light_vp;
 		Light()
 		{
-			light_type = LightType::Point;
+			light_type = LightType::Omni;
 			light_position = { 0.0f,0.0f,0.0f,1.0f };
 			light_size = { 0.0f,0.0f };
 			light_color = { 1.0f,1.0f,1.0f,1.0f };
