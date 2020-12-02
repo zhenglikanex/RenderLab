@@ -295,7 +295,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 
 	for (int i = 0; i < context.lights.size(); ++i)
 	{
-		char uniformNames[11][256];
+		char uniformNames[12][256];
 
 		sprintf(uniformNames[0x0], "allLights[%zd].lightPosition", i);
 		sprintf(uniformNames[0x1], "allLights[%zd].lightColor", i);
@@ -308,17 +308,18 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 		sprintf(uniformNames[0x8], "allLights[%zd].lightAngleAttenCurveParams_0", i);
 		sprintf(uniformNames[0x9], "allLights[%zd].lightShadowMapIndex", i);
 		sprintf(uniformNames[0xA], "allLights[%zd].lightVP", i);
+		sprintf(uniformNames[0xB], "allLights[%zd].lightType", i);
 
-		const char* names[11] = {
+		const char* names[12] = {
 			uniformNames[0x0], uniformNames[0x1], uniformNames[0x2], uniformNames[0x3],
 			uniformNames[0x4], uniformNames[0x5], uniformNames[0x6], uniformNames[0x7],
-			uniformNames[0x8], uniformNames[0x9], uniformNames[0xA]
+			uniformNames[0x8], uniformNames[0x9], uniformNames[0xA], uniformNames[0xB]
 		};
 
-		GLuint indices[11];
-		glGetUniformIndices(current_shader_, 11, names, indices);
-		GLint offset[11];
-		glGetActiveUniformsiv(current_shader_, 11, indices, GL_UNIFORM_OFFSET, offset);
+		GLuint indices[12];
+		glGetUniformIndices(current_shader_, 12, names, indices);
+		GLint offset[12];
+		glGetActiveUniformsiv(current_shader_, 12, indices, GL_UNIFORM_OFFSET, offset);
 
 
 		memcpy(block_buffer + offset[0x0], &context.lights[i].light_position, sizeof(glm::vec4));
@@ -332,6 +333,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 		memcpy(block_buffer + offset[0x8], &context.lights[i].light_angle_atten_curve_params[0], sizeof(float) * 5);
 		memcpy(block_buffer + offset[0x9], &context.lights[i].light_shadowmap_index, sizeof(int32_t));
 		memcpy(block_buffer + offset[0xA], &context.lights[i].light_vp, sizeof(glm::mat4));
+		memcpy(block_buffer + offset[0xB], &context.lights[i].light_type, sizeof(LightType));
 	}
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
@@ -742,17 +744,35 @@ intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMap(const uint32_t width
 	return static_cast<intptr_t>(shadowmap);
 }
 
+intptr_t OpenGLGraphicsManagerCommonBase::GenerateCubeShadowMapArray(const uint32_t width, const uint32_t height, const uint32_t count)
+{
+	GLuint shadowmap;
+	
+	glGenTextures(1, &shadowmap);
+	glActiveTexture(GL_TEXTURE0 + shadowmap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, shadowmap);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexStorage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 1, GL_DEPTH_COMPONENT24, width, height, count * 6);
+	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT24, width, height, count * 6, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	
+	return static_cast<intptr_t>(shadowmap);
+}
+
 intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMapArray(const uint32_t width,const uint32_t height,uint32_t count)
 {
 	GLuint shadowmap;
 	glGenTextures(1, &shadowmap);
 	glActiveTexture(GL_TEXTURE0 + shadowmap);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowmap);
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT24, width, height, count);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT24, width, height, count);
 	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT24, width, height,count, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
 	return static_cast<intptr_t>(shadowmap);
@@ -806,6 +826,43 @@ void OpenGLGraphicsManagerCommonBase::SetShadowMap(const intptr_t shadowmap)
 	bool result = SetShaderParameters("shadowMap", texture_id);
 	assert(result);
 
+}
+
+void OpenGLGraphicsManagerCommonBase::SetShadowMaps(const Frame& frame)
+{
+	GLint texture_id = (GLint)frame.shadowmap;
+	glActiveTexture(GL_TEXTURE0 + texture_id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	const float color[] = { 1.0f,1.0f,1.0f,1.0f };
+	glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, color);
+
+	bool result = SetShaderParameters("shadowMap", texture_id);
+	assert(result);
+
+	texture_id = (GLint)frame.global_shadowmap;
+	glActiveTexture(GL_TEXTURE0 + texture_id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, texture_id);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, color);
+
+	result = SetShaderParameters("globalShadowMap", texture_id);
+	assert(result);
+
+	texture_id = (GLint)frame.cube_shadowmap;
+	glActiveTexture(GL_TEXTURE0 + texture_id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, texture_id);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	result = SetShaderParameters("cubeShadowMap", texture_id);
+	assert(result);
 }
 
 void OpenGLGraphicsManagerCommonBase::SetGlobalShadowMap(const intptr_t shadowmap)

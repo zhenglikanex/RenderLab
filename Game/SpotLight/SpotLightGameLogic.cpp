@@ -27,7 +27,7 @@ void SpotLightGameLogic::Finalize()
 
 void SpotLightGameLogic::Tick()
 {
-
+	
 }
 
 void SpotLightGameLogic::OnLeftKey()

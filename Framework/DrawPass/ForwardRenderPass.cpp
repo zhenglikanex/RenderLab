@@ -12,7 +12,7 @@ void ForwardRenderPass::Draw(Frame& frame)
 	auto& graphics_manager = g_app->GetEngine()->GetGraphicsManager();
 	graphics_manager->UseShaderProgram(shader_program);
 	graphics_manager->SetPerFrameConstants(frame.frame_context);
-	graphics_manager->SetShadowMap(frame.shadowmap);
+	graphics_manager->SetShadowMaps(frame);
 	for (auto dbc : frame.batch_contexts)
 	{
 		graphics_manager->DrawBatch(*dbc);

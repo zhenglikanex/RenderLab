@@ -1,10 +1,11 @@
-#version 330 core
+#version 400
 /////////////////////
 // CONSTANTS       //
 /////////////////////
 // per frame
 #define MAX_LIGHTS 100
 struct Light {
+    int lightType;
 	vec4 lightPosition;
 	vec4 lightColor;
 	vec4 lightDirection;
@@ -36,7 +37,8 @@ layout(std140) uniform DrawFrameConstants {
 };
 
 uniform sampler2DArray shadowMap;
-uniform sampler2D globalShadowMap;
+uniform sampler2DArray globalShadowMap;
+uniform samplerCubeArray cubeShadowMap;
 
 // per drawcall
 uniform mat4 modelMatrix;

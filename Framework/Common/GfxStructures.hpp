@@ -6,7 +6,7 @@
 
 namespace Aurora
 {
-	enum class LightType
+	enum class LightType : int32_t
 	{
 		Point = 0,
 		Spot = 1,

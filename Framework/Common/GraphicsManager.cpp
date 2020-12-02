@@ -295,7 +295,10 @@ intptr_t GraphicsManager::GenerateShadowMap(const uint32_t width, const uint32_t
 	return 0;
 }
 
-intptr_t GraphicsManager::
+intptr_t GraphicsManager::GenerateCubeShadowMapArray(const uint32_t width, const uint32_t height, const uint32_t count)
+{
+	return 0;
+}
 
 intptr_t GraphicsManager::GenerateShadowMapArray(const uint32_t width, const uint32_t height, const uint32_t count)
 {

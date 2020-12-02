@@ -15,12 +15,21 @@ void HUDPass::Draw(Frame& frame)
 	
 #ifdef DEBUG
 	float top = 0.95f;
-	float left = 0.60f;
+	float left = 0.70f;
 
 	for (uint32_t index = 0;index < frame.shadowmap_count;++index)
 	{
-		graphics_manager->DrawOverlay(frame.shadowmap,index,left, top, 0.35f, 0.35f);
-		top -= 0.45f;
+		graphics_manager->DrawOverlay(frame.shadowmap,index,left, top, 0.25f, 0.25f);
+		top -= 0.30f;
+	}
+
+	top = 0.95f;
+	left = 0.40f;
+
+	for (uint32_t i = 0; i < frame.global_shadowmap_count; i++)
+	{
+		graphics_manager->DrawOverlay(frame.global_shadowmap, i, left, top, 0.25f, 0.25f);
+		top -= 0.30f;
 	}
 #endif
 }
