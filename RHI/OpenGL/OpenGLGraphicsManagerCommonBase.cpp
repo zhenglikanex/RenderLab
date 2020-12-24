@@ -235,7 +235,7 @@ void OpenGLGraphicsManagerCommonBase::DrawTextureOverlay(const intptr_t shadowma
 void OpenGLGraphicsManagerCommonBase::DrawCubeMapOverlay(const intptr_t cubemap, uint32_t layer_index, float vp_left, float vp_top, float vp_width, float vp_height)
 {
 	GLint texture_id = (GLuint)cubemap;
-	
+
 	glActiveTexture(GL_TEXTURE0 + texture_id);
 	glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, texture_id);
 	auto result = SetShaderParameters("depthSampler", texture_id);
@@ -311,12 +311,12 @@ void OpenGLGraphicsManagerCommonBase::DrawCubeMapOverlay(const intptr_t cubemap,
 	   -1.0f,  1.0f, -1.0f,
 
 	   // left
-	   -1.0f,  1.0f,  1.0f,
-	   -1.0f,  1.0f, -1.0f,
-	   -1.0f, -1.0f,  1.0f,
-	   -1.0f,  1.0f, -1.0f,
-	   -1.0f, -1.0f,  1.0f,
-	   -1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
 
 	   // front
 	   -1.0f, -1.0f,  1.0f,
@@ -355,7 +355,7 @@ void OpenGLGraphicsManagerCommonBase::DrawCubeMapOverlay(const intptr_t cubemap,
 	glGenVertexArrays(1, &vao);
 
 	glBindVertexArray(vao);
-	
+
 	GLuint buffer_id[2];
 
 	glGenBuffers(2, buffer_id);
@@ -363,7 +363,7 @@ void OpenGLGraphicsManagerCommonBase::DrawCubeMapOverlay(const intptr_t cubemap,
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false,0,0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, buffer_id[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(uvw), uvw, GL_STATIC_DRAW);
@@ -371,7 +371,7 @@ void OpenGLGraphicsManagerCommonBase::DrawCubeMapOverlay(const intptr_t cubemap,
 	glEnableVertexAttribArray(1);
 
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-	glDrawArrays(GL_TRIANGLES,0,36);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(2, buffer_id);
 }
@@ -394,7 +394,7 @@ void Aurora::OpenGLGraphicsManagerCommonBase::ClearDebugBuffers()
 #endif
 
 bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFrameContext& context)
-{	
+{
 	GLuint block_index = glGetUniformBlockIndex(current_shader_, "DrawFrameConstants");
 	if (block_index == GL_INVALID_INDEX)
 	{
@@ -406,7 +406,7 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 	{
 		glGenBuffers(1, &ubo_buffer_);
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_buffer_);
-		
+
 		glGetActiveUniformBlockiv(current_shader_, block_index, GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
 
 		glBufferData(GL_UNIFORM_BUFFER, block_size, nullptr, GL_DYNAMIC_DRAW);
@@ -417,24 +417,23 @@ bool OpenGLGraphicsManagerCommonBase::SetPerFrameShaderParameters(const DrawFram
 		glGetActiveUniformBlockiv(current_shader_, block_index, GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
 	}
 
-	GLubyte* block_buffer = static_cast<GLubyte*>(glMapBufferRange(GL_UNIFORM_BUFFER,0,block_size,GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT));
-	
+	GLubyte* block_buffer = static_cast<GLubyte*>(glMapBufferRange(GL_UNIFORM_BUFFER, 0, block_size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT));
+
 	{
 		// 查询每个变量的偏移位置
-		const GLchar *names[] = { "worldMatrix","viewMatrix","projectionMatrix","ambientColor","numLights" };
-		GLuint indices[5];
-		glGetUniformIndices(current_shader_, 5, names, indices);
+		const GLchar *names[] = { "viewMatrix","projectionMatrix","ambientColor","numLights" };
+		GLuint indices[4];
+		glGetUniformIndices(current_shader_, 4, names, indices);
 
-		GLint offset[5];
-		glGetActiveUniformsiv(current_shader_, 5, indices, GL_UNIFORM_OFFSET, offset);
+		GLint offset[4];
+		glGetActiveUniformsiv(current_shader_, 4, indices, GL_UNIFORM_OFFSET, offset);
 
-		memcpy(block_buffer + offset[0], &context.world_matrix, sizeof(glm::mat4));
-		memcpy(block_buffer + offset[1], &context.view_matrix, sizeof(glm::mat4));
-		memcpy(block_buffer + offset[2], &context.projection_matrix, sizeof(glm::mat4));
-		memcpy(block_buffer + offset[3], &context.ambient_color, sizeof(glm::vec3));
+		memcpy(block_buffer + offset[0], &context.view_matrix, sizeof(glm::mat4));
+		memcpy(block_buffer + offset[1], &context.projection_matrix, sizeof(glm::mat4));
+		memcpy(block_buffer + offset[2], &context.ambient_color, sizeof(glm::vec3));
 
 		GLint num_lights = (GLint)context.lights.size();
-		memcpy(block_buffer + offset[4], &num_lights, sizeof(GLint));
+		memcpy(block_buffer + offset[3], &num_lights, sizeof(GLint));
 	}
 
 	for (int i = 0; i < context.lights.size(); ++i)
@@ -501,6 +500,20 @@ bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& par
 	return true;
 }
 
+bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& param_name, const glm::mat4* param, int32_t count)
+{
+	bool result = true;
+	char uniform_name[256];
+
+	for (int32_t i = 0; i < count; i++)
+	{
+		sprintf(uniform_name, "%s[%d]", param_name, i);
+		result &= SetShaderParameters(uniform_name, *(param + i));
+	}
+
+	return result;
+}
+
 bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& param_name, const glm::vec3& param)
 {
 	unsigned int location;
@@ -530,7 +543,7 @@ bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& par
 	return true;
 }
 
-bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& param_name, const int param)
+bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& param_name, const int32_t param)
 {
 	unsigned int location;
 
@@ -540,6 +553,19 @@ bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& par
 		return false;
 	}
 	glUniform1i(location, param);
+
+	return true;
+}
+
+bool OpenGLGraphicsManagerCommonBase::SetShaderParameters(const std::string& param_name, const uint32_t param)
+{
+	unsigned int location;
+	location = glGetUniformLocation(current_shader_, param_name.c_str());
+	if (location == -1)
+	{
+		return false;
+	}
+	glUniform1ui(location, param);
 
 	return true;
 }
@@ -803,7 +829,7 @@ void OpenGLGraphicsManagerCommonBase::DrawBatch(const DrawBatchContext& context)
 	//draw_frame_context_.world_matrix = rotationMatrixZ;
 
 	const OpenGLDrawBatchContext& dbc = dynamic_cast<const OpenGLDrawBatchContext&>(context);
-	SetShaderParameters("modelMatrix",dbc.trans);
+	SetShaderParameters("modelMatrix", dbc.trans);
 
 	glBindVertexArray(dbc.vao);
 
@@ -891,7 +917,7 @@ intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMap(const uint32_t width
 intptr_t OpenGLGraphicsManagerCommonBase::GenerateCubeShadowMapArray(const uint32_t width, const uint32_t height, const uint32_t count)
 {
 	GLuint shadowmap;
-	
+
 	glGenTextures(1, &shadowmap);
 	glActiveTexture(GL_TEXTURE0 + shadowmap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, shadowmap);
@@ -901,12 +927,12 @@ intptr_t OpenGLGraphicsManagerCommonBase::GenerateCubeShadowMapArray(const uint3
 	glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glTexStorage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 1, GL_DEPTH_COMPONENT24, width, height, count * 6);
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT24, width, height, count * 6, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	
+	//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT24, width, height, count * 6, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+
 	return static_cast<intptr_t>(shadowmap);
 }
 
-intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMapArray(const uint32_t width,const uint32_t height,uint32_t count)
+intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMapArray(const uint32_t width, const uint32_t height, uint32_t count)
 {
 	GLuint shadowmap;
 	glGenTextures(1, &shadowmap);
@@ -917,7 +943,7 @@ intptr_t OpenGLGraphicsManagerCommonBase::GenerateShadowMapArray(const uint32_t 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT24, width, height, count);
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT24, width, height,count, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT24, width, height,count, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
 	return static_cast<intptr_t>(shadowmap);
 }
@@ -926,30 +952,78 @@ void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const i
 {
 	glGenFramebuffers(1, &shadowmap_framebuffer_name_);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowmap_framebuffer_name_);
-	
+
 #ifdef OPENGL_ES
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
 #else
-	glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,(GLuint)shadowmap,0,layer_index);
+	if (light.light_type == LightType::Omni)
+	{
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, (GLuint)shadowmap, 0);
+	}
+	else
+	{
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, (GLuint)shadowmap, 0, layer_index);
+	}
 #endif
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
 		assert(0);
 	}
-	
+
 	//glDrawBuffer(GL_NONE);
 	glDrawBuffers(0, nullptr);
 	glDepthMask(TRUE);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, width, height);
+	switch (light.light_type)
+	{
+	case LightType::Omni:
+	{
+		glm::mat4 shadow_matrices[6];
+		const glm::vec3 direction[6] =
+		{
+			{1.0f,0.0f,0.0f},
+			{-1.0f,0.0f,0.0f},
+			{0.0f,1.0f,0.0f},
+			{0.0f,-1.0f,0.0f},
+			{0.0f,0.0f,1.0f},
+			{0.0f,0.0f,-1.0f}
+		};
+		const glm::vec3 up[6] = {
+			{0.0f,-1.0f,0.0f},		// 因为ligh是朝下的,所以y是-1
+			{0.0f,-1.0f,0.0f},		// 因为ligh是朝下的,所以y是-1
+			{0.0f,0.0f,1.0f},
+			{0.0f,0.0f,-1.0f},
+			{0.0f,-1.0f,0.0f},		// 因为ligh是朝下的,所以y是-1
+			{0.0f,-1.0f,0.0f}		// 因为ligh是朝下的,所以y是-1
+		};
 
-	SetShaderParameters("depthVP", light.light_vp);
+		float near_clip_distance = 0.1f;
+		float far_clip_distance = 10.0f;
+		float fov = PI / 2.0f;		// 90保证每个面相接
+		float aspect = (float)width / (float)height;
+		glm::mat4 projection = glm::perspectiveRH(fov, aspect, near_clip_distance, far_clip_distance);
+		glm::vec3 pos = light.light_position;
+		for (int32_t i = 0; i < 6; i++)
+		{
+			glm::mat4 view = glm::lookAt(pos, pos + direction[i], up[i]);
+			shadow_matrices[i] = view * projection;
+		}
+
+		SetShaderParameters("shadowMatrices", shadow_matrices, 6);
+		SetShaderParameters("layer_index", layer_index);
+		SetShaderParameters("lightPos", pos);
+		SetShaderParameters("far_plane", far_clip_distance);
+	}break;
+	default:
+		SetShaderParameters("depthVP", light.light_vp);
+	}
 }
 
-void OpenGLGraphicsManagerCommonBase::EndShadowMap(const intptr_t shadowmap,uint32_t layer_index)
+void OpenGLGraphicsManagerCommonBase::EndShadowMap(const intptr_t shadowmap, uint32_t layer_index)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDeleteFramebuffers(1, &shadowmap_framebuffer_name_);
 
 	const GfxConfiguration& conf = g_app->GetConfiguration();

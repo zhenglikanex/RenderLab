@@ -52,9 +52,11 @@ namespace Aurora
 
 	protected:
 		bool SetShaderParameters(const std::string& param_name, const glm::mat4& param);
+		bool SetShaderParameters(const std::string& param_name, const glm::mat4* param, const int32_t count);
 		bool SetShaderParameters(const std::string& param_name, const glm::vec3& param);
 		bool SetShaderParameters(const std::string& param_name, const float param);
-		bool SetShaderParameters(const std::string& param_name, const int param);
+		bool SetShaderParameters(const std::string& param_name, const int32_t param);
+		bool SetShaderParameters(const std::string& param_name, const uint32_t param);
 		bool SetShaderParameters(const std::string& param_name, const bool param);
 		bool SetPerFrameShaderParameters(const DrawFrameContext& context);
 

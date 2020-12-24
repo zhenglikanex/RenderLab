@@ -8,10 +8,7 @@ using namespace Aurora;
 
 void ShadowMapPass::Draw(Frame& frame)
 {
-	auto shader_program = g_app->GetEngine()->GetShaderManager()->GetDefaultShaderProgram(DefaultShaderIndex::ShadowMap);
 	auto& graphics_manager = g_app->GetEngine()->GetGraphicsManager();
-	graphics_manager->UseShaderProgram(shader_program);
-	graphics_manager->SetPerFrameConstants(frame.frame_context);
 
 	if (frame.global_shadowmap != -1)
 	{
@@ -78,31 +75,46 @@ void ShadowMapPass::Draw(Frame& frame)
 		if (light.light_cast_shadow)
 		{
 			intptr_t shadowmap;
+			DefaultShaderIndex shader_index = DefaultShaderIndex::ShadowMap;
+			int32_t width, height;
+
 			switch (light.light_type)
 			{
 			case LightType::Omni:
+				shader_index = DefaultShaderIndex::OmniShadowMap;
 				shadowmap = frame.cube_shadowmap;
-				graphics_manager->BeginShadowMap(light, shadowmap, kCubeShadowMapWidth, kCubeShadowMapHeight,cube_shadowmap_index);
+				width = kCubeShadowMapWidth;
+				height = kCubeShadowMapHeight;
 				light.light_shadowmap_index = cube_shadowmap_index++;
 				break;
 			case LightType::Spot:
 				shadowmap = frame.shadowmap;
-				graphics_manager->BeginShadowMap(light, shadowmap, kShadowMapWidth, kShadowMapHeight, shadowmap_index);
+				width = kShadowMapWidth;
+				height = kShadowMapHeight;
 				light.light_shadowmap_index = shadowmap_index++;
 				break;
 			case LightType::Area:
 				shadowmap = frame.shadowmap;
-				graphics_manager->BeginShadowMap(light, shadowmap, kShadowMapWidth, kShadowMapHeight, shadowmap_index);
+				width = kShadowMapWidth;
+				height = kShadowMapHeight;
 				light.light_shadowmap_index = shadowmap_index++;
 				break;
 			case LightType::Infinity:
 				shadowmap = frame.global_shadowmap;
-				graphics_manager->BeginShadowMap(light, shadowmap, kGlobalShadowMapWidth, kGlobalShadowMapHeight, global_shadowmap_index);
+				width = kGlobalShadowMapWidth;
+				height = kGlobalShadowMapHeight;
 				light.light_shadowmap_index = global_shadowmap_index++;
 				break;
 			default:
 				assert(0);
 			}
+
+			auto shader_program = g_app->GetEngine()->GetShaderManager()->GetDefaultShaderProgram(shader_index);
+
+			graphics_manager->UseShaderProgram(shader_program);
+			graphics_manager->SetPerFrameConstants(frame.frame_context);
+
+			graphics_manager->BeginShadowMap(light, shadowmap, width, height, light.light_shadowmap_index);
 
 			for (auto dbc : frame.batch_contexts)
 			{
@@ -112,4 +124,8 @@ void ShadowMapPass::Draw(Frame& frame)
 			graphics_manager->EndShadowMap(shadowmap, light.light_shadowmap_index);
 		}
 	}
+
+	assert(shadowmap_index == frame.shadowmap_count);
+	assert(global_shadowmap_index == frame.global_shadowmap_count);
+	assert(cube_shadowmap_index == frame.cube_shadowmap_count);
 }

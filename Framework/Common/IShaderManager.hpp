@@ -7,6 +7,7 @@ namespace Aurora
 	enum class DefaultShaderIndex
 	{
 		ShadowMap = 0,
+		OmniShadowMap,
 		Forward,
 		Differed,
 		Debug,

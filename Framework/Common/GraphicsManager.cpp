@@ -158,10 +158,11 @@ void GraphicsManager::CalculateLights()
 			light_param.light_direction = (*trans_ptr) * light_param.light_direction;
 			light_param.light_color = light->GetColor().Value;
 			light_param.light_intensity = light->GetIntensity();
+			light_param.light_cast_shadow = light->GetIfCastShadow();
 			const AttenCurve& atten_curve = light->GetDistanceAttenuation();
 			light_param.light_dist_atten_curve_type = atten_curve.type;
 			memcpy(light_param.light_dist_atten_curve_params, &atten_curve.u, sizeof(atten_curve.u));
-			light_param.light_cast_shadow = light->GetIfCastShadow();
+			light_param.light_angle_atten_curve_type = AttenCurveType::kNone;
 
 			glm::vec3 position = light_param.light_position;
 			glm::vec3 look_at = position + glm::vec3(light_param.light_direction);
@@ -240,7 +241,7 @@ void GraphicsManager::CalculateLights()
 				else
 				{
 					light_param.light_type = LightType::Omni;
-					auto point_light = std::dynamic_pointer_cast<SceneObjectOmniLight>(light);
+					//auto point_light = std::dynamic_pointer_cast<SceneObjectOmniLight>(light);
 					
 					float fov = PI / 2.0f;
 					float screen_aspect = 1.0f;
