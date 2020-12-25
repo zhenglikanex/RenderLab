@@ -974,7 +974,12 @@ void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const i
 	//glDrawBuffer(GL_NONE);
 	glDrawBuffers(0, nullptr);
 	glDepthMask(TRUE);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	//make sure omni light shadowmap arrays get cleared only
+	// once, because glClear will clear all cubemaps in the array
+	if (light.light_type != LightType::Omni || layer_index == 0)
+	{
+		glClear(GL_DEPTH_BUFFER_BIT);
+	}
 	glViewport(0, 0, width, height);
 	switch (light.light_type)
 	{
@@ -1012,8 +1017,8 @@ void OpenGLGraphicsManagerCommonBase::BeginShadowMap(const Light& light, const i
 		}
 
 		SetShaderParameters("shadowMatrices", shadow_matrices, 6);
-		SetShaderParameters("layer_index", layer_index);
 		SetShaderParameters("lightPos", pos);
+		SetShaderParameters("layer_index", static_cast<int>(layer_index));
 		SetShaderParameters("far_plane", far_clip_distance);
 	}break;
 	default:
